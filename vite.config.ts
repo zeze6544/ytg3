@@ -11,5 +11,18 @@ export default defineConfig({
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
     server: { entry: "server" },
+    import { defineConfig } from "vite";
+import { cloudflare } from "@cloudflare/vite-plugin";
+
+// Keep your other existing imports here.
+
+export default defineConfig({
+  plugins: [
+    cloudflare(),
+
+    // Keep your existing plugins here.
+  ],
+});
   },
+  
 });
