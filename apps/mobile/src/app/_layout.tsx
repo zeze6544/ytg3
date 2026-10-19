@@ -1,6 +1,7 @@
 import "@/global.css";
 import { colors, fonts } from "@/constants/theme";
 import { GateProvider, useGate } from "@/lib/gate";
+import { whenArchiveReady } from "@/lib/localArchive";
 import { SessionProvider } from "@/lib/session";
 import { JetBrainsMono_400Regular, JetBrainsMono_500Medium } from "@expo-google-fonts/jetbrains-mono";
 import { VT323_400Regular, useFonts } from "@expo-google-fonts/vt323";
@@ -86,6 +87,7 @@ export default function RootLayout() {
     JetBrainsMono_500Medium,
   });
   const [ready, setReady] = useState(false);
+  const [archiveReady, setArchiveReady] = useState(false);
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
@@ -94,8 +96,18 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, fontError]);
 
-  if (!ready) {
-    return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
+  useEffect(() => {
+    void whenArchiveReady().finally(() => setArchiveReady(true));
+  }, []);
+
+  if (!ready || !archiveReady) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.bg, alignItems: "center", justifyContent: "center" }}>
+        <Text style={{ color: colors.phosphor, fontFamily: fontsLoaded ? fonts.display : undefined, fontSize: 28 }}>
+          OPENING THE INDEX
+        </Text>
+      </View>
+    );
   }
 
   return (

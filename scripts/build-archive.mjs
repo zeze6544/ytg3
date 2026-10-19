@@ -8,6 +8,7 @@ import { DOUBLE_ROWS, EXTRA_STRAINS, EXTRA_TIMELINE, EXTRA_RULES, EXTRA_GROUPS }
 import { FOLD_ROWS, FOLD_STRAINS, FOLD_TIMELINE, FOLD_RULES, FOLD_GROUPS } from "./substances-fold.mjs";
 import { TRIPLE_ROWS, TRIPLE_STRAINS, TRIPLE_TIMELINE, TRIPLE_RULES, TRIPLE_GROUPS } from "./substances-triple.mjs";
 import { QUAD_ROWS, QUAD_STRAINS } from "./substances-quad.mjs";
+import { MAX_ROWS, MAX_STRAINS } from "./substances-max.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -24,6 +25,7 @@ const MEDICAL = {
   adulterant:
     "Encountered as a contaminant in other substances. Presence is a warning about the supply, not a target.",
   otc: "Sold without a prescription in many places. Easy access does not make a mix with alcohol or other sedatives safe.",
+  listed: "Named on the public FDA substance list. A listing is not an approval, a dose, or a clearance.",
 };
 
 const CLASSES = {
@@ -503,7 +505,7 @@ function split(value) {
   return value.split(",").map((part) => part.trim()).filter(Boolean);
 }
 
-const drugs = [...ROWS, ...MORE_ROWS, ...NEXT_ROWS, ...DOUBLE_ROWS, ...FOLD_ROWS, ...TRIPLE_ROWS, ...QUAD_ROWS].map(drugRecord);
+const drugs = [...ROWS, ...MORE_ROWS, ...NEXT_ROWS, ...DOUBLE_ROWS, ...FOLD_ROWS, ...TRIPLE_ROWS, ...QUAD_ROWS, ...MAX_ROWS].map(drugRecord);
 const slugs = new Set();
 for (const drug of drugs) {
   if (slugs.has(drug.slug)) throw new Error("duplicate slug " + drug.slug);
@@ -627,6 +629,7 @@ const strains = [
   ...FOLD_STRAINS,
   ...TRIPLE_STRAINS,
   ...QUAD_STRAINS,
+  ...MAX_STRAINS,
 ].map(([slug, name, type, lineage, thcLow, thcHigh, cbdLow, cbdHigh, terpenes]) => ({
   id: `s_${slug}`,
   slug,
@@ -1312,8 +1315,14 @@ for (const slug of Object.keys(CLASSES)) {
   if (!categories.has(slug)) throw new Error("empty category " + slug);
 }
 
-if (drugs.length < 25000) throw new Error("catalogue below 25000 files: " + drugs.length);
-if (strains.length < 10000) throw new Error("catalogue below 10000 strains: " + strains.length);
+const strainSlugs = new Set();
+for (const strain of strains) {
+  if (strainSlugs.has(strain.slug)) throw new Error("duplicate strain " + strain.slug);
+  strainSlugs.add(strain.slug);
+}
+
+if (drugs.length < 55000) throw new Error("catalogue below 55000 files: " + drugs.length);
+if (strains.length < 24000) throw new Error("catalogue below 24000 strains: " + strains.length);
 
 for (const event of timeline) {
   event.title = plain(event.title);
@@ -1333,12 +1342,26 @@ const archive = {
   rules: rules.map(([left, right, severity, note]) => ({ left, right, severity, note: plain(note) })),
 };
 
-const extraIds = new Set(archive.drugs.slice(archive.drugs.length - QUAD_ROWS.length).map((drug) => drug.id));
-const extraDrugs = archive.drugs.filter((drug) => extraIds.has(drug.id));
-archive.drugs = archive.drugs.filter((drug) => !extraIds.has(drug.id));
-const extraRefs = archive.refs.filter((ref) => extraIds.has(ref.drug_id));
-archive.refs = archive.refs.filter((ref) => !extraIds.has(ref.drug_id));
-const extra = { drugs: extraDrugs, refs: extraRefs, strains: [] };
+function peelDrugs(count) {
+  const ids = new Set(archive.drugs.slice(archive.drugs.length - count).map((drug) => drug.id));
+  const picked = archive.drugs.filter((drug) => ids.has(drug.id));
+  archive.drugs = archive.drugs.filter((drug) => !ids.has(drug.id));
+  const pickedRefs = archive.refs.filter((ref) => ids.has(ref.drug_id));
+  archive.refs = archive.refs.filter((ref) => !ids.has(ref.drug_id));
+  return { drugs: picked, refs: pickedRefs };
+}
+
+const maxDrugIds = new Set(MAX_ROWS.map((row) => `d_${row.slug}`));
+const maxDrugs = archive.drugs.filter((drug) => maxDrugIds.has(drug.id));
+archive.drugs = archive.drugs.filter((drug) => !maxDrugIds.has(drug.id));
+const maxRefs = archive.refs.filter((ref) => maxDrugIds.has(ref.drug_id));
+archive.refs = archive.refs.filter((ref) => !maxDrugIds.has(ref.drug_id));
+const maxStrainIds = new Set(MAX_STRAINS.map((row) => `s_${row[0]}`));
+const maxStrains = archive.strains.filter((strain) => maxStrainIds.has(strain.id));
+archive.strains = archive.strains.filter((strain) => !maxStrainIds.has(strain.id));
+
+const extra = peelDrugs(QUAD_ROWS.length);
+extra.strains = [];
 const json = JSON.stringify(archive);
 const extraJson = JSON.stringify(extra);
 if (Buffer.byteLength(json) > 95_000_000) throw new Error("archive.json too large: " + Buffer.byteLength(json));
@@ -1353,5 +1376,45 @@ for (const rel of ["src/data/drugs-extra.json", "apps/mobile/src/data/drugs-extr
   mkdirSync(dirname(path), { recursive: true });
   writeFileSync(path, extraJson);
 }
+
+const drugShards = [];
+let drugChunk = [];
+let refChunk = [];
+let chunkBytes = 2;
+for (let index = 0; index < maxDrugs.length; index += 1) {
+  const drug = maxDrugs[index];
+  const ref = maxRefs[index];
+  const piece = JSON.stringify(drug) + (ref ? JSON.stringify(ref) : "");
+  if (drugChunk.length && chunkBytes + piece.length > 90_000_000) {
+    drugShards.push({ drugs: drugChunk, refs: refChunk });
+    drugChunk = [];
+    refChunk = [];
+    chunkBytes = 2;
+  }
+  drugChunk.push(drug);
+  if (ref) refChunk.push(ref);
+  chunkBytes += piece.length + 1;
+}
+if (drugChunk.length) drugShards.push({ drugs: drugChunk, refs: refChunk });
+
+const manifest = { drugs: [], strains: ["strains-max.json"] };
+const shardBodies = drugShards.map((shard, index) => {
+  const body = JSON.stringify({ drugs: shard.drugs, refs: shard.refs });
+  if (Buffer.byteLength(body) > 95_000_000) throw new Error("drug shard too large: " + index);
+  const name = `drugs-max-${index}.json`;
+  manifest.drugs.push(name);
+  return [name, body];
+});
+const strainBody = JSON.stringify({ strains: maxStrains });
+if (Buffer.byteLength(strainBody) > 95_000_000) throw new Error("strains-max.json too large: " + Buffer.byteLength(strainBody));
+if (/\b(buy online|for sale|seedbank|seed co|low prices)\b/i.test(strainBody)) throw new Error("strain shard contains a sales line");
+const catalogueDirs = ["src/data/catalogue", "apps/mobile/public/catalogue", "public/catalogue"];
+for (const rel of catalogueDirs) {
+  const dir = join(root, rel);
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, "manifest.json"), JSON.stringify(manifest));
+  for (const [name, body] of shardBodies) writeFileSync(join(dir, name), body);
+  writeFileSync(join(dir, "strains-max.json"), strainBody);
+}
 console.log(`drugs ${drugs.length} strains ${strains.length} classes ${classes.length} rules ${rules.length}`);
-console.log(`archive ${Buffer.byteLength(json)} extra ${Buffer.byteLength(extraJson)}`);
+console.log(`archive ${Buffer.byteLength(json)} extra ${Buffer.byteLength(extraJson)} maxDrugs ${maxDrugs.length} maxStrains ${maxStrains.length} shards ${manifest.drugs.length}`);

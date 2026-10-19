@@ -374,6 +374,49 @@ export function localTimelineFor(name: string) {
   return archive.timeline.filter((event) => re.test(`${event.title}\n${event.description ?? ""}`));
 }
 
+const strainSlugs = new Set(archive.strains.map((strain) => strain.slug));
+let loading: Promise<void> | null = null;
+
+async function loadMax() {
+  if (typeof fetch !== "function") return;
+  const response = await fetch("/catalogue/manifest.json");
+  if (!response.ok) throw new Error("catalogue manifest " + response.status);
+  const manifest = (await response.json()) as { drugs?: string[]; strains?: string[] };
+  for (const name of manifest.drugs ?? []) {
+    const partResponse = await fetch(`/catalogue/${name}`);
+    if (!partResponse.ok) throw new Error("catalogue shard " + name);
+    const part = (await partResponse.json()) as { drugs?: ArchiveDrug[]; refs?: Archive["refs"] };
+    for (const drug of part.drugs ?? []) {
+      if (bySlug.has(drug.slug)) continue;
+      archive.drugs.push(drug);
+      byId.set(drug.id, drug);
+      bySlug.set(drug.slug, drug);
+    }
+    for (const ref of part.refs ?? []) archive.refs.push(ref);
+  }
+  for (const name of manifest.strains ?? []) {
+    const partResponse = await fetch(`/catalogue/${name}`);
+    if (!partResponse.ok) throw new Error("catalogue shard " + name);
+    const part = (await partResponse.json()) as { strains?: Strain[] };
+    for (const strain of part.strains ?? []) {
+      if (strainSlugs.has(strain.slug)) continue;
+      strainSlugs.add(strain.slug);
+      archive.strains.push(strain);
+    }
+  }
+}
+
+export function whenArchiveReady(): Promise<void> {
+  if (!loading) {
+    loading = loadMax().catch(() => {
+      // The bundled catalogue still opens if a shard is missing.
+    });
+  }
+  return loading;
+}
+
+if (typeof window !== "undefined") void whenArchiveReady();
+
 export function localUnnamedFloor(drug: { name: string; category: string }) {
   if (drug.category === "inhalant") {
     return `${drug.name} is an inhalant. A pair with no stored rule is still treated as dangerous, because a sudden heart rhythm can arrive while the other substance is acting.`;
