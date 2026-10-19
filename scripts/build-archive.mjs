@@ -2,6 +2,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ROWS } from "./substances.mjs";
+import { MORE_ROWS } from "./substances-more.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -497,7 +498,7 @@ function split(value) {
   return value.split(",").map((part) => part.trim()).filter(Boolean);
 }
 
-const drugs = ROWS.map(drugRecord);
+const drugs = [...ROWS, ...MORE_ROWS].map(drugRecord);
 const slugs = new Set();
 for (const drug of drugs) {
   if (slugs.has(drug.slug)) throw new Error("duplicate slug " + drug.slug);
@@ -576,6 +577,32 @@ const strains = [
   ["harlequin", "Harlequin", "sativa", "Colombian Gold x Nepali x Thai x Swiss", 4, 10, 8, 15, "myrcene,pinene,caryophyllene"],
   ["cannatonic", "Cannatonic", "hybrid", "MK Ultra x G13 Haze", 6, 12, 6, 17, "myrcene,pinene,caryophyllene"],
   ["ruderalis", "Ruderalis", "ruderalis", "Cannabis ruderalis landrace", 1, 5, 0, 2, "myrcene,pinene"],
+  ["acapulco-gold", "Acapulco Gold", "sativa", "Mexican landrace", 16, 22, 0, 1, "myrcene,pinene,caryophyllene"],
+  ["colombian-gold", "Colombian Gold", "sativa", "Colombian landrace", 15, 20, 0, 1, "myrcene,pinene,caryophyllene"],
+  ["panama-red", "Panama Red", "sativa", "Panamanian landrace", 14, 20, 0, 1, "myrcene,caryophyllene,pinene"],
+  ["maui-wowie", "Maui Wowie", "sativa", "Hawaiian landrace", 15, 22, 0, 1, "myrcene,pinene,limonene"],
+  ["malawi-gold", "Malawi Gold", "sativa", "Malawian landrace", 16, 24, 0, 1, "terpinolene,myrcene,caryophyllene"],
+  ["lambs-bread", "Lamb's Bread", "sativa", "Jamaican landrace", 15, 22, 0, 1, "myrcene,caryophyllene,pinene"],
+  ["thai", "Thai", "sativa", "Thai landrace", 15, 22, 0, 1, "terpinolene,myrcene,caryophyllene"],
+  ["chemdawg", "Chemdawg", "hybrid", "unknown, often cited behind OG lines", 18, 26, 0, 1, "myrcene,caryophyllene,limonene"],
+  ["g13", "G13", "hybrid", "disputed lab or Afghan line", 18, 24, 0, 1, "myrcene,caryophyllene,pinene"],
+  ["blueberry", "Blueberry", "indica", "Purple Thai x Thai x Afghan", 16, 24, 0, 1, "myrcene,pinene,caryophyllene"],
+  ["purple-urkle", "Purple Urkle", "indica", "Mendocino Purps lineage", 16, 22, 0, 1, "myrcene,caryophyllene,linalool"],
+  ["white-rhino", "White Rhino", "hybrid", "White Widow x unknown indica", 18, 25, 0, 1, "myrcene,caryophyllene,pinene"],
+  ["super-lemon-haze", "Super Lemon Haze", "sativa", "Lemon Skunk x Super Silver Haze", 17, 25, 0, 1, "limonene,terpinolene,caryophyllene"],
+  ["headband", "Headband", "hybrid", "OG Kush x Sour Diesel", 18, 27, 0, 1, "myrcene,caryophyllene,limonene"],
+  ["kosher-kush", "Kosher Kush", "indica", "unknown indica line", 18, 26, 0, 1, "myrcene,caryophyllene,limonene"],
+  ["skywalker-og", "Skywalker OG", "hybrid", "Skywalker x OG Kush", 18, 25, 0, 1, "myrcene,caryophyllene,limonene"],
+  ["la-confidential", "LA Confidential", "indica", "OG LA Affie x Afghani", 16, 25, 0, 1, "myrcene,caryophyllene,limonene"],
+  ["cinderella-99", "Cinderella 99", "sativa", "Jack Herer x Shiva Skunk line", 16, 22, 0, 1, "myrcene,pinene,caryophyllene"],
+  ["alaskan-thunder-fuck", "Alaskan Thunder Fuck", "sativa", "disputed Alaskan line", 16, 23, 0, 1, "myrcene,pinene,caryophyllene"],
+  ["stardawg", "Stardawg", "hybrid", "Chemdawg descendant lines", 18, 26, 0, 1, "caryophyllene,myrcene,limonene"],
+  ["apple-fritter", "Apple Fritter", "hybrid", "Sour Apple x Animal Cookies", 18, 28, 0, 1, "caryophyllene,limonene,myrcene"],
+  ["cereal-milk", "Cereal Milk", "hybrid", "Y Life x Snowman", 18, 25, 0, 1, "caryophyllene,limonene,linalool"],
+  ["mimosa-cannabis", "Mimosa", "hybrid", "Purple Punch x Clementine", 18, 27, 0, 1, "limonene,caryophyllene,myrcene"],
+  ["tropicana-cookies", "Tropicana Cookies", "hybrid", "Girl Scout Cookies x Tangie", 16, 24, 0, 1, "caryophyllene,limonene,myrcene"],
+  ["permanent-marker", "Permanent Marker", "hybrid", "Biscotti x Sherb Bx x Jealousy", 20, 28, 0, 1, "caryophyllene,limonene,linalool"],
+  ["gary-payton", "Gary Payton", "hybrid", "The Y x Snowman", 18, 26, 0, 1, "caryophyllene,limonene,myrcene"],
 ].map(([slug, name, type, lineage, thcLow, thcHigh, cbdLow, cbdHigh, terpenes]) => ({
   id: `s_${slug}`,
   slug,
@@ -620,6 +647,16 @@ const timeline = [
   [2019, "Esketamine approved", "A nasal esketamine product was approved for treatment-resistant depression in the United States, inside a medical programme.", "dissociative"],
   [2020, "Nitazenes detected", "Nitazene opioids began appearing in drug-checking data. They add another unknown-strength opioid to an already contaminated supply.", "opioid"],
   [2021, "Xylazine spread", "The veterinary sedative xylazine was found more often in opioid supplies. Naloxone does not reverse the xylazine sedation.", "other"],
+  [1897, "Aspirin registered", "Aspirin was registered as a medicine. Stomach bleeding and, in children with viral illness, a reason for caution came later.", "otc"],
+  [1903, "Barbital introduced", "Barbital opened the barbiturate era. Stopping breathing in overdose, and seizures in withdrawal, are why that era ended.", "depressant"],
+  [1932, "Amphetamine marketed", "Amphetamine reached the market as a decongestant and stimulant. Heart strain and dependence outlasted the early enthusiasm.", "stimulant"],
+  [1965, "Methadone treatment expands", "Methadone maintenance was shown to reduce death and illness for people dependent on opioids. The medicine itself still slows breathing and prolongs QT.", "opioid"],
+  [1977, "PCP emergency scheduling", "Phencyclidine was emergency-scheduled in the United States after agitation, accidents, and anaesthetic-level overdose.", "dissociative"],
+  [2009, "Mephedrone spreads", "Mephedrone and other synthetic cathinones spread as unregulated stimulants. Compulsive redosing and heart strain were the pattern.", "stimulant"],
+  [2012, "NBOMe blotter deaths", "NBOMe compounds sold as LSD caused seizures and deaths. A bitter blotter is a warning, not an identification.", "psychedelic"],
+  [2022, "Pholcodine withdrawn", "Regulators withdrew pholcodine cough medicines after a link with severe allergic reactions under anaesthesia.", "opioid"],
+  [2023, "Nitazenes widen", "Nitazene opioids were identified in more regions and more product types. Fentanyl strips often miss them.", "opioid"],
+  [2024, "Medetomidine in the supply", "The veterinary sedative medetomidine was reported in some illicit opioid supplies. Naloxone does not reverse that sedation.", "other"],
 ].map(([year, title, description, category]) => ({
   id: `t_${year}_${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`,
   year,
@@ -669,18 +706,34 @@ const rules = [
   [["antipsychotic"], ["opioid"], "dangerous", "Antipsychotics add sedation. With an opioid, the person can become deeply unconscious and stop protecting their airway."],
   [["antipsychotic"], ["depressant"], "dangerous", "Antipsychotics plus alcohol or other sedatives deepen unconsciousness and low blood pressure."],
   [["group:qt"], ["group:qt"], "dangerous", "Two drugs that prolong the QT interval raise the chance of a dangerous heart rhythm."],
+  [["group:maoi"], ["group:triptan"], "deadly", "Triptans with MAO inhibitors are contraindicated. Serotonin syndrome and a blood-pressure crisis are the risk."],
+  [["group:triptan"], ["group:ssri", "group:snri"], "moderate", "Triptans plus an SSRI or SNRI have a serotonin-syndrome warning. The risk is lower than with an MAOI and it is not zero."],
+  [["group:ssri", "group:snri"], ["group:serotonin"], "dangerous", "SSRIs and SNRIs plus other serotonergic drugs, including MDMA, DXM, tramadol, and 5-HTP, can cause serotonin syndrome: agitation, rigidity, sweating, and high temperature."],
+  [["alcohol-ethanol"], ["group:disulfiram-like"], "dangerous", "These medicines make alcohol metabolism toxic. Flushing, vomiting, and a pounding heart can follow even alcohol hidden in medicines or mouthwash."],
+  [["alcohol-ethanol"], ["methanol", "ethylene-glycol", "diethylene-glycol", "isopropanol"], "dangerous", "These are toxic alcohols, not drinking alcohol. Mixing them with ethanol does not make a nonmedical exposure safe. Methanol and the glycols cause acidosis and organ failure. Isopropanol adds to intoxication."],
+  [["opioid"], ["promethazine", "diphenhydramine", "doxylamine", "hydroxyzine", "chlorpheniramine", "dimenhydrinate"], "dangerous", "Sedating antihistamines deepen opioid sedation and make it more likely that someone stops protecting their airway. Breathing can still fail."],
+  [["alcohol-ethanol"], ["promethazine", "diphenhydramine", "doxylamine", "hydroxyzine", "chlorpheniramine"], "dangerous", "Sedating antihistamines plus alcohol cause blackouts, falls, and slowed breathing."],
+  [["medetomidine"], ["opioid"], "deadly", "Medetomidine deepens unconsciousness and slows the heart in opioid supplies. Naloxone does not reverse it. Breathing support still matters."],
+  [["medetomidine"], ["benzodiazepine", "depressant"], "dangerous", "Medetomidine is a strong sedative. With alcohol or benzodiazepines the person may become unconscious and stop protecting their airway."],
+  [["lofexidine"], ["opioid", "depressant"], "dangerous", "Lofexidine lowers blood pressure and adds sedation. With an opioid or alcohol someone can collapse. In treatment this mix is a medical decision, not a casual one."],
+  [["warfarin"], ["metronidazole", "tinidazole"], "dangerous", "These antibiotics can raise the effect of warfarin and the chance of serious bleeding."],
+  [["simvastatin"], ["clarithromycin", "erythromycin"], "dangerous", "These antibiotics can raise simvastatin levels and cause severe muscle breakdown."],
+  [["tizanidine"], ["ciprofloxacin", "fluvoxamine"], "deadly", "Ciprofloxacin and fluvoxamine can raise tizanidine sharply. Blood pressure can collapse. This mix is contraindicated."],
+  [["bupropion"], ["alcohol-ethanol"], "moderate", "Bupropion lowers the seizure threshold. The risk is higher during heavy drinking and during alcohol withdrawal."],
 ];
 
 const groups = {
-  maoi: ["phenelzine", "tranylcypromine", "moclobemide", "isocarboxazid", "selegiline", "harmine", "harmaline", "syrian-rue", "banisteriopsis-caapi", "ayahuasca"],
+  maoi: ["phenelzine", "tranylcypromine", "moclobemide", "isocarboxazid", "selegiline", "harmine", "harmaline", "syrian-rue", "banisteriopsis-caapi", "ayahuasca", "changa", "linezolid", "methylene-blue", "procarbazine", "rasagiline", "safinamide"],
   ssri: ["fluoxetine", "sertraline", "citalopram", "escitalopram", "paroxetine", "fluvoxamine", "vortioxetine", "vilazodone"],
   snri: ["venlafaxine", "duloxetine", "desvenlafaxine", "levomilnacipran", "milnacipran"],
-  tca: ["amitriptyline", "nortriptyline", "imipramine", "clomipramine", "doxepin", "dosulepin", "trimipramine"],
-  serotonin: ["mdma", "mda", "mdea", "amt", "st-johns-wort", "tramadol", "dxm"],
-  nitrite: ["amyl-nitrite", "isobutyl-nitrite"],
+  tca: ["amitriptyline", "nortriptyline", "imipramine", "clomipramine", "doxepin", "dosulepin", "trimipramine", "desipramine", "protriptyline", "amoxapine"],
+  serotonin: ["mdma", "mda", "mdea", "amt", "aet", "5-meo-amt", "st-johns-wort", "kanna", "tramadol", "dxm", "6-apb", "5-apb", "5-mapb", "6-mapb", "mdai", "mbdb", "ethylone", "5-htp", "l-tryptophan", "sam-e"],
+  triptan: ["sumatriptan", "rizatriptan", "zolmitriptan", "naratriptan", "eletriptan", "frovatriptan", "almotriptan"],
+  "disulfiram-like": ["disulfiram", "metronidazole", "tinidazole"],
+  nitrite: ["amyl-nitrite", "isobutyl-nitrite", "isopropyl-nitrite", "butyl-nitrite"],
   pde5: ["sildenafil", "tadalafil", "vardenafil", "avanafil"],
-  nsaid: ["ibuprofen", "aspirin", "naproxen", "diclofenac"],
-  qt: ["citalopram", "escitalopram", "ziprasidone", "haloperidol", "thioridazine", "methadone", "ondansetron", "domperidone"],
+  nsaid: ["ibuprofen", "aspirin", "naproxen", "diclofenac", "indomethacin", "meloxicam", "celecoxib", "ketorolac", "piroxicam", "mefenamic-acid", "etoricoxib"],
+  qt: ["citalopram", "escitalopram", "ziprasidone", "haloperidol", "thioridazine", "methadone", "ondansetron", "domperidone", "sotalol", "erythromycin", "clarithromycin", "azithromycin", "moxifloxacin", "dofetilide", "dronedarone", "droperidol", "pimozide", "amiodarone", "hydroxyzine", "levomepromazine", "iloperidone"],
 };
 
 for (const slug of Object.values(groups).flat()) {

@@ -160,4 +160,5 @@ export const CATEGORIES: (DrugCategory | "all")[] = [
   "otc",
   "withdrawn",
   "historical",
+  "other",
 ];
