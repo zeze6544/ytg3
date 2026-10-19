@@ -6,6 +6,7 @@ import { MORE_ROWS } from "./substances-more.mjs";
 import { NEXT_ROWS } from "./substances-next.mjs";
 import { DOUBLE_ROWS, EXTRA_STRAINS, EXTRA_TIMELINE, EXTRA_RULES, EXTRA_GROUPS } from "./substances-double.mjs";
 import { FOLD_ROWS, FOLD_STRAINS, FOLD_TIMELINE, FOLD_RULES, FOLD_GROUPS } from "./substances-fold.mjs";
+import { TRIPLE_ROWS, TRIPLE_STRAINS, TRIPLE_TIMELINE, TRIPLE_RULES, TRIPLE_GROUPS } from "./substances-triple.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -501,7 +502,7 @@ function split(value) {
   return value.split(",").map((part) => part.trim()).filter(Boolean);
 }
 
-const drugs = [...ROWS, ...MORE_ROWS, ...NEXT_ROWS, ...DOUBLE_ROWS, ...FOLD_ROWS].map(drugRecord);
+const drugs = [...ROWS, ...MORE_ROWS, ...NEXT_ROWS, ...DOUBLE_ROWS, ...FOLD_ROWS, ...TRIPLE_ROWS].map(drugRecord);
 const slugs = new Set();
 for (const drug of drugs) {
   if (slugs.has(drug.slug)) throw new Error("duplicate slug " + drug.slug);
@@ -623,6 +624,7 @@ const strains = [
   ["london-pound-cake", "London Pound Cake", "hybrid", "Sunset Sherbet x unknown", 18, 25, 0, 1, "caryophyllene,limonene,linalool"],
   ...EXTRA_STRAINS,
   ...FOLD_STRAINS,
+  ...TRIPLE_STRAINS,
 ].map(([slug, name, type, lineage, thcLow, thcHigh, cbdLow, cbdHigh, terpenes]) => ({
   id: `s_${slug}`,
   slug,
@@ -633,7 +635,7 @@ const strains = [
   thc_high: thcHigh,
   cbd_low: cbdLow,
   cbd_high: cbdHigh,
-  terpenes: terpenes.split(","),
+  terpenes: terpenes ? String(terpenes).split(",").map((part) => part.trim()).filter(Boolean) : [],
   effects: ["reported relaxation or stimulation varies by person and batch"],
   adverse: ["anxiety", "fast heart rate", "impaired attention"],
   confidence: "anecdotal",
@@ -685,6 +687,7 @@ const timeline = [
   [2022, "Dipentylone sold as MDMA", "Drug checking began finding dipentylone in tablets and crystals sold as MDMA. A weaker effect is how people take more.", "stimulant"],
   ...EXTRA_TIMELINE,
   ...FOLD_TIMELINE,
+  ...TRIPLE_TIMELINE,
 ].map(([year, title, description, category]) => ({
   id: `t_${year}_${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`,
   year,
@@ -769,6 +772,7 @@ const rules = [
   [["group:maoi"], ["metaxalone"], "dangerous", "Metaxalone has serotonergic activity. With an MAOI the chance of serotonin syndrome rises."],
   ...EXTRA_RULES,
   ...FOLD_RULES,
+  ...TRIPLE_RULES,
 ];
 
 const groups = {
@@ -790,6 +794,9 @@ for (const [key, members] of Object.entries(EXTRA_GROUPS)) {
   groups[key] = [...(groups[key] ?? []), ...members];
 }
 for (const [key, members] of Object.entries(FOLD_GROUPS)) {
+  groups[key] = [...(groups[key] ?? []), ...members];
+}
+for (const [key, members] of Object.entries(TRIPLE_GROUPS)) {
   groups[key] = [...(groups[key] ?? []), ...members];
 }
 
