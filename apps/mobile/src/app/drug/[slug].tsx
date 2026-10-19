@@ -77,7 +77,9 @@ export default function DrugScreen() {
       </Text>
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
         <Tag tone={CATEGORY_TONE[drug.category] ?? "phosphor"}>{CATEGORY_LABELS[drug.category]}</Tag>
-        <Tag tone={EVIDENCE_TONE[drug.evidence_quality] ?? "cyan"}>evidence: {drug.evidence_quality}</Tag>
+        <Tag tone={EVIDENCE_TONE[drug.evidence_quality] ?? "cyan"}>
+          evidence: {drug.evidence_quality === "unknown" ? "class record" : drug.evidence_quality}
+        </Tag>
         {drug.discovered_year ? <Tag tone="amber">est. {drug.discovered_year}</Tag> : null}
       </View>
       {drug.summary ? (
@@ -138,7 +140,7 @@ export default function DrugScreen() {
       </Frame>
       <Frame title="HISTORY" code="HIS" tone="purple">
         <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 13, lineHeight: 20 }]}>
-          {drug.history ?? "· unknown ·"}
+          {drug.history ?? "· see the class record ·"}
         </Text>
       </Frame>
       <Frame title="REFERENCES" code="REF">

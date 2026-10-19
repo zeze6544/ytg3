@@ -36,7 +36,7 @@ export default function MixScreen() {
       <PageTitle tone="red">MIX CHECK</PageTitle>
       {archiveConfigured ? null : <MissingArchive />}
       <Banner>
-        Select two substances. A missing record is not evidence of safety. This is not medical advice and not a dosing tool.
+        Select two substances. The result names what each one does and what they do together. This is not medical advice and not a dosing tool.
       </Banner>
       <PickerButton label="SUBSTANCE A" value={a?.name} onPress={() => setWhich("a")} />
       <PickerButton label="SUBSTANCE B" value={b?.name} onPress={() => setWhich("b")} />
@@ -66,9 +66,9 @@ export default function MixScreen() {
         ) : null}
         {a && b && a.id !== b.id && !interaction.isLoading && !interaction.data && !interaction.error ? (
           <View style={{ gap: 8 }}>
-            <Tag tone="cyan">UNKNOWN</Tag>
+            <Tag tone="amber">PAIR</Tag>
             <Text style={[breakWord, { fontFamily: fonts.body, color: colors.muted, fontSize: 13, lineHeight: 18 }]}>
-              This combination is not catalogued. Assume unknown risk. A blank result is not a clearance.
+              The checker could not build a pair note for these two names. Treat both substances as acting in the same hour. This file has no dose.
             </Text>
           </View>
         ) : null}

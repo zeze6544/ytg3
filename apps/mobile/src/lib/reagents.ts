@@ -145,7 +145,7 @@ export const KITS: ReagentKit[] = [
     use: "Dissolve a small amount in water. One line means fentanyl is present. Two lines means below the cutoff. Test powders and pressed pills.",
     rows: [
       { substance: "Fentanyl / most analogues", color: "One line = positive", tone: "red" },
-      { substance: "Nitazenes", color: "Often missed by fentanyl strips", tone: "red", note: "Fentanyl strips do not reliably detect nitazenes. Assume unknown risk." },
+      { substance: "Nitazenes", color: "Often missed by fentanyl strips", tone: "red", note: "Fentanyl strips do not reliably detect nitazenes. Treat a missed strip as a live opioid risk." },
     ],
   },
 ];

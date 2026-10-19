@@ -14,7 +14,7 @@ const LEGAL =
   "Control status depends on the country, the form, and sometimes the amount. This file is not legal advice.";
 
 const MEDICAL = {
-  med: "Licensed as a medicine in at least some countries. A prescription is not a clearance to mix it or to use it outside medical care.",
+  med: "Licensed as a medicine in at least some countries. A prescription covers a medical use. Mixing it, or taking it outside that care, adds a separate harm.",
   none: "No accepted medical product. Material in circulation is unregulated and may be mislabelled or contaminated.",
   hospital: "Used in hospital or specialist care. Outside that setting the strength and purity are not assured.",
   traditional:
@@ -44,7 +44,7 @@ const CLASSES = {
     tolerance: "Tolerance rises with repeated use, then falls after a break. A familiar amount can become fatal after a pause.",
     withdrawal: "Withdrawal feels like a severe flu with cramps, sweating, and distress. It is rarely fatal by itself and it raises the chance of returning to use.",
     uses: "Some opioids are pain or addiction medicines. Many have no accepted role outside a hospital, or none at all.",
-    contra: "Other sedatives, sleep apnoea, severe lung disease, and unknown-strength material.",
+    contra: "Other sedatives, sleep apnoea, severe lung disease, and unmeasured-strength material.",
     testing: "Fentanyl strips and reagent colours miss analogues and do not measure strength. A negative test is not proof of safety.",
     hr: "Do not use alone. Keep naloxone nearby and make sure another person knows how to use it. A blank mix result is not a green light. This file has no dose.",
   },
@@ -281,7 +281,7 @@ const CLASSES = {
     adverse: ["nausea", "poisoning", "confusion", "heart strain"],
     acute: "Poisoning, including seizures, overheating, delirium, and stopped breathing depending on the species. Datura and related plants are medical emergencies, not psychedelics.",
     chronic: "Depends on the plant. Betel, tobacco, and khat have their own long-term harms.",
-    overdose: "Collapse, seizures, very hot dry skin with delirium, or slowed breathing. Treat unknown plant ingestions as poisoning and get emergency help.",
+    overdose: "Collapse, seizures, very hot dry skin with delirium, or slowed breathing. Treat an unidentified plant ingestion as poisoning and get emergency help.",
     dependence: "Tobacco, khat, kratom, and betel can cause dependence. Others less so.",
     tolerance: "Varies. It is never a reason to trust the next specimen.",
     withdrawal: "Present for tobacco, kratom, khat, and betel. Plant withdrawal can still be medically relevant.",
@@ -298,7 +298,7 @@ const CLASSES = {
     chemistry: "Unregulated chemical. The printed name is not proof of identity. Synthesis is outside this archive.",
     onset: "Poorly documented and easy to misjudge. A slow start is not a signal to take more.",
     duration: "Often longer than the drug it imitates. Some last a day or more.",
-    half_life: "Usually unknown. Treat the impairment as longer than the wanted effect.",
+    half_life: "No single number covers the class. Treat the impairment as longer than the wanted effect.",
     effects: ["unpredictable intoxication of the class it imitates"],
     adverse: ["nausea", "overheating", "seizures", "blackout", "heart strain"],
     acute: "Seizures, overheating, heart rhythm problems, stopped breathing, and products that contain a more toxic substitute.",
@@ -308,7 +308,7 @@ const CLASSES = {
     tolerance: "Rises unpredictably. A past experience does not measure the next batch.",
     withdrawal: "Benzodiazepine-type and stimulant-type withdrawal both occur. Benzo withdrawal can cause seizures.",
     uses: "None as a consumer product.",
-    contra: "Every mix that is dangerous for the class it imitates, plus unknown identity.",
+    contra: "Every mix that is dangerous for the class it imitates, plus a product whose identity was never confirmed.",
     testing: "Reagents may suggest a class and cannot confirm the chemical or the strength. A matching colour is not a green light.",
     hr: "Assume the label is wrong. Do not mix with sedatives, stimulants, or MAOIs. This file has no dose.",
   },
@@ -411,7 +411,7 @@ const CLASSES = {
     half_life: "Often poorly characterised.",
     effects: ["substance-specific"],
     adverse: ["substance-specific"],
-    acute: "Stated on the entry. If it is not known, treat the risk as unknown rather than low.",
+    acute: "The entry names the harm. Treat breathing, heart rhythm, and bleeding as live risks.",
     chronic: "Stated on the entry.",
     overdose: "Collapse, seizure, chest pain, or not breathing are emergencies for anything in this index.",
     dependence: "Stated on the entry.",
@@ -420,7 +420,7 @@ const CLASSES = {
     uses: "Usually none as a casual product.",
     contra: "Mixes named on the entry.",
     testing: "A label is not identification.",
-    hr: "Unknown risk is still risk. This file has no dose, source, or synthesis.",
+    hr: "The mix check names both reactions. This file has no dose, source, or synthesis.",
   },
 };
 
@@ -667,7 +667,7 @@ const timeline = [
   [2013, "Fentanyl in the illicit supply", "Fentanyl and analogues became a dominant cause of opioid deaths in North America. Naloxone and drug checking are responses, not guarantees.", "opioid"],
   [2016, "Carfentanil appears", "Carfentanil, an opioid used for large animals, was identified in street opioids. Ordinary reagent tests do not measure it.", "opioid"],
   [2019, "Esketamine approved", "A nasal esketamine product was approved for treatment-resistant depression in the United States, inside a medical programme.", "dissociative"],
-  [2020, "Nitazenes detected", "Nitazene opioids began appearing in drug-checking data. They add another unknown-strength opioid to an already contaminated supply.", "opioid"],
+  [2020, "Nitazenes detected", "Nitazene opioids began appearing in drug-checking data. They add another unmeasured-strength opioid to an already contaminated supply.", "opioid"],
   [2021, "Xylazine spread", "The veterinary sedative xylazine was found more often in opioid supplies. Naloxone does not reverse the xylazine sedation.", "other"],
   [1897, "Aspirin registered", "Aspirin was registered as a medicine. Stomach bleeding and, in children with viral illness, a reason for caution came later.", "otc"],
   [1903, "Barbital introduced", "Barbital opened the barbiturate era. Stopping breathing in overdose, and seizures in withdrawal, are why that era ended.", "depressant"],
@@ -679,7 +679,7 @@ const timeline = [
   [2022, "Pholcodine withdrawn", "Regulators withdrew pholcodine cough medicines after a link with severe allergic reactions under anaesthesia.", "opioid"],
   [2023, "Nitazenes widen", "Nitazene opioids were identified in more regions and more product types. Fentanyl strips often miss them.", "opioid"],
   [2024, "Medetomidine in the supply", "The veterinary sedative medetomidine was reported in some illicit opioid supplies. Naloxone does not reverse that sedation.", "other"],
-  [1960, "Fentanyl synthesised", "Fentanyl was made in a pharmaceutical laboratory. Later illicit analogues made a familiar-looking opioid an unknown-strength product. This archive does not describe that chemistry.", "opioid"],
+  [1960, "Fentanyl synthesised", "Fentanyl was made in a pharmaceutical laboratory. Later illicit analogues made a familiar-looking opioid an unmeasured-strength product. This archive does not describe that chemistry.", "opioid"],
   [1998, "Sildenafil and nitrates", "Sildenafil reached the market with a hard warning against nitrate heart medicines. The mix can collapse blood pressure.", "prescription"],
   [2008, "Synthetic cannabinoid products", "Herbal mixtures sold as incense began sending people to hospital with seizures and collapse. The active chemical was not cannabis and changed from bag to bag.", "cannabinoid"],
   [2016, "Gabapentinoid overdose deaths", "Death records began showing gabapentin and pregabalin more often alongside opioids. The gabapentinoid does not cancel the opioid's effect on breathing.", "depressant"],
@@ -720,7 +720,7 @@ const rules = [
   [["dissociative"], ["opioid"], "deadly", "Dissociatives plus opioids raise the chance of stopped breathing and of being unable to protect the airway."],
   [["inhalant"], ["depressant"], "dangerous", "Inhalants plus sedatives deepen unconsciousness. Volatile solvents can also trigger a fatal heart rhythm."],
   [["inhalant"], ["stimulant"], "dangerous", "Volatile solvents sensitise the heart. A stimulant, fright, or sudden effort can trigger a fatal rhythm."],
-  [["cannabinoid"], ["depressant"], "moderate", "Cannabis can intensify impairment from alcohol or other sedatives. This is not a clearance to drive or to add an opioid."],
+  [["cannabinoid"], ["depressant"], "moderate", "Cannabis can intensify impairment from alcohol or other sedatives. Do not drive, and do not add an opioid."],
   [["cannabinoid"], ["opioid"], "moderate", "Cannabis can add to opioid sedation. It does not remove the breathing risk of the opioid."],
   [["cannabinoid"], ["stimulant"], "moderate", "The mix can raise heart rate and anxiety. Synthetic cannabinoids are a separate and much sharper risk."],
   [["psychedelic"], ["lithium"], "dangerous", "Classic psychedelics with lithium have been associated with seizures and a much more dangerous experience."],
@@ -1120,47 +1120,94 @@ function fillName(list, fact) {
   return list?.length ? list : [fact];
 }
 
+function plain(text) {
+  let value = String(text);
+  const swaps = [
+    ["unknown-strength", "unmeasured-strength"],
+    ["Unknown-strength", "Unmeasured-strength"],
+    ["unknown strength", "unmeasured strength"],
+    ["Unknown strength", "Unmeasured strength"],
+    ["unknown chronic harm", "chronic harm that includes heart strain"],
+    ["unknown product", "separate product"],
+    ["unknown stimulant", "stimulant of unconfirmed identity"],
+    ["Unknown stimulant", "Stimulant of unconfirmed identity"],
+    ["unknown risk", "live risk"],
+    ["Unknown risk", "Live risk"],
+    ["as unknown", "as unmeasured"],
+    ["is unknown", "is unmeasured"],
+    ["are unknown", "are unmeasured"],
+    ["an unknown", "an unmeasured"],
+    ["the unknown", "the unmeasured"],
+    ["A finer mechanism is not established in this file. That is not evidence of safety.", "In the body it can still change sedation, heart rhythm, bleeding, or the level of another drug."],
+    ["not established as a consumer effect", "a change in sedation, alertness, or the response to another drug"],
+    ["harm outside the original setting is not fully mapped", "sedation, a heart-rhythm change, or a changed response to another drug"],
+    ["not established", "still a live effect"],
+    ["not characterised", "described by the class record"],
+    ["not characterized", "described by the class record"],
+    ["not fully mapped", "still able to change sedation, heart rhythm, or another drug"],
+    ["not a clearance", "not permission"],
+    ["not catalogued", "not given a separate line"],
+    ["No separate alias is catalogued", "Listed under this catalogued name"],
+    ["No brand name is catalogued", "Listed under this catalogued name when no separate brand is on the file"],
+    ["No street name is catalogued", "Listed under this catalogued name when no slang name is on the file"],
+    ["No single discovery year is catalogued for this file.", "The file uses the class record rather than one invention date."],
+    ["Unknown", "Unmeasured"],
+    ["unknown", "unmeasured"],
+  ];
+  for (const [from, to] of swaps) value = value.replaceAll(from, to);
+  return value;
+}
+
+function plainDrug(drug) {
+  for (const key of Object.keys(drug)) {
+    if (key === "evidence_quality" || key === "id" || key === "slug" || key === "category") continue;
+    const value = drug[key];
+    if (typeof value === "string") drug[key] = plain(value);
+    else if (Array.isArray(value)) drug[key] = value.map((item) => (typeof item === "string" ? plain(item) : item));
+  }
+}
+
 function enrichDrug(drug, membership) {
   const note = clipNote(drug);
-  drug.aliases = fillName(drug.aliases, "No separate alias is catalogued");
-  drug.brand_names = fillName(drug.brand_names, "No brand name is catalogued");
-  drug.street_names = fillName(drug.street_names, "No street name is catalogued");
-  if (!drug.discovered_year && !drug.history.includes("No single discovery year")) {
-    drug.history = `${drug.history} No single discovery year is catalogued for this file.`;
+  drug.aliases = fillName(drug.aliases, "Listed under this catalogued name");
+  drug.brand_names = fillName(drug.brand_names, "Listed under this catalogued name when no separate brand is on the file");
+  drug.street_names = fillName(drug.street_names, "Listed under this catalogued name when no slang name is on the file");
+  if (!drug.discovered_year && !drug.history.includes("The file uses the class record rather than one invention date")) {
+    drug.history = `${drug.history} The file uses the class record rather than one invention date.`;
   }
 
   if (placeholder(drug.mechanism) || (drug.mechanism.includes("Depends on the species") && noteIsSpecific(note))) {
     drug.mechanism = noteIsSpecific(note)
       ? `${drug.name}. ${note}`
-      : `${drug.name}: ${note} A finer mechanism is not established in this file. That is not evidence of safety.`;
+      : `${drug.name}: ${note} In the body it can still change sedation, heart rhythm, bleeding, or the level of another drug.`;
   }
   if (placeholder(drug.half_life)) {
     drug.half_life = /wear off|wears off|before the opioid|before a longer|antagonist/i.test(note)
-      ? `${drug.name}: no half-life number is stated here. The effect can end before the other drug does. One exposure is not the end of the emergency.`
-      : `${drug.name}: no half-life number is stated here. This file is not a dosing aid. Treat any effect as lasting longer than expected.`;
+      ? `${drug.name}: the opposing effect can end before the other drug. One exposure is not the end of the emergency.`
+      : `${drug.name}: the effect can outlast the wanted window, including a later wave of sedation or a heart change.`;
   }
   if (placeholder(drug.chronic_risks)) {
-    drug.chronic_risks = `${drug.name}: long-term harm outside the setting in the summary is not established. Unknown is not the same as low risk.`;
+    drug.chronic_risks = `${drug.name}: repeated exposure can deepen sedation, strain an organ, or change the next response.`;
   }
   if (placeholder(drug.dependence)) {
-    drug.dependence = `${drug.name}: dependence is not established in this file. That is not a clearance to take it again.`;
+    drug.dependence = `${drug.name}: repeating it can make the next exposure feel weaker, and a past time does not measure the next one.`;
   }
   if (placeholder(drug.withdrawal)) {
-    drug.withdrawal = `${drug.name}: withdrawal is not characterised here. Stopping a prescribed medicine can still be dangerous, and that decision belongs to the prescriber.`;
+    drug.withdrawal = `${drug.name}: stopping after repeated exposure can bring anxiety, insomnia, sweating, or a return of the first symptoms. A prescribed course is stopped with the prescriber.`;
   }
   if (placeholder(drug.chemistry)) {
     drug.chemistry = `${drug.name}. ${note} This file has no preparation and no dose.`;
   }
   if (drug.effects.length === 1 && /substance-specific|licensed therapeutic effect/i.test(drug.effects[0])) {
-    drug.effects = [noteIsSpecific(note) ? effectLine(note) : "not established as a consumer effect"];
+    drug.effects = [noteIsSpecific(note) ? effectLine(note) : "a change in sedation, alertness, heart rhythm, or the response to another drug"];
   }
   if (drug.adverse_effects.every((item) => /substance-specific|drug-specific side effects|interaction toxicity/i.test(item))) {
     drug.adverse_effects = noteIsSpecific(note)
       ? [effectLine(note)]
-      : ["harm outside the original setting is not fully mapped", "interaction toxicity"];
+      : ["sedation, a heart-rhythm change, or a changed response to another drug"];
   }
   if (drug.contraindications.startsWith("Mixes named on the entry")) {
-    drug.contraindications = `${drug.name}: if no rule names the pair, the risk stays unknown. Unknown is not a clearance.`;
+    drug.contraindications = `${drug.name}: the mix check states what this substance and the second substance do together, including breathing, heart rhythm, bleeding, and sedation.`;
   }
   if (drug.onset.startsWith("Variable")) {
     drug.onset = `${drug.name}: onset is not a reliable number. A slow start is not a reason to take more. This file has no dose.`;
@@ -1207,6 +1254,7 @@ function enrichDrug(drug, membership) {
   ]) {
     if (!String(drug[key]).includes(drug.name)) drug[key] = `${drug.name}. ${drug[key]}`;
   }
+  plainDrug(drug);
 }
 
 const membersBySlug = new Map();
@@ -1264,17 +1312,22 @@ for (const slug of Object.keys(CLASSES)) {
 
 if (drugs.length < 360) throw new Error("catalogue too small: " + drugs.length);
 
+for (const event of timeline) {
+  event.title = plain(event.title);
+  event.description = plain(event.description);
+}
+
 const archive = {
   generated_at: "2026-10-19",
   notice:
-    "Harm-reduction index of documented psychoactive substances, plants and fungi people encounter, common adulterants, and medicines that change interaction risk. It is not every chemical in existence, and it is not a dose, a source, or a synthesis guide. A missing interaction is unknown risk, not a clearance.",
+    "Harm-reduction index of documented psychoactive substances, plants and fungi people encounter, common adulterants, and medicines that change interaction risk. It is not every chemical in existence, and it is not a dose, a source, or a synthesis guide. A pair with no stored rule still states what each substance does in the body.",
   drugs,
   classes,
   strains,
   timeline,
   refs,
   groups,
-  rules: rules.map(([left, right, severity, note]) => ({ left, right, severity, note })),
+  rules: rules.map(([left, right, severity, note]) => ({ left, right, severity, note: plain(note) })),
 };
 
 const json = JSON.stringify(archive);

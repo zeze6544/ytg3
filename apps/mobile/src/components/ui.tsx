@@ -119,7 +119,7 @@ export function Field({ label, value }: { label: string; value?: string | number
   return (
     <View style={styles.field}>
       <Text style={styles.fieldLabel}>{label}</Text>
-      <Text style={[styles.fieldValue, breakWord]}>{text ?? "· unknown ·"}</Text>
+      <Text style={[styles.fieldValue, breakWord]}>{text ?? "· see the class record ·"}</Text>
     </View>
   );
 }

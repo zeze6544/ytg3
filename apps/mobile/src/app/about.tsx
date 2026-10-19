@@ -16,7 +16,7 @@ export default function AboutScreen() {
       </Frame>
       <Frame title="WHAT THIS IS NOT" code="NO" tone="red">
         <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 13, lineHeight: 20 }}>
-          Not a shop. Not a dose calculator. Not synthesis instructions. Not a guide to obtaining a substance. Not a reason to use one. A missing interaction is unknown risk, not a clearance.
+          Not a shop. Not a dose calculator. Not synthesis instructions. Not a guide to obtaining a substance. Not a reason to use one. Every mix names what each substance does in the body. That description is not permission to combine them.
         </Text>
       </Frame>
     </Screen>

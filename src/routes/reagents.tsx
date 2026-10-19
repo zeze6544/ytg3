@@ -159,7 +159,7 @@ const KITS: Kit[] = [
     use: "Dissolve a small amount of the substance in water. One line = fentanyl present. Two lines = below cutoff. Test everything, especially anything sold as heroin, oxy, xanax, coke or MDMA.",
     rows: [
       { substance: "Fentanyl / most analogues", color: "One line = positive", tone: "red" },
-      { substance: "Nitazenes", color: "Often missed by fentanyl strips", tone: "red", note: "Fentanyl strips do not reliably detect nitazenes. Assume unknown risk." },
+      { substance: "Nitazenes", color: "Often missed by fentanyl strips", tone: "red", note: "Fentanyl strips do not reliably detect nitazenes. Treat a missed strip as a live opioid risk." },
     ],
   },
 ];

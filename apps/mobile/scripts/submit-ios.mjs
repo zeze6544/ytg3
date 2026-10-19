@@ -157,7 +157,7 @@ store.apple.review = {
   phone: process.env.APPLE_REVIEW_PHONE.trim(),
   demoRequired: false,
   notes:
-    "NARCØDEX is an educational harm-reduction reference for adults. It does not sell substances, does not link to sellers, does not calculate doses, and does not provide synthesis or sourcing instructions. It does not encourage use. On first launch, confirm you are 18 or older. Sign-in is optional. Open Files and search for caffeine, then open the monograph. The Mix tab compares two catalogued substances. A missing interaction is unknown, not safe. Please rate the app 17+ for frequent substance references. This is not a medical device.",
+    "NARCØDEX is an educational harm-reduction reference for adults. It does not sell substances, does not link to sellers, does not calculate doses, and does not provide synthesis or sourcing instructions. It does not encourage use. On first launch, confirm you are 18 or older. Sign-in is optional. Open Files and search for caffeine, then open the monograph. The Mix tab compares two catalogued substances and states what each one does. That note is not permission to combine them. Please rate the app 17+ for frequent substance references. This is not a medical device.",
 };
 writeFileSync(storePath, JSON.stringify(store, null, 2) + "\n");
 

@@ -110,7 +110,7 @@ export default function StrainsScreen() {
           {item.summary ? (
             <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 12, lineHeight: 18 }]}>{item.summary}</Text>
           ) : null}
-          <Tag tone={EVIDENCE_TONE[item.confidence] ?? "cyan"}>{item.confidence}</Tag>
+          <Tag tone={EVIDENCE_TONE[item.confidence] ?? "cyan"}>{item.confidence === "unknown" ? "class record" : item.confidence}</Tag>
         </View>
       )}
     />

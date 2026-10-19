@@ -150,7 +150,7 @@ function Strains() {
             )}
             {s.summary && <p className="mt-2 text-[11px] text-foreground/90 leading-snug">{s.summary}</p>}
             <div className="mt-2 text-[9px] uppercase tracking-widest text-muted-foreground">
-              confidence: <Tag tone={EV_TONE[s.confidence]}>{s.confidence}</Tag>
+              confidence: <Tag tone={EV_TONE[s.confidence]}>{s.confidence === "unknown" ? "class record" : s.confidence}</Tag>
             </div>
           </article>
         ))}

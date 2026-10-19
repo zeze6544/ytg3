@@ -92,7 +92,7 @@ function Database() {
               <Tag tone={CATEGORY_COLOR[d.category!] ?? "phosphor"}>{CATEGORY_LABELS[d.category!]}</Tag>
             </div>
             <p className="mt-2 text-[11px] text-foreground/85 line-clamp-2">{d.summary}</p>
-            <div className="mt-2 text-[9px] uppercase tracking-widest text-muted-foreground">EVIDENCE: <span className="text-phosphor">{d.evidence_quality}</span></div>
+            <div className="mt-2 text-[9px] uppercase tracking-widest text-muted-foreground">EVIDENCE: <span className="text-phosphor">{d.evidence_quality === "unknown" ? "class record" : d.evidence_quality}</span></div>
           </Link>
         ))}
       </div>
