@@ -5,6 +5,7 @@ import { ROWS } from "./substances.mjs";
 import { MORE_ROWS } from "./substances-more.mjs";
 import { NEXT_ROWS } from "./substances-next.mjs";
 import { DOUBLE_ROWS, EXTRA_STRAINS, EXTRA_TIMELINE, EXTRA_RULES, EXTRA_GROUPS } from "./substances-double.mjs";
+import { FOLD_ROWS, FOLD_STRAINS, FOLD_TIMELINE, FOLD_RULES, FOLD_GROUPS } from "./substances-fold.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -500,7 +501,7 @@ function split(value) {
   return value.split(",").map((part) => part.trim()).filter(Boolean);
 }
 
-const drugs = [...ROWS, ...MORE_ROWS, ...NEXT_ROWS, ...DOUBLE_ROWS].map(drugRecord);
+const drugs = [...ROWS, ...MORE_ROWS, ...NEXT_ROWS, ...DOUBLE_ROWS, ...FOLD_ROWS].map(drugRecord);
 const slugs = new Set();
 for (const drug of drugs) {
   if (slugs.has(drug.slug)) throw new Error("duplicate slug " + drug.slug);
@@ -621,6 +622,7 @@ const strains = [
   ["original-haze", "Original Haze", "sativa", "Mexican x Colombian x Thai x Indian", 16, 23, 0, 1, "terpinolene,myrcene,caryophyllene"],
   ["london-pound-cake", "London Pound Cake", "hybrid", "Sunset Sherbet x unknown", 18, 25, 0, 1, "caryophyllene,limonene,linalool"],
   ...EXTRA_STRAINS,
+  ...FOLD_STRAINS,
 ].map(([slug, name, type, lineage, thcLow, thcHigh, cbdLow, cbdHigh, terpenes]) => ({
   id: `s_${slug}`,
   slug,
@@ -682,6 +684,7 @@ const timeline = [
   [2018, "Unregulated cannabinoid vapes", "A change in US hemp law was followed by unregulated cannabinoid vapes. A legal-sounding label is not an assay, and some additives have injured lungs.", "cannabinoid"],
   [2022, "Dipentylone sold as MDMA", "Drug checking began finding dipentylone in tablets and crystals sold as MDMA. A weaker effect is how people take more.", "stimulant"],
   ...EXTRA_TIMELINE,
+  ...FOLD_TIMELINE,
 ].map(([year, title, description, category]) => ({
   id: `t_${year}_${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`,
   year,
@@ -765,6 +768,7 @@ const rules = [
   [["alcohol-ethanol"], ["gliclazide", "glimepiride", "glipizide"], "moderate", "Alcohol plus these diabetes medicines can push blood sugar dangerously low, especially if the person has not eaten."],
   [["group:maoi"], ["metaxalone"], "dangerous", "Metaxalone has serotonergic activity. With an MAOI the chance of serotonin syndrome rises."],
   ...EXTRA_RULES,
+  ...FOLD_RULES,
 ];
 
 const groups = {
@@ -783,6 +787,9 @@ const groups = {
 };
 
 for (const [key, members] of Object.entries(EXTRA_GROUPS)) {
+  groups[key] = [...(groups[key] ?? []), ...members];
+}
+for (const [key, members] of Object.entries(FOLD_GROUPS)) {
   groups[key] = [...(groups[key] ?? []), ...members];
 }
 
