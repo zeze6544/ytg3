@@ -56,6 +56,7 @@ export interface Drug {
   evidence_quality: EvidenceQuality;
   discovered_year: number | null;
   featured: boolean;
+  risk_classes?: string[];
 }
 
 export interface DrugClass {

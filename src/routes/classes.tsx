@@ -18,7 +18,10 @@ function Classes() {
   const cls = useQuery({ queryKey: ["classes"], queryFn: fetchClasses });
   const drugs = useQuery({ queryKey: ["drugs-all"], queryFn: () => fetchDrugs() });
   const counts = new Map<string, number>();
-  (drugs.data ?? []).forEach((d) => counts.set(d.category!, (counts.get(d.category!) ?? 0) + 1));
+  (drugs.data ?? []).forEach((d) => {
+    const tags = d.risk_classes?.length ? d.risk_classes : d.category ? [d.category] : [];
+    tags.forEach((tag) => counts.set(tag, (counts.get(tag) ?? 0) + 1));
+  });
 
   return (
     <div className="space-y-4">

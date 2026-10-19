@@ -11,8 +11,8 @@ export default function ClassesScreen() {
   const drugs = useQuery({ queryKey: ["drugs", "", "all"], queryFn: () => fetchDrugs() });
   const counts = new Map<string, number>();
   (drugs.data ?? []).forEach((drug) => {
-    if (!drug.category) return;
-    counts.set(drug.category, (counts.get(drug.category) ?? 0) + 1);
+    const tags = drug.risk_classes?.length ? drug.risk_classes : drug.category ? [drug.category] : [];
+    tags.forEach((tag) => counts.set(tag, (counts.get(tag) ?? 0) + 1));
   });
 
   return (

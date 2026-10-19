@@ -15,9 +15,9 @@ export const Route = createFileRoute("/database")({
   head: () => ({
     meta: [
       { title: "Database · NARCØDEX" },
-      { name: "description", content: "Searchable database of 360+ drugs across every major pharmacological category. Filter by opioid, stimulant, psychedelic, benzodiazepine and more." },
+      { name: "description", content: "Searchable harm-reduction index of 492 substances across every class in the archive, with risks and interactions filled in." },
       { property: "og:title", content: "NARCØDEX Database" },
-      { property: "og:description", content: "360+ drug files. Search, filter by class, evidence-graded." },
+      { property: "og:description", content: "492 substance files. Search, filter by class, evidence-graded. Not a dose or a source." },
     ],
   }),
   validateSearch: (s) => searchSchema.parse(s),

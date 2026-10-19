@@ -2,6 +2,7 @@ import "react-native-url-polyfill/auto";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import Constants from "expo-constants";
+import { LOCAL_DRUG_COUNT } from "@/lib/localArchive";
 
 const extra = (Constants.expoConfig?.extra ?? {}) as {
   supabaseUrl?: string;
@@ -13,7 +14,8 @@ export const supabaseUrl =
 
 export const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_KEY || extra.supabaseKey || "";
 
-export const archiveConfigured = Boolean(supabaseUrl && supabaseKey);
+const remoteArchive = Boolean(supabaseUrl && supabaseKey);
+export const archiveConfigured = remoteArchive || LOCAL_DRUG_COUNT > 0;
 
 export class ArchiveConfigError extends Error {
   constructor() {
@@ -22,7 +24,7 @@ export class ArchiveConfigError extends Error {
   }
 }
 
-export const supabase: SupabaseClient | null = archiveConfigured
+export const supabase: SupabaseClient | null = remoteArchive
   ? createClient(supabaseUrl, supabaseKey, {
       auth: {
         storage: AsyncStorage,

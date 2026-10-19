@@ -1,10 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Frame, Tag } from "@/components/narcodex/Frame";
-import { fetchPopularDrugs, fetchRandomDrug } from "@/lib/db";
+import { fetchCounts, fetchPopularDrugs, fetchRandomDrug } from "@/lib/db";
 import { CATEGORY_COLOR, CATEGORY_LABELS } from "@/lib/types";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({ component: Home });
 
@@ -14,15 +13,7 @@ function Home() {
   const featured = useQuery({ queryKey: ["home-featured"], queryFn: fetchPopularDrugs });
 
   useEffect(() => {
-    (async () => {
-      const sb: any = supabase;
-      const [d, s, c] = await Promise.all([
-        sb.from("drugs").select("*", { count: "exact", head: true }),
-        sb.from("strains").select("*", { count: "exact", head: true }),
-        sb.from("drug_classes").select("*", { count: "exact", head: true }),
-      ]);
-      setCounts({ drugs: d.count ?? 0, strains: s.count ?? 0, classes: c.count ?? 0 });
-    })();
+    fetchCounts().then(setCounts).catch(() => setCounts(null));
   }, []);
 
   async function surprise() {
