@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { ROWS } from "./substances.mjs";
 import { MORE_ROWS } from "./substances-more.mjs";
 import { NEXT_ROWS } from "./substances-next.mjs";
+import { DOUBLE_ROWS, EXTRA_STRAINS, EXTRA_TIMELINE, EXTRA_RULES, EXTRA_GROUPS } from "./substances-double.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -499,7 +500,7 @@ function split(value) {
   return value.split(",").map((part) => part.trim()).filter(Boolean);
 }
 
-const drugs = [...ROWS, ...MORE_ROWS, ...NEXT_ROWS].map(drugRecord);
+const drugs = [...ROWS, ...MORE_ROWS, ...NEXT_ROWS, ...DOUBLE_ROWS].map(drugRecord);
 const slugs = new Set();
 for (const drug of drugs) {
   if (slugs.has(drug.slug)) throw new Error("duplicate slug " + drug.slug);
@@ -619,6 +620,7 @@ const strains = [
   ["swazi-gold", "Swazi Gold", "sativa", "Swazi landrace", 14, 20, 0, 1, "myrcene,pinene,caryophyllene"],
   ["original-haze", "Original Haze", "sativa", "Mexican x Colombian x Thai x Indian", 16, 23, 0, 1, "terpinolene,myrcene,caryophyllene"],
   ["london-pound-cake", "London Pound Cake", "hybrid", "Sunset Sherbet x unknown", 18, 25, 0, 1, "caryophyllene,limonene,linalool"],
+  ...EXTRA_STRAINS,
 ].map(([slug, name, type, lineage, thcLow, thcHigh, cbdLow, cbdHigh, terpenes]) => ({
   id: `s_${slug}`,
   slug,
@@ -679,6 +681,7 @@ const timeline = [
   [2016, "Gabapentinoid overdose deaths", "Death records began showing gabapentin and pregabalin more often alongside opioids. The gabapentinoid does not cancel the opioid's effect on breathing.", "depressant"],
   [2018, "Unregulated cannabinoid vapes", "A change in US hemp law was followed by unregulated cannabinoid vapes. A legal-sounding label is not an assay, and some additives have injured lungs.", "cannabinoid"],
   [2022, "Dipentylone sold as MDMA", "Drug checking began finding dipentylone in tablets and crystals sold as MDMA. A weaker effect is how people take more.", "stimulant"],
+  ...EXTRA_TIMELINE,
 ].map(([year, title, description, category]) => ({
   id: `t_${year}_${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`,
   year,
@@ -761,6 +764,7 @@ const rules = [
   [["spironolactone"], ["co-trimoxazole", "trimethoprim"], "dangerous", "Trimethoprim plus spironolactone can raise potassium high enough to stop the heart."],
   [["alcohol-ethanol"], ["gliclazide", "glimepiride", "glipizide"], "moderate", "Alcohol plus these diabetes medicines can push blood sugar dangerously low, especially if the person has not eaten."],
   [["group:maoi"], ["metaxalone"], "dangerous", "Metaxalone has serotonergic activity. With an MAOI the chance of serotonin syndrome rises."],
+  ...EXTRA_RULES,
 ];
 
 const groups = {
@@ -777,6 +781,10 @@ const groups = {
   nsaid: ["ibuprofen", "aspirin", "naproxen", "diclofenac", "indomethacin", "meloxicam", "celecoxib", "ketorolac", "piroxicam", "mefenamic-acid", "etoricoxib", "benzydamine", "bismuth-subsalicylate", "metamizole"],
   qt: ["citalopram", "escitalopram", "ziprasidone", "haloperidol", "thioridazine", "methadone", "ondansetron", "domperidone", "sotalol", "erythromycin", "clarithromycin", "azithromycin", "moxifloxacin", "dofetilide", "dronedarone", "droperidol", "pimozide", "amiodarone", "hydroxyzine", "levomepromazine", "iloperidone", "hydroxychloroquine", "chloroquine", "mesoridazine", "sertindole", "ibogaine", "zotepine"],
 };
+
+for (const [key, members] of Object.entries(EXTRA_GROUPS)) {
+  groups[key] = [...(groups[key] ?? []), ...members];
+}
 
 for (const slug of Object.values(groups).flat()) {
   if (!slugs.has(slug)) throw new Error("group slug missing " + slug);
