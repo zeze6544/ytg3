@@ -1,9 +1,8 @@
 import { colors, fonts } from "@/constants/theme";
-import { Action, Frame } from "@/components/ui";
+import { Action, Frame, Screen } from "@/components/ui";
 import { useGate } from "@/lib/gate";
 import { Redirect } from "expo-router";
-import { Text } from "react-native";
-import { Screen } from "@/components/ui";
+import { Platform, Text } from "react-native";
 
 export default function GateScreen() {
   const gate = useGate();
@@ -29,6 +28,11 @@ export default function GateScreen() {
       <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 11, lineHeight: 16 }}>
         If you are under 18, close the app. The archive stays locked until an adult confirms.
       </Text>
+      {Platform.OS === "web" ? (
+        <Text style={{ fontFamily: fonts.body, color: colors.cyan, fontSize: 12, lineHeight: 18 }}>
+          On iPhone, tap Share, then Add to Home Screen. NARCØDEX stays on your phone from this page.
+        </Text>
+      ) : null}
     </Screen>
   );
 }

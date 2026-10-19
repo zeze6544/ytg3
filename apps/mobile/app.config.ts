@@ -36,7 +36,16 @@ const config: ExpoConfig = {
   web: {
     output: "single",
     favicon: "./assets/images/favicon.png",
+    name: "NARCØDEX",
+    shortName: "NARCØDEX",
+    description: "Adult harm-reduction reference for substances, risks, and interactions.",
+    lang: "en",
+    themeColor: "#07140c",
     backgroundColor: "#07140c",
+    display: "standalone",
+    orientation: "portrait",
+    startUrl: "/",
+    barStyle: "black",
   },
   plugins: [
     "expo-router",

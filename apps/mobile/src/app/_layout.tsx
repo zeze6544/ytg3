@@ -63,7 +63,7 @@ function RootStack() {
 }
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     VT323_400Regular,
     JetBrainsMono_400Regular,
     JetBrainsMono_500Medium,
@@ -71,11 +71,11 @@ export default function RootLayout() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (fontsLoaded) {
+    if (fontsLoaded || fontError) {
       SplashScreen.hideAsync();
       setReady(true);
     }
-  }, [fontsLoaded]);
+  }, [fontsLoaded, fontError]);
 
   if (!ready) {
     return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
