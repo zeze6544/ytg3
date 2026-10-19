@@ -800,6 +800,444 @@ for (const [key, members] of Object.entries(TRIPLE_GROUPS)) {
   groups[key] = [...(groups[key] ?? []), ...members];
 }
 
+const GROUP_FACTS = {
+  nsaid: {
+    mechanism: "Inhibits cyclo-oxygenase and lowers prostaglandins. That can ease pain and also injure the stomach lining and the kidneys.",
+    effects: ["pain relief", "reduced inflammation"],
+    adverse: ["stomach bleeding", "kidney injury", "raised blood pressure"],
+    acute: "Stomach bleeding and kidney injury are the acute harms, especially with another NSAID, alcohol, or dehydration.",
+    contra: "Ulcers, kidney disease, later pregnancy, and medicines that already raise bleeding or kidney risk.",
+  },
+  "beta-blocker": {
+    mechanism: "Blocks beta-adrenergic receptors. Heart rate and blood pressure fall.",
+    effects: ["slower heart rate", "lower blood pressure"],
+    adverse: ["fatigue", "cold hands", "wheeze in susceptible people", "hidden low-blood-sugar warning signs"],
+    acute: "Heart rate and blood pressure can fall hard. A wheeze in someone with asthma is an emergency.",
+    contra: "Do not stop a long course suddenly. Cocaine and other stimulants are not made safe by a beta blocker.",
+  },
+  qt: {
+    mechanism: "Can prolong the QT interval on the heart tracing. The risk is a dangerous rhythm, higher when potassium is low or a second QT drug is present.",
+    effects: ["a prolonged QT interval"],
+    adverse: ["palpitations", "fainting", "a dangerous heart rhythm"],
+    acute: "Fainting or a racing irregular heart needs emergency care. Two QT-prolonging drugs stack.",
+    contra: "Low potassium, low magnesium, and another drug that prolongs QT.",
+  },
+  diuretic: {
+    mechanism: "Increases urine output and shifts sodium, water, and often potassium.",
+    effects: ["increased urine", "lower blood pressure"],
+    adverse: ["dehydration", "dizziness", "potassium too high or too low"],
+    acute: "Collapse from low blood pressure, or a heart rhythm problem from a potassium shift.",
+    contra: "Dehydration, and the combination of an NSAID with an ACE inhibitor or ARB, which can injure the kidneys.",
+  },
+  penicillin: {
+    mechanism: "A beta-lactam antibiotic. It interferes with bacterial cell walls. It is not an intoxicant.",
+    effects: ["treatment of susceptible infections in medical use"],
+    adverse: ["rash", "diarrhoea", "allergic reaction"],
+    acute: "Allergy can become anaphylaxis: rash, swelling, wheeze, or collapse. That is an emergency.",
+    contra: "A previous severe penicillin allergy. This file is not a regimen.",
+  },
+  "beta-agonist": {
+    mechanism: "Stimulates beta-adrenergic receptors. Airways open, heart rate rises, and potassium can fall.",
+    effects: ["opened airways in medical use", "tremor", "faster heart rate"],
+    adverse: ["tremor", "pounding heart", "low potassium"],
+    acute: "Chest pain or a very fast heart rate, especially if another stimulant is present.",
+    contra: "Other stimulants add heart strain. This file has no dose.",
+  },
+  acei: {
+    mechanism: "Blocks angiotensin-converting enzyme. Blood pressure falls. Potassium can rise.",
+    effects: ["lower blood pressure"],
+    adverse: ["cough", "high potassium", "kidney injury", "swelling of the face or tongue"],
+    acute: "Face or tongue swelling, or collapse, is an emergency. Kidneys fail more easily with an NSAID plus dehydration.",
+    contra: "Pregnancy, previous angioedema, and the NSAID plus diuretic combination.",
+  },
+  fluoroquinolone: {
+    mechanism: "An antibiotic that can injure tendons and, for several in the class, prolong the QT interval.",
+    effects: ["treatment of susceptible infections in medical use"],
+    adverse: ["tendon pain", "confusion", "a prolonged QT interval"],
+    acute: "Sudden tendon pain, especially with a corticosteroid, or fainting from a heart rhythm.",
+    contra: "A corticosteroid raises the tendon risk. This file is not a regimen.",
+  },
+  "sedating-antihistamine": {
+    mechanism: "Blocks histamine H1 receptors and often has anticholinergic effects. The result is sedation and, at high exposure, delirium.",
+    effects: ["drowsiness", "dry mouth"],
+    adverse: ["next-day impairment", "confusion", "delirium", "a fast heart"],
+    acute: "Blackout with alcohol or an opioid. The opioid can still stop breathing. High exposure can cause seizures or a pounding heart.",
+    contra: "Alcohol, opioids, other sedatives, and older age, where confusion is more likely.",
+  },
+  arb: {
+    mechanism: "Blocks angiotensin receptors. Blood pressure falls. Potassium can rise.",
+    effects: ["lower blood pressure"],
+    adverse: ["high potassium", "kidney injury", "dizziness"],
+    acute: "Kidney injury when combined with an NSAID and dehydration, or a heart problem from high potassium.",
+    contra: "Pregnancy, and the NSAID plus diuretic combination.",
+  },
+  serotonin: {
+    mechanism: "Increases serotonin signalling. With another serotonergic drug or an MAOI the picture can become serotonin syndrome.",
+    effects: ["changed mood or alertness, depending on the substance"],
+    adverse: ["agitation", "sweating", "rigidity", "high temperature"],
+    acute: "Serotonin syndrome: rigidity, agitation, sweating, and high temperature. With an MAOI this is an emergency.",
+    contra: "MAO inhibitors and other serotonergic drugs, including some antidepressants, tramadol, and DXM.",
+  },
+  dihydropyridine: {
+    mechanism: "A dihydropyridine calcium-channel blocker. Blood vessels widen and blood pressure falls.",
+    effects: ["lower blood pressure"],
+    adverse: ["ankle swelling", "flushing", "dizziness", "collapse"],
+    acute: "Blood pressure can fall sharply with alcohol, a beta blocker, or another pressure-lowering medicine.",
+    contra: "Other drugs that lower blood pressure. This file has no dose.",
+  },
+  azole: {
+    mechanism: "An azole antifungal. Several inhibit liver enzymes and raise the level of other drugs, including some statins and sedatives.",
+    effects: ["treatment of susceptible fungal infection in medical use"],
+    adverse: ["liver injury", "raised levels of other medicines"],
+    acute: "Jaundice, or severe muscle pain when a statin level rises.",
+    contra: "Medicines whose levels rise into toxicity. This file is not a regimen.",
+  },
+  sulfonamide: {
+    mechanism: "A sulfonamide. The practical risk people meet is allergy, including rare severe skin reactions.",
+    effects: ["treatment of susceptible infection in medical use"],
+    adverse: ["rash", "severe skin reaction", "kidney irritation"],
+    acute: "A spreading rash, blistering, or peeling skin needs urgent care.",
+    contra: "A previous severe sulfa reaction. This file is not a regimen.",
+  },
+  "contraceptive-hormone": {
+    mechanism: "A hormonal contraceptive. Enzyme-inducing drugs can lower its level and make it fail.",
+    effects: ["contraception when the level is maintained"],
+    adverse: ["clot risk in susceptible people", "changed bleeding"],
+    acute: "Chest pain, sudden shortness of breath, or a one-sided leg swelling can be a clot.",
+    contra: "Enzyme inducers such as some seizure medicines and St John's wort. This file is not a regimen.",
+  },
+  nitrate: {
+    mechanism: "Releases nitric oxide and widens blood vessels. With a PDE5 inhibitor or a nitrite, blood pressure can collapse.",
+    effects: ["widened blood vessels"],
+    adverse: ["headache", "low blood pressure", "collapse"],
+    acute: "Collapse with sildenafil-type medicines or poppers. That mix is deadly.",
+    contra: "PDE5 inhibitors and nitrites.",
+  },
+  corticosteroid: {
+    mechanism: "A corticosteroid. It reduces inflammation and, with longer exposure, raises blood sugar and weakens tissue.",
+    effects: ["reduced inflammation in medical use"],
+    adverse: ["high blood sugar", "stomach bleeding with an NSAID", "tendon injury with a fluoroquinolone"],
+    acute: "Stomach bleeding with an NSAID, or a tendon rupture with a fluoroquinolone.",
+    contra: "Stopping a long course suddenly can itself be dangerous. This file is not a regimen.",
+  },
+  maoi: {
+    mechanism: "Inhibits monoamine oxidase. Stimulants can cause a blood-pressure crisis. Serotonergic drugs can cause serotonin syndrome.",
+    effects: ["changed mood in medical or plant use"],
+    adverse: ["hypertensive crisis", "serotonin syndrome"],
+    acute: "Severe headache, chest pain, rigidity, or high temperature. Treat that as an emergency.",
+    contra: "SSRIs, SNRIs, many antidepressants, stimulants, tramadol, and triptans.",
+  },
+  tca: {
+    mechanism: "A tricyclic antidepressant. Overdose blocks sodium channels in the heart and causes anticholinergic toxicity.",
+    effects: ["changed mood over weeks", "sedation"],
+    adverse: ["dry mouth", "confusion", "a wide-complex heart rhythm in overdose"],
+    acute: "Seizures, coma, or a wide-complex heart rhythm. This is an emergency, not a wait-and-see overdose.",
+    contra: "MAO inhibitors, other sedatives, and any nonmedical overdose.",
+  },
+  "combined-contraceptive": {
+    mechanism: "An estrogen plus a progestin. Clot risk is higher in some people, and enzyme inducers can make the contraceptive fail.",
+    effects: ["contraception when the level is maintained"],
+    adverse: ["clot", "migraine worsening in some people"],
+    acute: "Chest pain, sudden breathlessness, or one-sided weakness can be a clot or a stroke.",
+    contra: "Smoking over age 35 in the licensed warnings, migraine with aura, and enzyme inducers. This file is not a regimen.",
+  },
+  "disulfiram-like": {
+    mechanism: "Makes alcohol metabolism toxic, by blocking aldehyde dehydrogenase or a related step.",
+    effects: ["flushing and vomiting if alcohol is taken"],
+    adverse: ["flushing", "vomiting", "a pounding heart", "a blood-pressure swing"],
+    acute: "Alcohol, including alcohol hidden in medicines or mouthwash, can cause flushing, vomiting, and collapse.",
+    contra: "Any alcohol exposure while the medicine is still in the body.",
+  },
+  xanthine: {
+    mechanism: "A xanthine, in the caffeine and theophylline family. Levels that rise too far cause seizures and a dangerous heart rhythm.",
+    effects: ["alertness or opened airways, depending on the substance"],
+    adverse: ["tremor", "vomiting", "a fast heart", "seizures"],
+    acute: "Seizures or a racing heart, including when ciprofloxacin raises theophylline.",
+    contra: "Drugs that raise theophylline, and stacking with other stimulants.",
+  },
+  sulfonylurea: {
+    mechanism: "Stimulates insulin release. Blood sugar can fall dangerously low.",
+    effects: ["lower blood sugar in medical use"],
+    adverse: ["hypoglycaemia", "sweating", "confusion"],
+    acute: "Sweating, confusion, or unconsciousness from low blood sugar, especially with alcohol or a missed meal.",
+    contra: "Alcohol and other glucose-lowering drugs. This file has no dose.",
+  },
+  statin: {
+    mechanism: "Inhibits HMG-CoA reductase and lowers cholesterol production. Muscle breakdown is the serious interaction harm when levels rise.",
+    effects: ["lower cholesterol in medical use"],
+    adverse: ["muscle pain", "muscle breakdown", "liver enzyme rises"],
+    acute: "Severe muscle pain or dark urine, especially with clarithromycin, erythromycin, or some azoles.",
+    contra: "Medicines that raise the statin level. Pravastatin and rosuvastatin depend less on the same enzyme, and the risk is not identical.",
+  },
+  "cardiac-glycoside": {
+    mechanism: "A cardiac glycoside. It increases the force of the heartbeat and can slow the rate. The margin between effect and toxicity is narrow.",
+    effects: ["stronger, often slower heartbeat in medical use"],
+    adverse: ["nausea", "visual halos", "a dangerous heart rhythm"],
+    acute: "Nausea, visual halos, and an irregular heart. Levels rise with clarithromycin, amiodarone, and verapamil.",
+    contra: "Those level-raising medicines, and low potassium. This file has no dose.",
+  },
+  doac: {
+    mechanism: "A direct oral anticoagulant. Bleeding is the harm. If the level falls, clot risk returns.",
+    effects: ["reduced clotting in medical use"],
+    adverse: ["bleeding", "bruising"],
+    acute: "Bleeding that will not stop, black stools, or a sudden severe headache.",
+    contra: "Other anticoagulants, and enzyme inducers that drop the level. This file is not a regimen.",
+  },
+  ssri: {
+    mechanism: "A selective serotonin reuptake inhibitor. Serotonin rises. With other serotonergic drugs the picture can become serotonin syndrome. Bleeding risk also rises.",
+    effects: ["changed mood over weeks"],
+    adverse: ["nausea", "sexual dysfunction", "bleeding", "discontinuation symptoms"],
+    acute: "Serotonin syndrome with another serotonergic drug: rigidity, agitation, sweating, high temperature. Stomach bleeding with an NSAID.",
+    contra: "MAO inhibitors, and caution with tramadol, triptans, NSAIDs, and warfarin.",
+  },
+  triptan: {
+    mechanism: "A serotonin 1B/1D agonist used for migraine. Blood vessels constrict.",
+    effects: ["migraine relief in medical use"],
+    adverse: ["chest tightness", "tingling", "blood-vessel spasm"],
+    acute: "Chest pain, or prolonged spasm if combined with an ergot. With an MAOI the mix is contraindicated.",
+    contra: "MAO inhibitors and ergot medicines. This file is not a regimen.",
+  },
+  heparin: {
+    mechanism: "An anticoagulant used in care settings. Bleeding is the harm.",
+    effects: ["reduced clotting in medical use"],
+    adverse: ["bleeding", "a fall in platelets in some people"],
+    acute: "Bleeding that will not stop, or a clot that appears because platelets fell.",
+    contra: "Active serious bleeding. This file is not a protocol and has no amount.",
+  },
+  vka: {
+    mechanism: "A vitamin K antagonist. Clotting falls over days. Many other drugs swing the effect.",
+    effects: ["reduced clotting in medical use"],
+    adverse: ["bleeding", "bruising"],
+    acute: "Bleeding, black stools, or a sudden severe headache. Antibiotics, NSAIDs, and alcohol can swing the effect.",
+    contra: "NSAIDs and drugs that raise or drop the effect. This file has no dose.",
+  },
+  pde5: {
+    mechanism: "Inhibits phosphodiesterase-5. Blood vessels widen. With a nitrate or a nitrite, blood pressure can collapse.",
+    effects: ["widened blood vessels"],
+    adverse: ["headache", "flushing", "low blood pressure", "a painful prolonged erection"],
+    acute: "Collapse with nitrate heart medicines or poppers. Alpha blockers can drop the pressure sharply as well.",
+    contra: "Nitrates, nitrites, and caution with alpha blockers.",
+  },
+  "alpha-blocker": {
+    mechanism: "Blocks alpha-1 receptors. Blood pressure falls, and the first doses can cause collapse on standing.",
+    effects: ["lower blood pressure"],
+    adverse: ["dizziness on standing", "collapse", "a fast heart"],
+    acute: "Collapse on standing, worse with a PDE5 inhibitor or alcohol.",
+    contra: "PDE5 inhibitors and other drugs that lower blood pressure.",
+  },
+  nitrite: {
+    mechanism: "An alkyl nitrite. Blood vessels widen briefly. With a PDE5 inhibitor the pressure drop can be fatal.",
+    effects: ["a brief drop in blood pressure", "flushing"],
+    adverse: ["fainting", "a dangerous heart rhythm", "low oxygen with some nitrites"],
+    acute: "Collapse, especially with sildenafil-type medicines. A blue colour and breathlessness need emergency care.",
+    contra: "PDE5 inhibitors. This file does not describe use.",
+  },
+  "potassium-sparing": {
+    mechanism: "A potassium-sparing diuretic. Potassium is held in the blood and can rise high enough to stop the heart.",
+    effects: ["increased urine", "potassium retention"],
+    adverse: ["high potassium", "breast tenderness with spironolactone"],
+    acute: "Weakness or a slow irregular heart from high potassium, especially with an ACE inhibitor, an ARB, a potassium supplement, or trimethoprim.",
+    contra: "Other potassium-raising drugs and significant kidney disease.",
+  },
+  "potassium-supplement": {
+    mechanism: "A potassium salt. If the kidneys cannot clear it, or another drug holds potassium, the level can stop the heart.",
+    effects: ["a rise in potassium"],
+    adverse: ["high potassium", "gut irritation"],
+    acute: "Weakness, paralysis, or a dangerous heart rhythm from high potassium.",
+    contra: "ACE inhibitors, ARBs, potassium-sparing diuretics, and kidney failure. This file has no amount.",
+  },
+  snri: {
+    mechanism: "Inhibits reuptake of serotonin and noradrenaline. Blood pressure can rise. Serotonin syndrome is the mix risk.",
+    effects: ["changed mood over weeks", "sometimes a higher blood pressure"],
+    adverse: ["nausea", "sweating", "raised blood pressure", "discontinuation symptoms"],
+    acute: "Serotonin syndrome with another serotonergic drug or an MAOI.",
+    contra: "MAO inhibitors. This file is not a regimen.",
+  },
+  "pethidine-product": {
+    mechanism: "Pethidine, also called meperidine. It is an opioid, and a metabolite can cause seizures. With an MAOI it is particularly hazardous.",
+    effects: ["pain relief", "sedation", "slowed breathing"],
+    adverse: ["slowed breathing", "seizures", "serotonin toxicity with an MAOI"],
+    acute: "Stopped breathing, or seizures. With an MAOI, treat the mix as deadly.",
+    contra: "MAO inhibitors, benzodiazepines, and alcohol.",
+  },
+  "xanthine-oxidase": {
+    mechanism: "Inhibits xanthine oxidase. Azathioprine and mercaptopurine levels can rise into dangerous bone-marrow toxicity.",
+    effects: ["lower uric acid in medical use"],
+    adverse: ["rash", "marrow suppression when mixed with azathioprine or mercaptopurine"],
+    acute: "Fever, mouth ulcers, or bleeding if azathioprine or mercaptopurine rises.",
+    contra: "Azathioprine and mercaptopurine. This file has no dose.",
+  },
+  "bleed-herb": {
+    mechanism: "A plant associated with extra bleeding. The evidence is uneven, and the risk still matters next to an anticoagulant.",
+    effects: ["traditional uses that this file does not endorse"],
+    adverse: ["bleeding", "bruising"],
+    acute: "Bleeding that is hard to stop when an anticoagulant or an NSAID is also present.",
+    contra: "Warfarin, other anticoagulants, and NSAIDs. This file has no preparation.",
+  },
+  "statin-like": {
+    mechanism: "Lowers lipids by a statin-like route. Muscle breakdown is the interaction harm when levels rise.",
+    effects: ["lower lipids in medical use"],
+    adverse: ["muscle pain", "muscle breakdown"],
+    acute: "Severe muscle pain or dark urine when another drug raises the level.",
+    contra: "Medicines that raise the level. This file is not a regimen.",
+  },
+};
+
+function clipNote(drug) {
+  const prefix = `${drug.name} is filed here as a harm-reduction record. `;
+  const suffix = " This is not a dose, a source, or a reason to use it.";
+  let note = drug.summary;
+  if (note.startsWith(prefix) && note.endsWith(suffix)) note = note.slice(prefix.length, -suffix.length);
+  note = note.replace(/\s+/g, " ").trim();
+  if (note.length <= 220) return note;
+  return `${note.slice(0, 200).replace(/\s+\S*$/, "")}.`;
+}
+
+function placeholder(text) {
+  const value = String(text ?? "").trim();
+  return (
+    value === "Stated on the entry." ||
+    value.startsWith("Drug-specific.") ||
+    value.startsWith("Often poorly characterised") ||
+    value.startsWith("See the entry.")
+  );
+}
+
+function noteIsSpecific(note) {
+  return !note.startsWith("An investigational substance that has been in human trials.") && !note.startsWith("A licensed medicine that reached the market.");
+}
+
+function effectLine(note) {
+  const parts = note.split(/(?<=\.)\s+/).filter(Boolean);
+  const start = parts[0]?.startsWith("It is in this index") ? 1 : 0;
+  let line = parts[start] ?? parts[0] ?? note;
+  if (line.length < 48 && parts[start + 1]) line = `${line} ${parts[start + 1]}`;
+  if (line.length > 120) line = line.slice(0, 110).replace(/\s+\S*$/, "");
+  return line;
+}
+
+function fillName(list, fact) {
+  return list?.length ? list : [fact];
+}
+
+function enrichDrug(drug, membership) {
+  const note = clipNote(drug);
+  drug.aliases = fillName(drug.aliases, "No separate alias is catalogued");
+  drug.brand_names = fillName(drug.brand_names, "No brand name is catalogued");
+  drug.street_names = fillName(drug.street_names, "No street name is catalogued");
+  if (!drug.discovered_year && !drug.history.includes("No single discovery year")) {
+    drug.history = `${drug.history} No single discovery year is catalogued for this file.`;
+  }
+
+  if (placeholder(drug.mechanism) || (drug.mechanism.includes("Depends on the species") && noteIsSpecific(note))) {
+    drug.mechanism = noteIsSpecific(note)
+      ? `${drug.name}. ${note}`
+      : `${drug.name}: ${note} A finer mechanism is not established in this file. That is not evidence of safety.`;
+  }
+  if (placeholder(drug.half_life)) {
+    drug.half_life = /wear off|wears off|before the opioid|before a longer|antagonist/i.test(note)
+      ? `${drug.name}: no half-life number is stated here. The effect can end before the other drug does. One exposure is not the end of the emergency.`
+      : `${drug.name}: no half-life number is stated here. This file is not a dosing aid. Treat any effect as lasting longer than expected.`;
+  }
+  if (placeholder(drug.chronic_risks)) {
+    drug.chronic_risks = `${drug.name}: long-term harm outside the setting in the summary is not established. Unknown is not the same as low risk.`;
+  }
+  if (placeholder(drug.dependence)) {
+    drug.dependence = `${drug.name}: dependence is not established in this file. That is not a clearance to take it again.`;
+  }
+  if (placeholder(drug.withdrawal)) {
+    drug.withdrawal = `${drug.name}: withdrawal is not characterised here. Stopping a prescribed medicine can still be dangerous, and that decision belongs to the prescriber.`;
+  }
+  if (placeholder(drug.chemistry)) {
+    drug.chemistry = `${drug.name}. ${note} This file has no preparation and no dose.`;
+  }
+  if (drug.effects.length === 1 && /substance-specific|licensed therapeutic effect/i.test(drug.effects[0])) {
+    drug.effects = [noteIsSpecific(note) ? effectLine(note) : "not established as a consumer effect"];
+  }
+  if (drug.adverse_effects.every((item) => /substance-specific|drug-specific side effects|interaction toxicity/i.test(item))) {
+    drug.adverse_effects = noteIsSpecific(note)
+      ? [effectLine(note)]
+      : ["harm outside the original setting is not fully mapped", "interaction toxicity"];
+  }
+  if (drug.contraindications.startsWith("Mixes named on the entry")) {
+    drug.contraindications = `${drug.name}: if no rule names the pair, the risk stays unknown. Unknown is not a clearance.`;
+  }
+  if (drug.onset.startsWith("Variable")) {
+    drug.onset = `${drug.name}: onset is not a reliable number. A slow start is not a reason to take more. This file has no dose.`;
+  }
+  if (drug.duration.startsWith("Variable")) {
+    drug.duration = `${drug.name}: duration is not a reliable number. Assume it lasts longer than any wanted effect.`;
+  }
+  if (drug.medical_uses.startsWith("Usually none")) {
+    drug.medical_uses = `${drug.name} has no casual use in this file. ${note}`;
+  }
+
+  const facts = membership.map((key) => GROUP_FACTS[key]).filter(Boolean);
+  if (facts.length) {
+    const mechanisms = facts.map((fact) => fact.mechanism);
+    const generated = drug.mechanism.startsWith(`${drug.name}.`) || drug.mechanism.startsWith(`${drug.name}:`);
+    if (!mechanisms.some((line) => drug.mechanism.includes(line))) {
+      drug.mechanism = generated ? `${drug.name}. ${mechanisms.join(" ")}` : `${drug.mechanism} ${mechanisms.join(" ")}`;
+    }
+    const genericEffect = /not established as a consumer effect|licensed therapeutic|substance-specific|It is in this index|This is not a prescribing/i;
+    const classEffects = drug.effects.filter((item) => !genericEffect.test(item));
+    const classAdverse = drug.adverse_effects.filter((item) => !/not fully mapped|drug-specific side effects|substance-specific|interaction toxicity|It is in this index|This is not a prescribing/i.test(item));
+    drug.effects = [...new Set([...facts.flatMap((fact) => fact.effects), ...classEffects])].slice(0, 8);
+    drug.adverse_effects = [...new Set([...facts.flatMap((fact) => fact.adverse), ...classAdverse])].slice(0, 8);
+    const acute = facts.map((fact) => fact.acute).join(" ");
+    if (!drug.acute_risks.includes(acute.slice(0, 40))) drug.acute_risks = `${acute} ${drug.acute_risks}`;
+    const contra = facts.map((fact) => fact.contra).join(" ");
+    drug.contraindications = drug.contraindications.includes("Listed on the entry. Pregnancy, kidney disease")
+      ? `${drug.name}. ${contra}`
+      : drug.contraindications.includes(contra.slice(0, 40))
+        ? drug.contraindications
+        : `${drug.contraindications} ${contra}`;
+  }
+  drug.acute_risks = drug.acute_risks
+    .replaceAll("The acute harm is usually the interaction: bleeding, serotonin syndrome, low blood pressure, sedation, or toxicity. ", "")
+    .replaceAll("Stated on the entry. If it is not known, treat the risk as unknown rather than low. ", "");
+  if (!/datura/i.test(note)) {
+    drug.acute_risks = drug.acute_risks.replaceAll("Datura and related plants are medical emergencies, not psychedelics. ", "");
+  }
+
+  for (const key of [
+    "legal_status", "medical_status", "chemistry", "mechanism", "onset", "duration", "half_life",
+    "acute_risks", "chronic_risks", "overdose_signs", "dependence", "tolerance", "withdrawal",
+    "medical_uses", "contraindications", "testing", "harm_reduction",
+  ]) {
+    if (!String(drug[key]).includes(drug.name)) drug[key] = `${drug.name}. ${drug[key]}`;
+  }
+}
+
+const membersBySlug = new Map();
+for (const [key, members] of Object.entries(groups)) {
+  for (const slug of members) {
+    const list = membersBySlug.get(slug);
+    if (list) list.push(key);
+    else membersBySlug.set(slug, [key]);
+  }
+}
+for (const drug of drugs) enrichDrug(drug, membersBySlug.get(drug.slug) ?? []);
+
+for (const drug of drugs) {
+  for (const key of [
+    "summary", "history", "legal_status", "medical_status", "chemistry", "mechanism",
+    "onset", "duration", "half_life", "acute_risks", "chronic_risks", "overdose_signs",
+    "dependence", "tolerance", "withdrawal", "medical_uses", "contraindications",
+    "testing", "harm_reduction",
+  ]) {
+    if (!drug[key] || !String(drug[key]).trim()) throw new Error("empty " + key + " on " + drug.slug);
+    if (!String(drug[key]).includes(drug.name)) throw new Error("unnamed " + key + " on " + drug.slug);
+  }
+  if (!drug.aliases.length || !drug.brand_names.length || !drug.street_names.length || !drug.effects.length || !drug.adverse_effects.length) {
+    throw new Error("empty list on " + drug.slug);
+  }
+}
+if (banned.test(JSON.stringify(drugs))) {
+  const hit = JSON.stringify(drugs).match(banned);
+  throw new Error("banned pattern after enrich: " + hit?.[0]);
+}
+
 for (const slug of Object.values(groups).flat()) {
   if (!slugs.has(slug)) throw new Error("group slug missing " + slug);
 }
