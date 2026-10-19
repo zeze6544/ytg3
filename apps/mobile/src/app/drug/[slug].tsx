@@ -1,6 +1,7 @@
 import { colors, fonts } from "@/constants/theme";
-import { Action, Banner, Field, Frame, QueryError, Screen, Status, Tag, breakWord } from "@/components/ui";
+import { Action, Banner, Field, FinePrint, Frame, QueryError, Screen, Status, Tag, breakWord } from "@/components/ui";
 import { fetchDrugBySlug, fetchDrugRefs } from "@/lib/api";
+import { rememberFile } from "@/lib/recent";
 import { useSession } from "@/lib/session";
 import { requireClient } from "@/lib/supabase";
 import { CATEGORY_LABELS, CATEGORY_TONE, EVIDENCE_TONE } from "@/lib/types";
@@ -25,6 +26,10 @@ export default function DrugScreen() {
     queryFn: () => fetchDrugRefs(drug!.id),
     enabled: Boolean(drug?.id),
   });
+
+  useEffect(() => {
+    if (drug?.slug && drug.name) rememberFile({ slug: drug.slug, name: drug.name });
+  }, [drug?.slug, drug?.name]);
 
   useEffect(() => {
     if (!drug || !user) return;
@@ -86,7 +91,17 @@ export default function DrugScreen() {
         <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 21 }]}>{drug.summary}</Text>
       ) : null}
       <Banner>Not medical advice. Not a dose, a source, or a reason to use this substance.</Banner>
-      <Action label="Save" onPress={() => void save()} />
+      <Action label={user ? "Save" : "Sign in to save"} onPress={() => void save()} />
+      <Action
+        label="Check a mix with this file"
+        tone="red"
+        onPress={() => router.push({ pathname: "/mix", params: { drug: drug.id, name: drug.name } })}
+      />
+      <Action
+        label={`More ${CATEGORY_LABELS[drug.category] ?? "files"}`}
+        tone="cyan"
+        onPress={() => router.push({ pathname: "/files", params: { cat: drug.category } })}
+      />
       {note ? <Status>{note}</Status> : null}
 
       <Frame title="NAMES" code="NAM" tone="cyan">
@@ -148,13 +163,15 @@ export default function DrugScreen() {
         {(refs.data ?? []).map((ref) => (
           <Text
             key={ref.id}
+            accessibilityRole={ref.url ? "link" : "text"}
             onPress={() => ref.url && Linking.openURL(ref.url)}
-            style={{ fontFamily: fonts.body, color: ref.url ? colors.cyan : colors.text, fontSize: 13 }}
+            style={{ fontFamily: fonts.body, color: ref.url ? colors.cyan : colors.text, fontSize: 14, lineHeight: 22, minHeight: 32 }}
           >
             {ref.label}
           </Text>
         ))}
       </Frame>
+      <FinePrint />
     </Screen>
   );
 }

@@ -1,9 +1,10 @@
 import { colors, fonts, type Tone } from "@/constants/theme";
-import { Banner, Frame, MissingArchive, PageTitle, QueryError, Screen, SearchField, Status, Tag, breakWord } from "@/components/ui";
+import { Banner, FinePrint, Frame, MissingArchive, PageTitle, QueryError, Screen, SearchField, Status, Tag, breakWord } from "@/components/ui";
 import { fetchDrugs, fetchInteraction } from "@/lib/api";
 import { archiveConfigured } from "@/lib/supabase";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useLocalSearchParams } from "expo-router";
+import { useEffect, useMemo, useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -17,11 +18,33 @@ const SEV: Record<string, { tone: Tone; label: string }> = {
 
 type Pick = { id: string; name: string };
 
+const KNOWN_PAIRS = [
+  ["Alcohol", "Heroin"],
+  ["Naloxone", "Heroin"],
+  ["Prazosin", "Sildenafil"],
+] as const;
+
 export default function MixScreen() {
+  const params = useLocalSearchParams<{ drug?: string; name?: string }>();
   const drugs = useQuery({ queryKey: ["drug-index"], queryFn: () => fetchDrugs(), enabled: archiveConfigured });
   const [a, setA] = useState<Pick | null>(null);
   const [b, setB] = useState<Pick | null>(null);
   const [which, setWhich] = useState<"a" | "b" | null>(null);
+
+  useEffect(() => {
+    if (typeof params.drug === "string" && typeof params.name === "string" && params.drug && params.name) {
+      setA({ id: params.drug, name: params.name });
+    }
+  }, [params.drug, params.name]);
+
+  function openPair(left: string, right: string) {
+    const find = (name: string) => (drugs.data ?? []).find((drug) => drug.name === name && drug.id);
+    const first = find(left);
+    const second = find(right);
+    if (!first?.id || !first.name || !second?.id || !second.name) return;
+    setA({ id: first.id, name: first.name });
+    setB({ id: second.id, name: second.name });
+  }
   const interaction = useQuery({
     queryKey: ["interaction", a?.id, b?.id],
     queryFn: () => fetchInteraction(a!.id, b!.id),
@@ -40,16 +63,29 @@ export default function MixScreen() {
       </Banner>
       <PickerButton label="SUBSTANCE A" value={a?.name} onPress={() => setWhich("a")} />
       <PickerButton label="SUBSTANCE B" value={b?.name} onPress={() => setWhich("b")} />
-      <Pressable
-        onPress={() => {
-          const nextA = b;
-          setB(a);
-          setA(nextA);
-        }}
-        style={{ minHeight: 44, justifyContent: "center" }}
-      >
-        <Text style={{ fontFamily: fonts.body, color: colors.purple, letterSpacing: 1 }}>SWAP</Text>
-      </Pressable>
+      <View style={{ flexDirection: "row", gap: 18, minHeight: 44, alignItems: "center" }}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => {
+            const nextA = b;
+            setB(a);
+            setA(nextA);
+          }}
+          style={{ minHeight: 44, justifyContent: "center" }}
+        >
+          <Text style={{ fontFamily: fonts.body, color: colors.purple, letterSpacing: 1 }}>SWAP</Text>
+        </Pressable>
+        <Pressable accessibilityRole="button" onPress={() => { setA(null); setB(null); }} style={{ minHeight: 44, justifyContent: "center" }}>
+          <Text style={{ fontFamily: fonts.body, color: colors.cyan, letterSpacing: 1 }}>CLEAR</Text>
+        </Pressable>
+      </View>
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+        {KNOWN_PAIRS.map(([left, right]) => (
+          <Pressable key={`${left}-${right}`} accessibilityRole="button" onPress={() => openPair(left, right)} style={{ minHeight: 36, justifyContent: "center" }}>
+            <Tag tone="amber">{left} + {right}</Tag>
+          </Pressable>
+        ))}
+      </View>
 
       <Frame title="RESULT" code="OUT" tone={sev?.tone ?? "phosphor"}>
         {!a || !b ? <Status>Awaiting two substances.</Status> : null}
@@ -73,6 +109,10 @@ export default function MixScreen() {
           </View>
         ) : null}
       </Frame>
+      <Text style={[breakWord, { fontFamily: fonts.body, color: colors.muted, fontSize: 12, lineHeight: 18 }]}>
+        Low, moderate, dangerous, and deadly describe the pair. The note says what each substance does. None of those words means the mix is safe.
+      </Text>
+      <FinePrint />
 
     </Screen>
       <SubstanceModal
@@ -125,7 +165,15 @@ function SubstanceModal({
   const [term, setTerm] = useState("");
   const filtered = useMemo(() => {
     const q = term.trim().toLowerCase();
-    return drugs.filter((drug) => drug.id && drug.name && (!q || drug.name.toLowerCase().includes(q))).slice(0, 80);
+    const rows = drugs.filter((drug) => drug.id && drug.name && (!q || drug.name.toLowerCase().includes(q)));
+    if (!q) return rows.slice(0, 80);
+    const rank = (name: string) => (name === q ? 0 : name.startsWith(q) ? 1 : 2);
+    return [...rows].sort((a, b) => rank(a.name!.toLowerCase()) - rank(b.name!.toLowerCase()) || a.name!.localeCompare(b.name!)).slice(0, 80);
+  }, [drugs, term]);
+  const matchCount = useMemo(() => {
+    const q = term.trim().toLowerCase();
+    if (!q) return drugs.length;
+    return drugs.filter((drug) => drug.name?.toLowerCase().includes(q)).length;
   }, [drugs, term]);
 
   if (!open) return null;
@@ -153,13 +201,14 @@ function SubstanceModal({
         </Pressable>
       </View>
       <SearchField value={term} onChangeText={setTerm} placeholder="Filter by name" />
-      {loading ? <Status>Loading the index…</Status> : null}
+      {loading ? <Status>Loading the index…</Status> : <Status>{filtered.length} shown · {matchCount} match</Status>}
       {error ? <QueryError error={error} /> : null}
       <FlatList
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: 72 }}
         data={filtered}
         keyboardShouldPersistTaps="handled"
+        ListEmptyComponent={!loading ? <Status>No names match. Try the catalogued name.</Status> : undefined}
         keyExtractor={(item) => item.id!}
         renderItem={({ item }) => (
           <Pressable

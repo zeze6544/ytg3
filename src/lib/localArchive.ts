@@ -67,8 +67,28 @@ export function localDrugs(opts?: { search?: string; category?: string; limit?: 
         .includes(term),
     );
   }
-  const sorted = [...rows].sort((a, b) => a.name.localeCompare(b.name));
+  const sorted = [...rows].sort((a, b) => {
+    if (term) {
+      const delta = searchRank(a, term) - searchRank(b, term);
+      if (delta) return delta;
+    }
+    return a.name.localeCompare(b.name);
+  });
   return opts?.limit ? sorted.slice(0, opts.limit) : sorted;
+}
+
+function searchRank(drug: ArchiveDrug, term: string) {
+  const name = drug.name.toLowerCase();
+  if (name === term) return 0;
+  if (name.startsWith(term)) return 1;
+  const aliases = (drug.aliases ?? []).map((alias) => alias.toLowerCase());
+  if (aliases.some((alias) => alias === term)) return 2;
+  if (name.includes(term)) return 3;
+  if (aliases.some((alias) => alias.includes(term))) return 4;
+  const streets = (drug.street_names ?? []).map((street) => street.toLowerCase());
+  if (streets.some((street) => street === term || street.includes(term))) return 5;
+  if (drug.slug.includes(term)) return 6;
+  return 7;
 }
 
 export function localPopular(slugs: string[]) {
@@ -207,4 +227,12 @@ export function localRandom() {
 
 export function localCounts() {
   return { drugs: archive.drugs.length, strains: archive.strains.length, classes: archive.classes.length };
+}
+
+export function localCategoryCounts() {
+  const counts: Record<string, number> = {};
+  for (const drug of archive.drugs) {
+    for (const tag of tagsOf(drug)) counts[tag] = (counts[tag] ?? 0) + 1;
+  }
+  return counts;
 }

@@ -16,3 +16,25 @@ body,
 body {
   margin: 0;
 }
+
+::selection {
+  background: #c6ff4a;
+  color: #07140c;
+}
+
+:focus-visible {
+  outline: 2px solid #c6ff4a;
+  outline-offset: 2px;
+}
+
+input,
+button,
+a,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+  scrollbar-color: #2f5a38 #07140c;
+}

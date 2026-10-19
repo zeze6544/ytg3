@@ -1,8 +1,8 @@
 import { colors, fonts } from "@/constants/theme";
-import { Banner, Frame, Screen } from "@/components/ui";
+import { Banner, FileCard, Frame, Prose, Screen } from "@/components/ui";
 import { KITS, READ_ORDER } from "@/lib/reagents";
 import { router } from "expo-router";
-import { Pressable, Text } from "react-native";
+import { Text } from "react-native";
 
 export default function ReagentsScreen() {
   return (
@@ -18,14 +18,10 @@ export default function ReagentsScreen() {
         ))}
       </Frame>
       {KITS.map((kit) => (
-        <Pressable
-          key={kit.slug}
-          onPress={() => router.push(`/reagents/${kit.slug}`)}
-          style={{ borderWidth: 1, borderColor: colors.line, padding: 12, backgroundColor: colors.panel, borderRadius: 4, gap: 4 }}
-        >
+        <FileCard key={kit.slug} onPress={() => router.push(`/reagents/${kit.slug}`)}>
           <Text style={{ fontFamily: fonts.display, color: colors.cyan, fontSize: 28 }}>{kit.name}</Text>
-          <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 12, lineHeight: 18 }}>{kit.blurb}</Text>
-        </Pressable>
+          <Prose>{kit.blurb}</Prose>
+        </FileCard>
       ))}
       <Frame title="LIMITS" code="RTFM" tone="red">
         <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 12, lineHeight: 18 }}>

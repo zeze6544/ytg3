@@ -1,14 +1,15 @@
 import { colors, fonts } from "@/constants/theme";
-import { ChipWrap, MissingArchive, NameRow, PageTitle, QueryError, SearchField, Status, Tag, breakWord, useScreenInsets } from "@/components/ui";
+import { ChipWrap, FileCard, FinePrint, LoadMore, MissingArchive, NameRow, PageTitle, QueryError, SearchField, Status, Tag, breakWord, useScreenInsets } from "@/components/ui";
 import { fetchStrains, filterStrains } from "@/lib/api";
 import { TERPENES } from "@/lib/reagents";
 import { archiveConfigured } from "@/lib/supabase";
 import { EVIDENCE_TONE, STRAIN_TONE, type StrainType } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
 
 const TYPES = ["all", "indica", "sativa", "hybrid", "ruderalis"] as const;
+const PAGE = 24;
 
 export default function StrainsScreen() {
   const insets = useScreenInsets(true);
@@ -16,13 +17,19 @@ export default function StrainsScreen() {
   const [type, setType] = useState<(typeof TYPES)[number]>("all");
   const [terps, setTerps] = useState<string[]>([]);
   const [mode, setMode] = useState<"any" | "all">("any");
+  const [shown, setShown] = useState(PAGE);
   const query = useQuery({
     queryKey: ["strains", search, type],
     queryFn: () => fetchStrains({ search, type }),
     enabled: archiveConfigured,
   });
   const matches = useMemo(() => filterStrains(query.data ?? [], terps, mode), [query.data, terps, mode]);
-  const rows = matches.slice(0, 40);
+  const rows = matches.slice(0, shown);
+  const filtered = Boolean(search.trim() || type !== "all" || terps.length);
+
+  useEffect(() => {
+    setShown(PAGE);
+  }, [search, type, terps, mode]);
 
   return (
     <FlatList
@@ -83,9 +90,20 @@ export default function StrainsScreen() {
           {query.isLoading ? (
             <Status>Loading cultivars…</Status>
           ) : (
-            <Status>{matches.length > rows.length ? `${rows.length} shown · ${matches.length} match` : `${rows.length} shown`}</Status>
+            <Status>{matches.length > rows.length ? `Showing ${rows.length} of ${matches.length}.` : `${rows.length} cultivars.`}</Status>
           )}
           {query.error ? <QueryError error={query.error} /> : null}
+        </View>
+      }
+      ListFooterComponent={
+        <View style={{ gap: 10 }}>
+          {shown < matches.length ? (
+            <LoadMore label={`Show ${Math.min(PAGE, matches.length - shown)} more`} onPress={() => setShown((count) => count + PAGE)} />
+          ) : null}
+          {filtered ? (
+            <LoadMore label="Clear filters" onPress={() => { setSearch(""); setType("all"); setTerps([]); setMode("any"); }} />
+          ) : null}
+          <FinePrint />
         </View>
       }
       renderItem={({ item }) => (

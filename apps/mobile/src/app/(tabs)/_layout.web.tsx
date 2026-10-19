@@ -22,7 +22,7 @@ export default function WebTabLayout() {
         tabBarItemStyle: { flex: 1, minWidth: 0, paddingHorizontal: 0 },
         tabBarActiveTintColor: colors.phosphor,
         tabBarInactiveTintColor: colors.muted,
-        tabBarLabelStyle: { fontFamily: fonts.body, fontSize: 10, letterSpacing: 0 },
+        tabBarLabelStyle: { fontFamily: fonts.body, fontSize: 11, letterSpacing: 0.2 },
         tabBarIcon: () => null,
         tabBarIconStyle: { display: "none", width: 0, height: 0 },
         sceneStyle: { backgroundColor: colors.bg },

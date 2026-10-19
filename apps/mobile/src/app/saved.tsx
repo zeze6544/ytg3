@@ -1,5 +1,6 @@
 import { colors, fonts } from "@/constants/theme";
 import { Action, Frame, Screen, Status, Tag, breakWord } from "@/components/ui";
+import { readRecent } from "@/lib/recent";
 import { useSession } from "@/lib/session";
 import { requireClient } from "@/lib/supabase";
 import { useQuery } from "@tanstack/react-query";
@@ -50,13 +51,22 @@ export default function SavedScreen() {
     );
   }
   if (!user) {
+    const recent = readRecent();
     return (
       <Screen>
         <Frame title="ACCESS" tone="red">
-          <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 13, lineHeight: 20 }}>
+          <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 22 }}>
             Sign in to keep saved files and a private reading history. The public archive stays open without an account.
           </Text>
           <Action label="Sign in" tone="cyan" onPress={() => router.push("/auth")} />
+        </Frame>
+        <Frame title="ON THIS DEVICE" code="LAST" tone="purple">
+          {recent.length === 0 ? <Status>Open a file and it will be listed here.</Status> : null}
+          {recent.map((file) => (
+            <Pressable key={file.slug} accessibilityRole="button" onPress={() => router.push(`/drug/${file.slug}`)} style={{ minHeight: 40, justifyContent: "center" }}>
+              <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 14 }]}>{file.name}</Text>
+            </Pressable>
+          ))}
         </Frame>
       </Screen>
     );

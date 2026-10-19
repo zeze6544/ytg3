@@ -57,19 +57,49 @@ export function PageTitle({ children, tone = "phosphor" }: { children: string; t
 }
 
 export function SearchField(props: TextInputProps) {
+  const value = String(props.value ?? "");
+  const canClear = Boolean(props.onChangeText && value);
   return (
-    <TextInput
-      placeholderTextColor={colors.muted}
-      autoCapitalize="none"
-      autoCorrect={false}
-      {...props}
-      style={[styles.search, props.style]}
-    />
+    <View style={styles.searchWrap}>
+      <TextInput
+        placeholderTextColor={colors.muted}
+        autoCapitalize="none"
+        autoCorrect={false}
+        accessibilityLabel={typeof props.placeholder === "string" ? props.placeholder : "Search"}
+        clearButtonMode="while-editing"
+        {...props}
+        style={[styles.search, canClear ? styles.searchPad : null, props.style]}
+      />
+      {canClear ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Clear search"
+          onPress={() => props.onChangeText?.("")}
+          style={styles.clearBtn}
+        >
+          <Text style={styles.clearText}>CLEAR</Text>
+        </Pressable>
+      ) : null}
+    </View>
   );
 }
 
 export function ChipWrap({ children }: { children: ReactNode }) {
   return <View style={styles.chips}>{children}</View>;
+}
+
+export function ChipScroller({ children }: { children: ReactNode }) {
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+      style={styles.scroller}
+      contentContainerStyle={styles.scrollerContent}
+    >
+      {children}
+    </ScrollView>
+  );
 }
 
 export function NameRow({ name, tag, tone = "phosphor" }: { name: string; tag: string; tone?: Tone }) {
@@ -132,6 +162,38 @@ export function Banner({ children, tone = "red" }: { children: string; tone?: To
   );
 }
 
+export function FileCard({ children, onPress }: { children: ReactNode; onPress: () => void }) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.fileCard,
+        pressed ? styles.fileCardOn : null,
+        Platform.OS === "web" ? styles.pointer : null,
+      ]}
+    >
+      {children}
+    </Pressable>
+  );
+}
+
+export function LoadMore({ label, onPress }: { label: string; onPress: () => void }) {
+  return <Action label={label} tone="cyan" onPress={onPress} />;
+}
+
+export function Prose({ children }: { children: string }) {
+  return <Text style={[styles.prose, breakWord]}>{children}</Text>;
+}
+
+export function FinePrint() {
+  return (
+    <Text style={[styles.fine, breakWord]}>
+      Not a dose. Not a source. If someone is not breathing or will not wake, contact local emergency services.
+    </Text>
+  );
+}
+
 export function Action({
   label,
   onPress,
@@ -150,7 +212,8 @@ export function Action({
       onPress={onPress}
       style={({ pressed }) => [
         styles.action,
-        { borderColor: toneColor[tone], opacity: disabled ? 0.4 : pressed ? 0.7 : 1 },
+        { borderColor: toneColor[tone], opacity: disabled ? 0.4 : pressed ? 0.72 : 1 },
+        Platform.OS === "web" ? styles.pointer : null,
       ]}
     >
       <Text style={[styles.actionText, breakWord, { color: toneColor[tone] }]}>{label}</Text>
@@ -180,6 +243,7 @@ export function QueryError({ error }: { error: unknown }) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   pageTitle: { fontFamily: fonts.display, color: colors.phosphor },
+  searchWrap: { position: "relative", justifyContent: "center" },
   search: {
     borderWidth: 1,
     borderColor: colors.phosphor,
@@ -190,8 +254,31 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 4,
     minHeight: 48,
+    ...(Platform.OS === "web" ? ({ outlineStyle: "none" } as object) : null),
   },
+  searchPad: { paddingRight: 76 },
+  clearBtn: {
+    position: "absolute",
+    right: 8,
+    minHeight: 32,
+    justifyContent: "center",
+    paddingHorizontal: 6,
+  },
+  clearText: { fontFamily: fonts.body, color: colors.cyan, fontSize: 11, letterSpacing: 1 },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 6, width: "100%" },
+  scroller: { flexGrow: 0, marginHorizontal: -16 },
+  scrollerContent: { gap: 6, paddingHorizontal: 16 },
+  fileCard: {
+    borderWidth: 1,
+    borderColor: colors.line,
+    padding: 12,
+    borderRadius: 4,
+    gap: 6,
+    backgroundColor: colors.panel,
+    minHeight: 44,
+  },
+  fileCardOn: { borderColor: colors.phosphor, backgroundColor: colors.panel2 },
+  pointer: { cursor: "pointer" } as object,
   nameRow: { gap: 6, minWidth: 0 },
   cardTitle: { fontFamily: fonts.display, color: colors.phosphor, fontSize: 26, lineHeight: 28 },
   frame: {
@@ -246,7 +333,9 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     textTransform: "uppercase",
   },
-  fieldValue: { fontFamily: fonts.body, color: colors.text, fontSize: 13, lineHeight: 18, minWidth: 0 },
+  fieldValue: { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 21, minWidth: 0 },
+  prose: { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 22 },
+  fine: { fontFamily: fonts.body, color: colors.muted, fontSize: 11, lineHeight: 16 },
   banner: { borderWidth: 1, borderRadius: 4, padding: 10, backgroundColor: "#1a120f" },
   bannerText: { fontFamily: fonts.body, fontSize: 12, lineHeight: 18 },
   action: {
@@ -269,8 +358,8 @@ const styles = StyleSheet.create({
   status: {
     fontFamily: fonts.body,
     color: colors.muted,
-    fontSize: 11,
-    letterSpacing: 1.2,
-    textTransform: "uppercase",
+    fontSize: 12,
+    lineHeight: 18,
+    letterSpacing: 0.2,
   },
   });

@@ -1,28 +1,54 @@
 import { colors, fonts } from "@/constants/theme";
-import { QueryError, Screen, Status, Tag, breakWord } from "@/components/ui";
+import { ChipScroller, Prose, QueryError, Screen, SearchField, Status, Tag, breakWord } from "@/components/ui";
 import { fetchTimeline } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
-import { Text, View } from "react-native";
+import { useMemo, useState } from "react";
+import { Pressable, Text, View } from "react-native";
 
 export default function TimelineScreen() {
   const query = useQuery({ queryKey: ["timeline"], queryFn: fetchTimeline });
+  const [search, setSearch] = useState("");
+  const [century, setCentury] = useState<string>("all");
+  const events = query.data ?? [];
+  const centuries = useMemo(() => {
+    const set = new Set(events.map((event) => `${Math.floor(event.year / 100) * 100}`));
+    return ["all", ...[...set].sort()];
+  }, [events]);
+  const rows = events.filter((event) => {
+    const term = search.trim().toLowerCase();
+    const text = `${event.year} ${event.title} ${event.description ?? ""}`.toLowerCase();
+    if (term && !text.includes(term)) return false;
+    if (century !== "all" && Math.floor(event.year / 100) * 100 !== Number(century)) return false;
+    return true;
+  });
+
   return (
     <Screen>
-      <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 12, lineHeight: 18 }}>
-        Milestones in pharmacology, policy, and psychoactive history.
-      </Text>
-      {query.isLoading ? <Status>Loading timeline…</Status> : null}
+      <Prose>Milestones in pharmacology, policy, and psychoactive history. The year is context, not a recipe.</Prose>
+      <SearchField value={search} onChangeText={setSearch} placeholder="Year or event" />
+      <ChipScroller>
+        {centuries.map((item) => {
+          const on = century === item;
+          return (
+            <Pressable key={item} accessibilityRole="button" onPress={() => setCentury(item)} style={{ minHeight: 36, justifyContent: "center" }}>
+              <Tag filled={on} tone={on ? "phosphor" : "cyan"}>{item === "all" ? "All years" : `${item}s`}</Tag>
+            </Pressable>
+          );
+        })}
+      </ChipScroller>
+      {query.isLoading ? <Status>Loading timeline…</Status> : <Status>{rows.length} events</Status>}
       {query.error ? <QueryError error={query.error} /> : null}
-      {(query.data ?? []).map((event) => (
+      {rows.map((event) => (
         <View key={event.id} style={{ borderLeftWidth: 2, borderLeftColor: colors.phosphor, paddingLeft: 12, gap: 4 }}>
           <Text style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: 28 }}>{event.year}</Text>
           <Text style={[breakWord, { fontFamily: fonts.bodyMedium, color: colors.text, fontSize: 14, lineHeight: 20 }]}>{event.title}</Text>
           {event.category ? <Tag tone="cyan">{event.category}</Tag> : null}
           {event.description ? (
-            <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 12, lineHeight: 18 }}>{event.description}</Text>
+            <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 13, lineHeight: 20 }}>{event.description}</Text>
           ) : null}
         </View>
       ))}
+      {!query.isLoading && rows.length === 0 ? <Status>No events match.</Status> : null}
     </Screen>
   );
 }

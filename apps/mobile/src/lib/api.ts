@@ -1,4 +1,5 @@
 import {
+  localCategoryCounts,
   localClasses,
   localCounts,
   localDrugBySlug,
@@ -80,6 +81,10 @@ export async function fetchDrugRefs(drugId: string) {
     if (error) throw error;
     return (data ?? []) as { id: string; label: string; url: string | null }[];
   }, localRefs(drugId), (rows) => rows.length > 0);
+}
+
+export function fetchCategoryCounts() {
+  return localCategoryCounts();
 }
 
 export async function fetchClasses(): Promise<DrugClass[]> {
