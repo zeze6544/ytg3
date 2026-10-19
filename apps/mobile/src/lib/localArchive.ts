@@ -256,6 +256,10 @@ export function localCounts() {
   return { drugs: archive.drugs.length, strains: archive.strains.length, classes: archive.classes.length };
 }
 
+export function localIndexStamp() {
+  return String((raw as { generated_at?: string }).generated_at ?? "");
+}
+
 export function localCategoryCounts() {
   const counts: Record<string, number> = {};
   for (const drug of archive.drugs) {

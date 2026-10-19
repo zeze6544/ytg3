@@ -3,6 +3,7 @@ import { Action, Banner, ChipScroller, Field, FileCard, FinePrint, Frame, QueryE
 import { fetchDrugBySlug, fetchDrugRefs, fetchNeighbors } from "@/lib/api";
 import { readingFor } from "@/lib/briefing";
 import { localGroupsOf, localRuleHits, localTimelineFor, localUnnamedFloor } from "@/lib/localArchive";
+import { blurb } from "@/lib/reading";
 import { rememberFile } from "@/lib/recent";
 import { useSession } from "@/lib/session";
 import { requireClient } from "@/lib/supabase";
@@ -10,7 +11,7 @@ import { CATEGORY_LABELS, CATEGORY_TONE, EVIDENCE_TONE } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { Stack, router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Linking, Pressable, Text, View, useWindowDimensions } from "react-native";
+import { Linking, Platform, Pressable, Text, View, useWindowDimensions } from "react-native";
 
 export default function DrugScreen() {
   const { width } = useWindowDimensions();
@@ -105,9 +106,6 @@ export default function DrugScreen() {
         </Tag>
         {drug.discovered_year ? <Tag tone="amber">est. {drug.discovered_year}</Tag> : null}
       </View>
-      {drug.summary ? (
-        <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 21 }]}>{drug.summary}</Text>
-      ) : null}
       <Banner>Not medical advice. Not a dose, a source, or a reason to use this substance.</Banner>
       <Action label={user ? "Save" : "Sign in to save"} onPress={() => void save()} />
       <Action
@@ -121,12 +119,13 @@ export default function DrugScreen() {
         onPress={() => router.push({ pathname: "/files", params: { cat: drug.category } })}
       />
       {note ? <Status>{note}</Status> : null}
-      <ChipScroller>
+      <ChipScroller sticky>
         {[
-          ["risk", "Risk"],
-          ["mixes", "Mixes"],
-          ["read", "Read"],
-          ["harm", "Harm reduction"],
+          ["overview", "Overview"],
+          ["pharm", "Pharmacology"],
+          ["risk", "Risks"],
+          ["mixes", "Interactions"],
+          ["history", "History"],
         ].map(([key, label]) => (
           <Pressable key={key} accessibilityRole="button" onPress={() => jump(key)} style={{ minHeight: 36, justifyContent: "center" }}>
             <Tag tone={key === "risk" || key === "mixes" ? "red" : "cyan"}>{label}</Tag>
@@ -134,75 +133,79 @@ export default function DrugScreen() {
         ))}
       </ChipScroller>
 
-      <View nativeID="spot-risk" onLayout={(event) => { spots.current.risk = event.nativeEvent.layout.y; }}>
-      <Frame title="RISK" code="RSK" tone="red">
-        <Field label="Acute" value={drug.acute_risks} />
-        <Field label="Chronic" value={drug.chronic_risks} />
-        <Field label="Overdose signs" value={drug.overdose_signs} />
-      </Frame>
+      <View nativeID="spot-overview" style={spotStyle} onLayout={(event) => { spots.current.overview = event.nativeEvent.layout.y; }}>
+        {drug.acute_risks ? (
+          <Text style={[breakWord, { fontFamily: fonts.bodyMedium, color: colors.red, fontSize: 14, lineHeight: 21 }]}>{blurb(drug.acute_risks, 180)}</Text>
+        ) : null}
+        {drug.summary ? (
+          <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 21 }]}>{drug.summary}</Text>
+        ) : null}
+        <Frame title="EFFECTS" code="EFF">
+          <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 10 }}>REPORTED</Text>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 4 }}>
+            {(drug.effects ?? []).filter(Boolean).map((effect) => (
+              <Tag key={effect}>{effect}</Tag>
+            ))}
+          </View>
+          <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 10 }}>ADVERSE</Text>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 4 }}>
+            {(drug.adverse_effects ?? []).filter(Boolean).map((effect) => (
+              <Tag key={effect} tone="red">{effect}</Tag>
+            ))}
+          </View>
+        </Frame>
+        <Frame title="NAMES" code="NAM" tone="cyan">
+          <Field label="Aliases" value={drug.aliases?.filter(Boolean).join(", ")} />
+          <Field label="Brand names" value={drug.brand_names?.filter(Boolean).join(", ")} />
+          <Field label="Street names" value={drug.street_names?.filter(Boolean).join(", ")} />
+          <Field label="Chemistry" value={drug.chemistry} />
+        </Frame>
       </View>
-      <View nativeID="spot-mixes" onLayout={(event) => { spots.current.mixes = event.nativeEvent.layout.y; }}>
-        <MixRecord drug={drug} />
+      <View nativeID="spot-pharm" style={spotStyle} onLayout={(event) => { spots.current.pharm = event.nativeEvent.layout.y; }}>
+        <Frame title="PHARMACOLOGY" code="MEC" tone="purple">
+          <Field label="Mechanism" value={drug.mechanism} />
+          <Field label="Onset" value={drug.onset} />
+          <Field label="Duration" value={drug.duration} />
+          <Field label="Half-life" value={drug.half_life} />
+        </Frame>
       </View>
-      <View nativeID="spot-read" onLayout={(event) => { spots.current.read = event.nativeEvent.layout.y; }}>
+      <View nativeID="spot-risk" style={spotStyle} onLayout={(event) => { spots.current.risk = event.nativeEvent.layout.y; }}>
+        <Frame title="RISKS" code="RSK" tone="red">
+          <Field label="Acute" value={drug.acute_risks} />
+          <Field label="Chronic" value={drug.chronic_risks} />
+          <Field label="Overdose signs" value={drug.overdose_signs} />
+          <Field label="Contraindications" value={drug.contraindications} />
+        </Frame>
+        <Frame title="DEPENDENCE" code="DEP" tone="amber">
+          <Field label="Dependence" value={drug.dependence} />
+          <Field label="Tolerance" value={drug.tolerance} />
+          <Field label="Withdrawal" value={drug.withdrawal} />
+        </Frame>
+        <Frame title="HARM REDUCTION" code="HR" tone="cyan">
+          <Field label="Testing" value={drug.testing} />
+          <Field label="Safer context" value={drug.harm_reduction} />
+          <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 11, lineHeight: 16 }}>
+            NARCØDEX does not provide dosing, sourcing, synthesis, or test-evasion instructions.
+          </Text>
+        </Frame>
         <ReadRecord category={drug.category} groups={localGroupsOf(drug.slug)} />
       </View>
-      <View nativeID="spot-effects" onLayout={(event) => { spots.current.effects = event.nativeEvent.layout.y; }}>
-      <Frame title="EFFECTS" code="EFF">
-        <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 10 }}>REPORTED</Text>
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 4 }}>
-          {(drug.effects ?? []).filter(Boolean).map((effect) => (
-            <Tag key={effect}>{effect}</Tag>
-          ))}
-        </View>
-        <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 10 }}>ADVERSE</Text>
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 4 }}>
-          {(drug.adverse_effects ?? []).filter(Boolean).map((effect) => (
-            <Tag key={effect} tone="red">{effect}</Tag>
-          ))}
-        </View>
-      </Frame>
+      <View nativeID="spot-mixes" style={spotStyle} onLayout={(event) => { spots.current.mixes = event.nativeEvent.layout.y; }}>
+        <MixRecord drug={drug} />
       </View>
-      <Frame title="DEPENDENCE" code="DEP" tone="amber">
-        <Field label="Dependence" value={drug.dependence} />
-        <Field label="Tolerance" value={drug.tolerance} />
-        <Field label="Withdrawal" value={drug.withdrawal} />
-      </Frame>
-      <View nativeID="spot-harm" onLayout={(event) => { spots.current.harm = event.nativeEvent.layout.y; }}>
-      <Frame title="HARM REDUCTION" code="HR" tone="cyan">
-        <Field label="Testing" value={drug.testing} />
-        <Field label="Safer context" value={drug.harm_reduction} />
-        <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 11, lineHeight: 16 }}>
-          NARCØDEX does not provide dosing, sourcing, synthesis, or test-evasion instructions.
-        </Text>
-      </Frame>
-      </View>
-      <Frame title="PHARMACOLOGY" code="MEC" tone="purple">
-        <Field label="Mechanism" value={drug.mechanism} />
-        <Field label="Onset" value={drug.onset} />
-        <Field label="Duration" value={drug.duration} />
-        <Field label="Half-life" value={drug.half_life} />
-      </Frame>
-      <View nativeID="spot-names" onLayout={(event) => { spots.current.names = event.nativeEvent.layout.y; }}>
-      <Frame title="NAMES" code="NAM" tone="cyan">
-        <Field label="Aliases" value={drug.aliases?.filter(Boolean).join(", ")} />
-        <Field label="Brand names" value={drug.brand_names?.filter(Boolean).join(", ")} />
-        <Field label="Street names" value={drug.street_names?.filter(Boolean).join(", ")} />
-        <Field label="Chemistry" value={drug.chemistry} />
-      </Frame>
+      <View nativeID="spot-history" style={spotStyle} onLayout={(event) => { spots.current.history = event.nativeEvent.layout.y; }}>
+        <Frame title="HISTORY" code="HIS" tone="purple">
+          <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 13, lineHeight: 20 }]}>
+            {drug.history ?? "· see the class record ·"}
+          </Text>
+        </Frame>
+        <TimelineRecord name={drug.name} />
       </View>
       <Frame title="STATUS" code="LEG" tone="amber">
         <Field label="Legal" value={drug.legal_status} />
         <Field label="Medical" value={drug.medical_status} />
         <Field label="Medical uses" value={drug.medical_uses} />
-        <Field label="Contraindications" value={drug.contraindications} />
       </Frame>
-      <Frame title="HISTORY" code="HIS" tone="purple">
-        <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 13, lineHeight: 20 }]}>
-          {drug.history ?? "· see the class record ·"}
-        </Text>
-      </Frame>
-      <TimelineRecord name={drug.name} />
       <Frame title="REFERENCES" code="REF">
         {(refs.data ?? []).length === 0 ? <Status>No references catalogued.</Status> : null}
         {(refs.data ?? []).map((ref) => (
@@ -234,6 +237,7 @@ export default function DrugScreen() {
 }
 
 const SEV_TONE = { deadly: "red", dangerous: "red", moderate: "amber", low: "phosphor", unknown: "cyan" } as const;
+const spotStyle = Platform.OS === "web" ? ({ gap: 12, scrollMarginTop: 56 } as const) : { gap: 12 };
 
 function MixRecord({ drug }: { drug: { slug: string; name: string; category: string } }) {
   const hits = localRuleHits(drug.slug);

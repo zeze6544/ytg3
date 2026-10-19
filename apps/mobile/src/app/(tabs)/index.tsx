@@ -1,6 +1,7 @@
 import { colors, fonts } from "@/constants/theme";
 import { Action, FileCard, FinePrint, Frame, MissingArchive, NameRow, Prose, QueryError, Screen, Status, Wordmark } from "@/components/ui";
 import { fetchCounts, fetchPopularDrugs, fetchRandomDrug } from "@/lib/api";
+import { localIndexStamp } from "@/lib/localArchive";
 import { blurb } from "@/lib/reading";
 import { readRecent, type RecentFile } from "@/lib/recent";
 import { archiveConfigured } from "@/lib/supabase";
@@ -9,6 +10,11 @@ import { useQuery } from "@tanstack/react-query";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { Pressable, Text, View, useWindowDimensions } from "react-native";
+
+function formatCount(value?: number) {
+  if (value === undefined) return "·";
+  return value.toLocaleString("en-US");
+}
 
 const LINES = [
   "Never mix opioids with benzodiazepines or alcohol.",
@@ -23,8 +29,10 @@ export default function HomeScreen() {
   const counts = useQuery({ queryKey: ["counts"], queryFn: fetchCounts, enabled: archiveConfigured });
   const featured = useQuery({ queryKey: ["featured"], queryFn: fetchPopularDrugs, enabled: archiveConfigured });
   const [recent, setRecent] = useState<RecentFile[]>([]);
-  const statSize = width < 360 ? 22 : 28;
+  const statSize = width < 360 ? 64 : 76;
   const subSize = width < 380 ? 10 : 11;
+  const files = counts.data ? counts.data.drugs + counts.data.strains : undefined;
+  const stamp = localIndexStamp();
 
   useFocusEffect(useCallback(() => { setRecent(readRecent()); }, []));
 
@@ -37,41 +45,38 @@ export default function HomeScreen() {
     <Screen safeTop>
       <Wordmark />
       <View style={{ height: 1, width: 72, backgroundColor: colors.line }} />
-      <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: subSize, letterSpacing: 0.2 }}>
-        A PUBLIC LIBRARY FOR SUBSTANCES
+      <Text style={{ fontFamily: fonts.body, color: colors.cyan, fontSize: subSize, letterSpacing: 1.4 }}>
+        PUBLIC SUBSTANCE ARCHIVE
       </Text>
       {archiveConfigured ? null : <MissingArchive />}
-      <Frame title="BOOT" code="MAIN">
-        <Prose>
-          Honest files on drugs, cannabis strains, interactions, and history. Files opens on a common shelf. Letters and All open the rest of the index. Each file lists the stored mix rules and the class chapter that applies. Nothing here is dosing advice, a sale, or a green light.
-        </Prose>
+      <Frame title="ARCHIVE" code="STAT" tone="cyan">
+        {(
+          [
+            ["DRUGS", counts.data?.drugs, "/files"],
+            ["CANNABIS STRAINS", counts.data?.strains, "/strains"],
+            ["CLASSES", counts.data?.classes, "/classes"],
+          ] as const
+        ).map(([label, value, href]) => (
+          <Pressable key={label} accessibilityRole="button" onPress={() => router.push(href)} style={{ minHeight: 72, justifyContent: "center" }}>
+            <Text numberOfLines={1} style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: statSize, lineHeight: statSize }}>
+              {formatCount(value)}
+            </Text>
+            <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 11, letterSpacing: 1 }}>{label}</Text>
+          </Pressable>
+        ))}
+        <Text style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: width < 360 ? 14 : 16, letterSpacing: 0.5 }}>
+          {"█".repeat(counts.data ? (width < 360 ? 16 : 20) : 4)}
+          <Text style={{ color: colors.line }}>{counts.data ? "" : "█".repeat(width < 360 ? 12 : 16)}</Text>
+        </Text>
+        <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 12, lineHeight: 18 }}>DATABASE STATUS: {counts.data ? "ONLINE" : "INDEXING"}</Text>
+        <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 12, lineHeight: 18 }}>LAST INDEX UPDATE: {stamp || "·"}</Text>
+        <Text style={{ fontFamily: fonts.body, color: colors.phosphor, fontSize: 12, lineHeight: 18 }}>FILES AVAILABLE: {formatCount(files)}</Text>
         <View style={{ gap: 8 }}>
           <Action label="Browse files" onPress={() => router.push("/files")} />
           <Action label="Check a mix" tone="red" onPress={() => router.push("/mix")} />
           <Action label="Surprise file" tone="purple" disabled={!archiveConfigured} onPress={() => void surprise()} />
         </View>
-      </Frame>
-
-      <Frame title="INDEX" code="STAT" tone="cyan">
-        <View style={{ flexDirection: "row", gap: 8 }}>
-          {[
-            ["DRUGS", counts.data?.drugs, "/files"],
-            ["STRAINS", counts.data?.strains, "/strains"],
-            ["CLASSES", counts.data?.classes, "/classes"],
-          ].map(([label, value, href]) => (
-            <Pressable
-              key={String(label)}
-              accessibilityRole="button"
-              onPress={() => router.push(href as "/files")}
-              style={{ flex: 1, minWidth: 0, borderWidth: 1, borderColor: colors.line, padding: 8, minHeight: 64 }}
-            >
-              <Text numberOfLines={1} style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: statSize, minWidth: 0 }}>
-                {value ?? "·"}
-              </Text>
-              <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 10 }}>{label}</Text>
-            </Pressable>
-          ))}
-        </View>
+        <Prose>Nothing here is dosing advice, a sale, or a green light.</Prose>
       </Frame>
 
       {recent.length ? (

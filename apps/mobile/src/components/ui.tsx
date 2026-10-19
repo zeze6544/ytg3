@@ -89,13 +89,18 @@ export function ChipWrap({ children }: { children: ReactNode }) {
   return <View style={styles.chips}>{children}</View>;
 }
 
-export function ChipScroller({ children }: { children: ReactNode }) {
+export function ChipScroller({ children, sticky = false }: { children: ReactNode; sticky?: boolean }) {
   return (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
-      style={styles.scroller}
+      style={[
+        styles.scroller,
+        sticky && Platform.OS === "web"
+          ? ({ position: "sticky", top: 0, zIndex: 4, backgroundColor: colors.bg, paddingVertical: 6 } as const)
+          : null,
+      ]}
       contentContainerStyle={styles.scrollerContent}
     >
       {children}

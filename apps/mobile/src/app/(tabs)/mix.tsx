@@ -8,13 +8,15 @@ import { useEffect, useMemo, useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const SEV: Record<string, { tone: Tone; label: string }> = {
-  low: { tone: "phosphor", label: "LOW" },
-  moderate: { tone: "amber", label: "MODERATE" },
-  dangerous: { tone: "red", label: "DANGEROUS" },
-  deadly: { tone: "red", label: "DEADLY" },
-  unknown: { tone: "cyan", label: "UNKNOWN" },
+const SEV: Record<string, { tone: Tone; label: string; gloss: string }> = {
+  low: { tone: "phosphor", label: "LOW", gloss: "Mildest stored rank. This is not a clearance." },
+  moderate: { tone: "amber", label: "MODERATE", gloss: "Both substances still act. This is not permission to combine them." },
+  dangerous: { tone: "red", label: "DANGEROUS", gloss: "This pair can injure." },
+  deadly: { tone: "red", label: "DEADLY", gloss: "This pair can kill." },
+  unknown: { tone: "cyan", label: "UNKNOWN", gloss: "The checker has no rank for this pair." },
 };
+
+const RANKS = ["low", "moderate", "dangerous", "deadly"] as const;
 
 type Pick = { id: string; name: string };
 
@@ -94,7 +96,24 @@ export default function MixScreen() {
         {interaction.error ? <QueryError error={interaction.error} /> : null}
         {a && b && a.id !== b.id && !interaction.isLoading && interaction.data ? (
           <View style={{ gap: 8 }}>
-            <Text style={{ fontFamily: fonts.display, color: toneColor[sev?.tone ?? "phosphor"], fontSize: 42, lineHeight: 46 }}>{sev?.label}</Text>
+            <View style={{ flexDirection: "row", gap: 4 }}>
+              {RANKS.map((rank) => {
+                const active = interaction.data?.severity === rank;
+                const meta = SEV[rank];
+                return (
+                  <View key={rank} style={{ flex: 1, minWidth: 0, gap: 4 }}>
+                    <View style={{ height: 8, backgroundColor: active ? toneColor[meta.tone] : colors.line }} />
+                    <Text numberOfLines={1} style={{ fontFamily: fonts.body, color: active ? toneColor[meta.tone] : colors.muted, fontSize: 9, letterSpacing: 0.2 }}>
+                      {meta.label}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+            <Text style={{ fontFamily: fonts.display, color: toneColor[sev?.tone ?? "phosphor"], fontSize: 56, lineHeight: 58 }}>{sev?.label}</Text>
+            <Text style={[breakWord, { fontFamily: fonts.bodyMedium, color: toneColor[sev?.tone ?? "phosphor"], fontSize: 16, lineHeight: 22 }]}>
+              {sev?.gloss}
+            </Text>
             <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 20 }]}>
               {interaction.data.note || "Catalogued. No further note is stored."}
             </Text>
