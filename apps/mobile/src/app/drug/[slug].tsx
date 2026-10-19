@@ -1,6 +1,8 @@
 import { colors, fonts } from "@/constants/theme";
 import { Action, Banner, ChipScroller, Field, FileCard, FinePrint, Frame, QueryError, Screen, Status, Tag, breakWord, type Scroller } from "@/components/ui";
 import { fetchDrugBySlug, fetchDrugRefs, fetchNeighbors } from "@/lib/api";
+import { readingFor } from "@/lib/briefing";
+import { localGroupsOf, localRuleHits, localTimelineFor, localUnnamedFloor } from "@/lib/localArchive";
 import { rememberFile } from "@/lib/recent";
 import { useSession } from "@/lib/session";
 import { requireClient } from "@/lib/supabase";
@@ -122,12 +124,12 @@ export default function DrugScreen() {
       <ChipScroller>
         {[
           ["risk", "Risk"],
-          ["effects", "Effects"],
+          ["mixes", "Mixes"],
+          ["read", "Read"],
           ["harm", "Harm reduction"],
-          ["names", "Names"],
         ].map(([key, label]) => (
           <Pressable key={key} accessibilityRole="button" onPress={() => jump(key)} style={{ minHeight: 36, justifyContent: "center" }}>
-            <Tag tone={key === "risk" ? "red" : "cyan"}>{label}</Tag>
+            <Tag tone={key === "risk" || key === "mixes" ? "red" : "cyan"}>{label}</Tag>
           </Pressable>
         ))}
       </ChipScroller>
@@ -138,6 +140,12 @@ export default function DrugScreen() {
         <Field label="Chronic" value={drug.chronic_risks} />
         <Field label="Overdose signs" value={drug.overdose_signs} />
       </Frame>
+      </View>
+      <View nativeID="spot-mixes" onLayout={(event) => { spots.current.mixes = event.nativeEvent.layout.y; }}>
+        <MixRecord drug={drug} />
+      </View>
+      <View nativeID="spot-read" onLayout={(event) => { spots.current.read = event.nativeEvent.layout.y; }}>
+        <ReadRecord category={drug.category} groups={localGroupsOf(drug.slug)} />
       </View>
       <View nativeID="spot-effects" onLayout={(event) => { spots.current.effects = event.nativeEvent.layout.y; }}>
       <Frame title="EFFECTS" code="EFF">
@@ -194,6 +202,7 @@ export default function DrugScreen() {
           {drug.history ?? "· see the class record ·"}
         </Text>
       </Frame>
+      <TimelineRecord name={drug.name} />
       <Frame title="REFERENCES" code="REF">
         {(refs.data ?? []).length === 0 ? <Status>No references catalogued.</Status> : null}
         {(refs.data ?? []).map((ref) => (
@@ -221,5 +230,83 @@ export default function DrugScreen() {
       ) : null}
       <FinePrint />
     </Screen>
+  );
+}
+
+const SEV_TONE = { deadly: "red", dangerous: "red", moderate: "amber", low: "phosphor", unknown: "cyan" } as const;
+
+function MixRecord({ drug }: { drug: { slug: string; name: string; category: string } }) {
+  const hits = localRuleHits(drug.slug);
+  const floor = localUnnamedFloor(drug);
+  const deadly = hits.filter((hit) => hit.severity === "deadly");
+  const dangerous = hits.filter((hit) => hit.severity === "dangerous");
+  return (
+    <Frame title="KNOWN MIXES" code="MIX" tone="red">
+      <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 21 }]}>
+        {hits.length
+          ? `${hits.length} stored rules name ${drug.name}. ${deadly.length} deadly, ${dangerous.length} dangerous. A pair with no stored rule is still described below, and it is not a clearance.`
+          : `No stored rule names ${drug.name} directly. The mix checker still describes a pair. That description is not a clearance.`}
+      </Text>
+      <Text style={[breakWord, { fontFamily: fonts.body, color: colors.muted, fontSize: 13, lineHeight: 20 }]}>{floor}</Text>
+      {hits.map((hit) => (
+        <View key={`${hit.severity}-${hit.other}-${hit.note}`} style={{ gap: 6, borderTopWidth: 1, borderTopColor: colors.line, paddingTop: 8 }}>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+            <Tag tone={SEV_TONE[hit.severity as keyof typeof SEV_TONE] ?? "cyan"}>{hit.severity}</Tag>
+            <Text style={[breakWord, { fontFamily: fonts.bodyMedium, color: colors.phosphor, fontSize: 13, lineHeight: 18, flex: 1 }]}>{hit.other}</Text>
+          </View>
+          <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 21 }]}>{hit.note}</Text>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+            {hit.examples.map((item) => (
+              <Pressable key={item.slug} accessibilityRole="button" onPress={() => router.push(`/drug/${item.slug}`)} style={{ minHeight: 32, justifyContent: "center" }}>
+                <Text style={{ fontFamily: fonts.body, color: colors.cyan, fontSize: 13 }}>{item.name}</Text>
+              </Pressable>
+            ))}
+            {hit.more ? <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 12, lineHeight: 32 }}>and {hit.more} more</Text> : null}
+          </View>
+          {hit.category ? (
+            <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: "/files", params: { cat: hit.category! } })} style={{ minHeight: 32, justifyContent: "center" }}>
+              <Text style={{ fontFamily: fonts.body, color: colors.amber, fontSize: 12 }}>Open every {CATEGORY_LABELS[hit.category] ?? hit.category} file</Text>
+            </Pressable>
+          ) : null}
+        </View>
+      ))}
+    </Frame>
+  );
+}
+
+function ReadRecord({ category, groups }: { category: string; groups: string[] }) {
+  const chapters = readingFor(category, groups);
+  if (!chapters.length) return null;
+  return (
+    <View style={{ gap: 10 }}>
+      {chapters.map((chapter) => (
+        <Frame key={chapter.id} title={chapter.title} code="READ" tone="cyan">
+          {chapter.paragraphs.map((paragraph) => (
+            <Text key={paragraph.slice(0, 48)} style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 22 }]}>
+              {paragraph}
+            </Text>
+          ))}
+        </Frame>
+      ))}
+    </View>
+  );
+}
+
+function TimelineRecord({ name }: { name: string }) {
+  const events = localTimelineFor(name);
+  if (!events.length) return null;
+  return (
+    <Frame title="IN THE TIMELINE" code="YEAR" tone="amber">
+      <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 12, lineHeight: 18 }}>
+        Events whose text names {name}. The year is context, not a recipe.
+      </Text>
+      {events.map((event) => (
+        <View key={event.id} style={{ gap: 4 }}>
+          <Text style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: 22 }}>{event.year}</Text>
+          <Text style={[breakWord, { fontFamily: fonts.bodyMedium, color: colors.text, fontSize: 14, lineHeight: 20 }]}>{event.title}</Text>
+          <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 13, lineHeight: 20 }]}>{event.description}</Text>
+        </View>
+      ))}
+    </Frame>
   );
 }

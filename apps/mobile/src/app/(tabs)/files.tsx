@@ -135,6 +135,11 @@ export default function FilesScreen() {
               {blurb(item.summary)}
             </Text>
           ) : null}
+          {item.acute_risks ? (
+            <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 12, lineHeight: 18 }} numberOfLines={3}>
+              {blurb(item.acute_risks, 220)}
+            </Text>
+          ) : null}
         </FileCard>
       )}
     />

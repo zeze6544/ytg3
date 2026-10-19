@@ -109,6 +109,12 @@ export default function MixScreen() {
           </View>
         ) : null}
       </Frame>
+      {a && b && a.id !== b.id && interaction.data ? (
+        <View style={{ gap: 10 }}>
+          <SubstanceFacts drug={(drugs.data ?? []).find((drug) => drug.id === a.id)} />
+          <SubstanceFacts drug={(drugs.data ?? []).find((drug) => drug.id === b.id)} />
+        </View>
+      ) : null}
       <Text style={[breakWord, { fontFamily: fonts.body, color: colors.muted, fontSize: 12, lineHeight: 18 }]}>
         Low, moderate, dangerous, and deadly describe the pair. The note says what each substance does. None of those words means the mix is safe.
       </Text>
@@ -127,6 +133,33 @@ export default function MixScreen() {
           setWhich(null);
         }}
       />
+    </View>
+  );
+}
+
+function SubstanceFacts({
+  drug,
+}: {
+  drug?: { name?: string | null; acute_risks?: string | null; overdose_signs?: string | null; harm_reduction?: string | null; contraindications?: string | null; testing?: string | null };
+}) {
+  if (!drug?.name) return null;
+  return (
+    <Frame title={drug.name} code="FILE" tone="amber">
+      <Fact label="Acute" value={drug.acute_risks} />
+      <Fact label="Overdose signs" value={drug.overdose_signs} />
+      <Fact label="Harm reduction" value={drug.harm_reduction} />
+      <Fact label="Contraindications" value={drug.contraindications} />
+      <Fact label="Testing" value={drug.testing} />
+    </Frame>
+  );
+}
+
+function Fact({ label, value }: { label: string; value?: string | null }) {
+  if (!value) return null;
+  return (
+    <View style={{ gap: 2 }}>
+      <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 10, letterSpacing: 1 }}>{label.toUpperCase()}</Text>
+      <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 21 }]}>{value}</Text>
     </View>
   );
 }

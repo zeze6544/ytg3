@@ -1,5 +1,5 @@
 import raw from "@/data/archive.json";
-import type { Drug, DrugClass, Strain } from "@/lib/types";
+import { CATEGORY_LABELS, type Drug, type DrugClass, type Strain } from "@/lib/types";
 
 export type ArchiveDrug = Drug & { risk_classes?: string[] };
 
@@ -15,6 +15,7 @@ type Archive = {
 
 const archive = raw as Archive;
 const byId = new Map(archive.drugs.map((drug) => [drug.id, drug]));
+const bySlug = new Map(archive.drugs.map((drug) => [drug.slug, drug]));
 const RANK: Record<string, number> = { unknown: 0, low: 1, moderate: 2, dangerous: 3, deadly: 4 };
 const SEDATIVE = new Set(["opioid", "depressant", "benzodiazepine", "anaesthetic", "dissociative", "antipsychotic"]);
 const ACTION: Record<string, string> = {
@@ -254,4 +255,133 @@ export function localCategoryCounts() {
     for (const tag of tagsOf(drug)) counts[tag] = (counts[tag] ?? 0) + 1;
   }
   return counts;
+}
+
+const GROUP_LABEL: Record<string, string> = {
+  maoi: "any MAOI",
+  ssri: "any SSRI",
+  snri: "any SNRI",
+  tca: "any tricyclic antidepressant",
+  serotonin: "any serotonergic substance in this group",
+  triptan: "any triptan",
+  "disulfiram-like": "any disulfiram-like medicine",
+  nitrite: "any alkyl nitrite",
+  nitrate: "any nitrate",
+  pde5: "any PDE5 inhibitor",
+  nsaid: "any NSAID",
+  qt: "any QT-prolonging drug in this group",
+  diuretic: "any diuretic",
+  penicillin: "any penicillin",
+  "beta-agonist": "any beta agonist",
+  acei: "any ACE inhibitor",
+  fluoroquinolone: "any fluoroquinolone",
+  "sedating-antihistamine": "any sedating antihistamine",
+  arb: "any ARB",
+  dihydropyridine: "any dihydropyridine calcium-channel blocker",
+  azole: "any azole antifungal",
+  sulfonamide: "any sulfonamide",
+  "contraceptive-hormone": "any hormonal contraceptive",
+  corticosteroid: "any corticosteroid",
+  "combined-contraceptive": "any combined contraceptive",
+  xanthine: "any xanthine",
+  sulfonylurea: "any sulfonylurea",
+  statin: "any statin",
+  "cardiac-glycoside": "any cardiac glycoside",
+  doac: "any direct oral anticoagulant",
+  heparin: "any heparin",
+  vka: "any vitamin K antagonist",
+  "alpha-blocker": "any alpha blocker",
+  "potassium-sparing": "any potassium-sparing diuretic",
+  "potassium-supplement": "any potassium supplement",
+  "pethidine-product": "any pethidine product",
+  "xanthine-oxidase": "any xanthine-oxidase inhibitor",
+  "bleed-herb": "any bleeding-associated plant in this group",
+  "statin-like": "any statin-like lipid drug",
+  "beta-blocker": "any beta blocker",
+};
+
+export type RuleHit = {
+  severity: string;
+  note: string;
+  other: string;
+  examples: { slug: string; name: string }[];
+  more: number;
+  category: string | null;
+};
+
+function tokenLabel(token: string) {
+  if (token.startsWith("group:")) return GROUP_LABEL[token.slice(6)] ?? `the ${token.slice(6)} group`;
+  if (CATEGORY_LABELS[token]) return `any ${CATEGORY_LABELS[token].toLowerCase()}`;
+  return bySlug.get(token)?.name ?? token;
+}
+
+function examplesFor(token: string, selfSlug: string) {
+  const slugs = token.startsWith("group:")
+    ? (archive.groups[token.slice(6)] ?? []).filter((slug) => slug !== selfSlug)
+    : bySlug.has(token) && token !== selfSlug
+      ? [token]
+      : [];
+  const rows = slugs.map((slug) => bySlug.get(slug)).filter((drug): drug is ArchiveDrug => Boolean(drug));
+  return { shown: rows.slice(0, 8).map((drug) => ({ slug: drug.slug, name: drug.name })), more: Math.max(0, rows.length - 8) };
+}
+
+export function localRuleHits(slug: string): RuleHit[] {
+  const drug = bySlug.get(slug);
+  if (!drug) return [];
+  const hits: (RuleHit & { index: number })[] = [];
+  archive.rules.forEach((rule, index) => {
+    const onLeft = sideMatches(drug, rule.left);
+    const onRight = sideMatches(drug, rule.right);
+    if (!onLeft && !onRight) return;
+    const otherTokens = onLeft ? rule.right : rule.left;
+    const category = otherTokens.find((token) => Boolean(CATEGORY_LABELS[token])) ?? null;
+    const packed = otherTokens.map((token) => examplesFor(token, drug.slug));
+    const examples = packed.flatMap((item) => item.shown);
+    const seen = new Set<string>();
+    const unique = examples.filter((item) => (seen.has(item.slug) ? false : (seen.add(item.slug), true)));
+    hits.push({
+      severity: rule.severity,
+      note: rule.note,
+      other: otherTokens.map(tokenLabel).join(" or "),
+      examples: unique.slice(0, 8),
+      more: packed.reduce((sum, item) => sum + item.more, 0) + Math.max(0, unique.length - 8),
+      category,
+      index,
+    });
+  });
+  hits.sort((a, b) => (RANK[b.severity] ?? 0) - (RANK[a.severity] ?? 0) || a.index - b.index);
+  return hits.map(({ index: _index, ...hit }) => hit);
+}
+
+export function localGroupsOf(slug: string) {
+  return Object.entries(archive.groups)
+    .filter(([, members]) => members.includes(slug))
+    .map(([key]) => key)
+    .sort();
+}
+
+export function localTimelineFor(name: string) {
+  const needle = name.trim();
+  if (needle.length < 3) return [];
+  const re = new RegExp(`\\b${escapeRegExp(needle)}\\b`, "i");
+  return archive.timeline.filter((event) => re.test(`${event.title}\n${event.description ?? ""}`));
+}
+
+export function localUnnamedFloor(drug: { name: string; category: string }) {
+  if (drug.category === "inhalant") {
+    return `${drug.name} is an inhalant. A pair with no stored rule is still treated as dangerous, because a sudden heart rhythm can arrive while the other substance is acting.`;
+  }
+  if (drug.category === "withdrawn") {
+    return `${drug.name} is filed as withdrawn or as a toxic contaminant. A pair with no stored rule is still treated as dangerous.`;
+  }
+  if (drug.category === "research_chemical") {
+    return `${drug.name} is filed as a research chemical. The material is often a different substance from the name, and a pair with no stored rule is still treated as dangerous.`;
+  }
+  if (SEDATIVE.has(drug.category)) {
+    return `${drug.name} sedates. A second sedative with no stored rule is still treated as dangerous, because breathing and protective reflexes fail more easily. A stimulant beside it is also treated as dangerous, because the stimulant can hide that sedation.`;
+  }
+  if (drug.category === "stimulant") {
+    return `${drug.name} raises heart rate, blood pressure, and temperature. A second stimulant is treated as dangerous. A sedative beside it is also treated as dangerous, because the stimulant can mask the sedation until breathing fails.`;
+  }
+  return `${drug.name} has a moderate floor when no stored rule names the pair. Moderate describes the pair. It is not permission to combine them.`;
 }

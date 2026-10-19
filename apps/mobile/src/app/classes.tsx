@@ -1,6 +1,7 @@
 import { colors, fonts } from "@/constants/theme";
 import { FileCard, Prose, QueryError, Screen, Status, Tag, breakWord } from "@/components/ui";
 import { fetchCategoryCounts, fetchClasses } from "@/lib/api";
+import { readingFor } from "@/lib/briefing";
 import { CATEGORY_TONE } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
@@ -24,6 +25,11 @@ export default function ClassesScreen() {
           {item.description ? (
             <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 13, lineHeight: 20 }}>{item.description}</Text>
           ) : null}
+          {(readingFor(item.slug, [])[0]?.paragraphs ?? []).map((paragraph) => (
+            <Text key={paragraph.slice(0, 40)} style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 22 }]}>
+              {paragraph}
+            </Text>
+          ))}
         </FileCard>
       ))}
     </Screen>
