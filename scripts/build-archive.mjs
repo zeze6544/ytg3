@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ROWS } from "./substances.mjs";
 import { MORE_ROWS } from "./substances-more.mjs";
+import { NEXT_ROWS } from "./substances-next.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -498,7 +499,7 @@ function split(value) {
   return value.split(",").map((part) => part.trim()).filter(Boolean);
 }
 
-const drugs = [...ROWS, ...MORE_ROWS].map(drugRecord);
+const drugs = [...ROWS, ...MORE_ROWS, ...NEXT_ROWS].map(drugRecord);
 const slugs = new Set();
 for (const drug of drugs) {
   if (slugs.has(drug.slug)) throw new Error("duplicate slug " + drug.slug);
@@ -603,6 +604,21 @@ const strains = [
   ["tropicana-cookies", "Tropicana Cookies", "hybrid", "Girl Scout Cookies x Tangie", 16, 24, 0, 1, "caryophyllene,limonene,myrcene"],
   ["permanent-marker", "Permanent Marker", "hybrid", "Biscotti x Sherb Bx x Jealousy", 20, 28, 0, 1, "caryophyllene,limonene,linalool"],
   ["gary-payton", "Gary Payton", "hybrid", "The Y x Snowman", 18, 26, 0, 1, "caryophyllene,limonene,myrcene"],
+  ["jealousy", "Jealousy", "hybrid", "Gelato 41 x Sherb Bx", 18, 26, 0, 1, "caryophyllene,limonene,linalool"],
+  ["biscotti", "Biscotti", "hybrid", "Gelato 25 x Sour Florida OG", 18, 25, 0, 1, "caryophyllene,limonene,myrcene"],
+  ["purple-punch", "Purple Punch", "indica", "Larry OG x Granddaddy Purple", 16, 22, 0, 1, "caryophyllene,linalool,myrcene"],
+  ["garlic-cookies", "Garlic Cookies", "hybrid", "GMO Cookies line", 18, 28, 0, 1, "caryophyllene,myrcene,limonene"],
+  ["platinum-og", "Platinum OG", "indica", "Master Kush x OG Kush", 18, 26, 0, 1, "myrcene,caryophyllene,limonene"],
+  ["triangle-kush", "Triangle Kush", "indica", "Florida OG line", 18, 25, 0, 1, "myrcene,caryophyllene,limonene"],
+  ["animal-mints", "Animal Mints", "hybrid", "Animal Cookies x SinMint Cookies", 18, 26, 0, 1, "caryophyllene,limonene,linalool"],
+  ["banana-kush", "Banana Kush", "hybrid", "Ghost OG x Skunk Haze", 16, 22, 0, 1, "myrcene,limonene,caryophyllene"],
+  ["critical-mass", "Critical Mass", "indica", "Afghani x Skunk #1", 16, 22, 0, 1, "myrcene,caryophyllene,pinene"],
+  ["shiva-skunk", "Shiva Skunk", "indica", "Northern Lights #5 x Skunk #1", 16, 22, 0, 1, "myrcene,caryophyllene,pinene"],
+  ["super-skunk", "Super Skunk", "indica", "Skunk #1 x Afghan", 16, 22, 0, 1, "myrcene,caryophyllene,limonene"],
+  ["ny-diesel", "NY Diesel", "sativa", "Mexican sativa x Afghani", 16, 22, 0, 1, "caryophyllene,limonene,myrcene"],
+  ["swazi-gold", "Swazi Gold", "sativa", "Swazi landrace", 14, 20, 0, 1, "myrcene,pinene,caryophyllene"],
+  ["original-haze", "Original Haze", "sativa", "Mexican x Colombian x Thai x Indian", 16, 23, 0, 1, "terpinolene,myrcene,caryophyllene"],
+  ["london-pound-cake", "London Pound Cake", "hybrid", "Sunset Sherbet x unknown", 18, 25, 0, 1, "caryophyllene,limonene,linalool"],
 ].map(([slug, name, type, lineage, thcLow, thcHigh, cbdLow, cbdHigh, terpenes]) => ({
   id: `s_${slug}`,
   slug,
@@ -657,6 +673,12 @@ const timeline = [
   [2022, "Pholcodine withdrawn", "Regulators withdrew pholcodine cough medicines after a link with severe allergic reactions under anaesthesia.", "opioid"],
   [2023, "Nitazenes widen", "Nitazene opioids were identified in more regions and more product types. Fentanyl strips often miss them.", "opioid"],
   [2024, "Medetomidine in the supply", "The veterinary sedative medetomidine was reported in some illicit opioid supplies. Naloxone does not reverse that sedation.", "other"],
+  [1960, "Fentanyl synthesised", "Fentanyl was made in a pharmaceutical laboratory. Later illicit analogues made a familiar-looking opioid an unknown-strength product. This archive does not describe that chemistry.", "opioid"],
+  [1998, "Sildenafil and nitrates", "Sildenafil reached the market with a hard warning against nitrate heart medicines. The mix can collapse blood pressure.", "prescription"],
+  [2008, "Synthetic cannabinoid products", "Herbal mixtures sold as incense began sending people to hospital with seizures and collapse. The active chemical was not cannabis and changed from bag to bag.", "cannabinoid"],
+  [2016, "Gabapentinoid overdose deaths", "Death records began showing gabapentin and pregabalin more often alongside opioids. The gabapentinoid does not cancel the opioid's effect on breathing.", "depressant"],
+  [2018, "Unregulated cannabinoid vapes", "A change in US hemp law was followed by unregulated cannabinoid vapes. A legal-sounding label is not an assay, and some additives have injured lungs.", "cannabinoid"],
+  [2022, "Dipentylone sold as MDMA", "Drug checking began finding dipentylone in tablets and crystals sold as MDMA. A weaker effect is how people take more.", "stimulant"],
 ].map(([year, title, description, category]) => ({
   id: `t_${year}_${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`,
   year,
@@ -720,20 +742,40 @@ const rules = [
   [["simvastatin"], ["clarithromycin", "erythromycin"], "dangerous", "These antibiotics can raise simvastatin levels and cause severe muscle breakdown."],
   [["tizanidine"], ["ciprofloxacin", "fluvoxamine"], "deadly", "Ciprofloxacin and fluvoxamine can raise tizanidine sharply. Blood pressure can collapse. This mix is contraindicated."],
   [["bupropion"], ["alcohol-ethanol"], "moderate", "Bupropion lowers the seizure threshold. The risk is higher during heavy drinking and during alcohol withdrawal."],
+  [["group:nitrate"], ["group:pde5"], "deadly", "Nitrate heart medicines and medicines such as sildenafil both widen blood vessels. Together they can collapse blood pressure. This includes chest sprays and tablets."],
+  [["kava"], ["alcohol-ethanol", "benzodiazepine", "opioid", "depressant"], "dangerous", "Kava adds sedation and has been linked with liver injury. With alcohol or other sedatives someone can become deeply unconscious. It does not remove the breathing risk of an opioid."],
+  [["valerian"], ["alcohol-ethanol", "benzodiazepine", "opioid"], "moderate", "Valerian adds sedation. With alcohol, a benzodiazepine, or an opioid the impairment is greater. The opioid can still stop breathing."],
+  [["colchicine"], ["clarithromycin", "erythromycin"], "deadly", "These antibiotics can raise colchicine into a fatal toxicity. The mix is contraindicated."],
+  [["methotrexate"], ["group:nsaid"], "dangerous", "NSAIDs raise methotrexate toxicity. Dosing mistakes with methotrexate are already dangerous on their own. This file has no dose."],
+  [["methotrexate"], ["co-trimoxazole", "trimethoprim"], "dangerous", "Trimethoprim raises methotrexate toxicity. Fever, mouth ulcers, or bleeding need urgent care."],
+  [["digoxin"], ["clarithromycin", "amiodarone", "verapamil"], "dangerous", "These medicines raise digoxin levels. Toxicity looks like nausea, visual halos, and a dangerous heart rhythm."],
+  [["group:ssri"], ["group:nsaid"], "moderate", "SSRIs plus NSAIDs raise the chance of stomach bleeding. The risk is higher again if the person is older or also takes warfarin."],
+  [["warfarin"], ["group:ssri"], "dangerous", "SSRIs can raise the bleeding risk of warfarin even when the clotting test looks unchanged."],
+  [["theophylline"], ["ciprofloxacin"], "dangerous", "Ciprofloxacin can raise theophylline into seizures and a dangerous heart rhythm."],
+  [["group:nsaid"], ["lisinopril", "ramipril", "enalapril"], "dangerous", "NSAIDs plus ACE inhibitors can injure the kidneys, especially if the person is also dehydrated or taking a diuretic."],
+  [["eluxadoline"], ["alcohol-ethanol"], "dangerous", "Eluxadoline with alcohol has caused pancreatitis. The mix is contraindicated."],
+  [["nitrous-oxide"], ["cyanocobalamin"], "moderate", "Nitrous oxide inactivates vitamin B12. A supplement does not make repeated nitrous use safe, and nerve injury can still occur."],
+  [["group:triptan"], ["ergometrine", "methylergometrine"], "dangerous", "Triptans plus ergot medicines can cause prolonged blood-vessel spasm, including in the heart."],
+  [["salbutamol"], ["stimulant"], "moderate", "Salbutamol raises heart rate and can lower potassium. Other stimulants add to the heart strain."],
+  [["st-johns-wort"], ["ethinylestradiol", "levonorgestrel"], "dangerous", "St John's wort makes many hormonal contraceptives fail. That includes some emergency pills."],
+  [["spironolactone"], ["co-trimoxazole", "trimethoprim"], "dangerous", "Trimethoprim plus spironolactone can raise potassium high enough to stop the heart."],
+  [["alcohol-ethanol"], ["gliclazide", "glimepiride", "glipizide"], "moderate", "Alcohol plus these diabetes medicines can push blood sugar dangerously low, especially if the person has not eaten."],
+  [["group:maoi"], ["metaxalone"], "dangerous", "Metaxalone has serotonergic activity. With an MAOI the chance of serotonin syndrome rises."],
 ];
 
 const groups = {
   maoi: ["phenelzine", "tranylcypromine", "moclobemide", "isocarboxazid", "selegiline", "harmine", "harmaline", "syrian-rue", "banisteriopsis-caapi", "ayahuasca", "changa", "linezolid", "methylene-blue", "procarbazine", "rasagiline", "safinamide"],
   ssri: ["fluoxetine", "sertraline", "citalopram", "escitalopram", "paroxetine", "fluvoxamine", "vortioxetine", "vilazodone"],
   snri: ["venlafaxine", "duloxetine", "desvenlafaxine", "levomilnacipran", "milnacipran"],
-  tca: ["amitriptyline", "nortriptyline", "imipramine", "clomipramine", "doxepin", "dosulepin", "trimipramine", "desipramine", "protriptyline", "amoxapine"],
-  serotonin: ["mdma", "mda", "mdea", "amt", "aet", "5-meo-amt", "st-johns-wort", "kanna", "tramadol", "dxm", "6-apb", "5-apb", "5-mapb", "6-mapb", "mdai", "mbdb", "ethylone", "5-htp", "l-tryptophan", "sam-e"],
+  tca: ["amitriptyline", "nortriptyline", "imipramine", "clomipramine", "doxepin", "dosulepin", "trimipramine", "desipramine", "protriptyline", "amoxapine", "opipramol"],
+  serotonin: ["mdma", "mda", "mdea", "amt", "aet", "5-meo-amt", "st-johns-wort", "kanna", "tramadol", "dxm", "6-apb", "5-apb", "5-mapb", "6-mapb", "mdai", "mbdb", "ethylone", "5-htp", "l-tryptophan", "sam-e", "dipentylone", "5-apdb", "6-apdb", "5-eapb", "bdb", "5-iai"],
   triptan: ["sumatriptan", "rizatriptan", "zolmitriptan", "naratriptan", "eletriptan", "frovatriptan", "almotriptan"],
   "disulfiram-like": ["disulfiram", "metronidazole", "tinidazole"],
   nitrite: ["amyl-nitrite", "isobutyl-nitrite", "isopropyl-nitrite", "butyl-nitrite"],
+  nitrate: ["nitroglycerin", "isosorbide-mononitrate", "isosorbide-dinitrate"],
   pde5: ["sildenafil", "tadalafil", "vardenafil", "avanafil"],
-  nsaid: ["ibuprofen", "aspirin", "naproxen", "diclofenac", "indomethacin", "meloxicam", "celecoxib", "ketorolac", "piroxicam", "mefenamic-acid", "etoricoxib"],
-  qt: ["citalopram", "escitalopram", "ziprasidone", "haloperidol", "thioridazine", "methadone", "ondansetron", "domperidone", "sotalol", "erythromycin", "clarithromycin", "azithromycin", "moxifloxacin", "dofetilide", "dronedarone", "droperidol", "pimozide", "amiodarone", "hydroxyzine", "levomepromazine", "iloperidone"],
+  nsaid: ["ibuprofen", "aspirin", "naproxen", "diclofenac", "indomethacin", "meloxicam", "celecoxib", "ketorolac", "piroxicam", "mefenamic-acid", "etoricoxib", "benzydamine", "bismuth-subsalicylate", "metamizole"],
+  qt: ["citalopram", "escitalopram", "ziprasidone", "haloperidol", "thioridazine", "methadone", "ondansetron", "domperidone", "sotalol", "erythromycin", "clarithromycin", "azithromycin", "moxifloxacin", "dofetilide", "dronedarone", "droperidol", "pimozide", "amiodarone", "hydroxyzine", "levomepromazine", "iloperidone", "hydroxychloroquine", "chloroquine", "mesoridazine", "sertindole", "ibogaine", "zotepine"],
 };
 
 for (const slug of Object.values(groups).flat()) {
