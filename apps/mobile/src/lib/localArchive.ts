@@ -1,4 +1,5 @@
 import raw from "@/data/archive.json";
+import extraRaw from "@/data/drugs-extra.json";
 import { CATEGORY_LABELS, type Drug, type DrugClass, type Strain } from "@/lib/types";
 
 export type ArchiveDrug = Drug & { risk_classes?: string[] };
@@ -13,7 +14,13 @@ type Archive = {
   rules: { left: string[]; right: string[]; severity: string; note: string }[];
 };
 
-const archive = raw as Archive;
+const extra = extraRaw as { drugs?: ArchiveDrug[]; refs?: Archive["refs"]; strains?: Strain[] };
+const archive = {
+  ...(raw as Archive),
+  drugs: [...(raw as Archive).drugs, ...(extra.drugs ?? [])],
+  refs: [...(raw as Archive).refs, ...(extra.refs ?? [])],
+  strains: [...(raw as Archive).strains, ...(extra.strains ?? [])],
+};
 const byId = new Map(archive.drugs.map((drug) => [drug.id, drug]));
 const bySlug = new Map(archive.drugs.map((drug) => [drug.slug, drug]));
 const RANK: Record<string, number> = { unknown: 0, low: 1, moderate: 2, dangerous: 3, deadly: 4 };

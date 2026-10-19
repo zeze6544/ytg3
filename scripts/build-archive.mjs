@@ -7,6 +7,7 @@ import { NEXT_ROWS } from "./substances-next.mjs";
 import { DOUBLE_ROWS, EXTRA_STRAINS, EXTRA_TIMELINE, EXTRA_RULES, EXTRA_GROUPS } from "./substances-double.mjs";
 import { FOLD_ROWS, FOLD_STRAINS, FOLD_TIMELINE, FOLD_RULES, FOLD_GROUPS } from "./substances-fold.mjs";
 import { TRIPLE_ROWS, TRIPLE_STRAINS, TRIPLE_TIMELINE, TRIPLE_RULES, TRIPLE_GROUPS } from "./substances-triple.mjs";
+import { QUAD_ROWS, QUAD_STRAINS } from "./substances-quad.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -502,7 +503,7 @@ function split(value) {
   return value.split(",").map((part) => part.trim()).filter(Boolean);
 }
 
-const drugs = [...ROWS, ...MORE_ROWS, ...NEXT_ROWS, ...DOUBLE_ROWS, ...FOLD_ROWS, ...TRIPLE_ROWS].map(drugRecord);
+const drugs = [...ROWS, ...MORE_ROWS, ...NEXT_ROWS, ...DOUBLE_ROWS, ...FOLD_ROWS, ...TRIPLE_ROWS, ...QUAD_ROWS].map(drugRecord);
 const slugs = new Set();
 for (const drug of drugs) {
   if (slugs.has(drug.slug)) throw new Error("duplicate slug " + drug.slug);
@@ -625,6 +626,7 @@ const strains = [
   ...EXTRA_STRAINS,
   ...FOLD_STRAINS,
   ...TRIPLE_STRAINS,
+  ...QUAD_STRAINS,
 ].map(([slug, name, type, lineage, thcLow, thcHigh, cbdLow, cbdHigh, terpenes]) => ({
   id: `s_${slug}`,
   slug,
@@ -1310,7 +1312,8 @@ for (const slug of Object.keys(CLASSES)) {
   if (!categories.has(slug)) throw new Error("empty category " + slug);
 }
 
-if (drugs.length < 360) throw new Error("catalogue too small: " + drugs.length);
+if (drugs.length < 25000) throw new Error("catalogue below 25000 files: " + drugs.length);
+if (strains.length < 10000) throw new Error("catalogue below 10000 strains: " + strains.length);
 
 for (const event of timeline) {
   event.title = plain(event.title);
@@ -1330,10 +1333,25 @@ const archive = {
   rules: rules.map(([left, right, severity, note]) => ({ left, right, severity, note: plain(note) })),
 };
 
+const extraIds = new Set(archive.drugs.slice(archive.drugs.length - QUAD_ROWS.length).map((drug) => drug.id));
+const extraDrugs = archive.drugs.filter((drug) => extraIds.has(drug.id));
+archive.drugs = archive.drugs.filter((drug) => !extraIds.has(drug.id));
+const extraRefs = archive.refs.filter((ref) => extraIds.has(ref.drug_id));
+archive.refs = archive.refs.filter((ref) => !extraIds.has(ref.drug_id));
+const extra = { drugs: extraDrugs, refs: extraRefs, strains: [] };
 const json = JSON.stringify(archive);
+const extraJson = JSON.stringify(extra);
+if (Buffer.byteLength(json) > 95_000_000) throw new Error("archive.json too large: " + Buffer.byteLength(json));
+if (Buffer.byteLength(extraJson) > 95_000_000) throw new Error("drugs-extra.json too large: " + Buffer.byteLength(extraJson));
 for (const rel of ["src/data/archive.json", "apps/mobile/src/data/archive.json"]) {
   const path = join(root, rel);
   mkdirSync(dirname(path), { recursive: true });
   writeFileSync(path, json);
 }
+for (const rel of ["src/data/drugs-extra.json", "apps/mobile/src/data/drugs-extra.json"]) {
+  const path = join(root, rel);
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, extraJson);
+}
 console.log(`drugs ${drugs.length} strains ${strains.length} classes ${classes.length} rules ${rules.length}`);
+console.log(`archive ${Buffer.byteLength(json)} extra ${Buffer.byteLength(extraJson)}`);
