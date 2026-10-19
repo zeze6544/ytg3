@@ -1,0 +1,6 @@
+:root {
+  --font-display: "VT323", ui-monospace, monospace;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  background: #07140c;
+  color: #e7ffc4;
+}
