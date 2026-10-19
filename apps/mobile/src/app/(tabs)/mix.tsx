@@ -1,4 +1,4 @@
-import { colors, fonts, type Tone } from "@/constants/theme";
+import { colors, fonts, toneColor, type Tone } from "@/constants/theme";
 import { Banner, FinePrint, Frame, MissingArchive, PageTitle, QueryError, Screen, SearchField, Status, Tag, breakWord } from "@/components/ui";
 import { fetchDrugs, fetchInteraction } from "@/lib/api";
 import { archiveConfigured } from "@/lib/supabase";
@@ -94,7 +94,7 @@ export default function MixScreen() {
         {interaction.error ? <QueryError error={interaction.error} /> : null}
         {a && b && a.id !== b.id && !interaction.isLoading && interaction.data ? (
           <View style={{ gap: 8 }}>
-            <Tag tone={sev?.tone}>{sev?.label}</Tag>
+            <Text style={{ fontFamily: fonts.display, color: toneColor[sev?.tone ?? "phosphor"], fontSize: 42, lineHeight: 46 }}>{sev?.label}</Text>
             <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 20 }]}>
               {interaction.data.note || "Catalogued. No further note is stored."}
             </Text>
@@ -155,7 +155,7 @@ function SubstanceModal({
   onPick,
 }: {
   open: boolean;
-  drugs: { id?: string; name?: string | null }[];
+  drugs: { id?: string; name?: string | null; aliases?: string[] | null; street_names?: string[] | null }[];
   loading: boolean;
   error: unknown;
   onClose: () => void;
@@ -165,15 +165,27 @@ function SubstanceModal({
   const [term, setTerm] = useState("");
   const filtered = useMemo(() => {
     const q = term.trim().toLowerCase();
-    const rows = drugs.filter((drug) => drug.id && drug.name && (!q || drug.name.toLowerCase().includes(q)));
+    const rows = drugs.filter((drug) => {
+      if (!drug.id || !drug.name) return false;
+      if (!q) return true;
+      const names = [drug.name, ...(drug.aliases ?? []), ...(drug.street_names ?? [])].map((item) => item.toLowerCase());
+      return names.some((item) => item.includes(q));
+    });
     if (!q) return rows.slice(0, 80);
-    const rank = (name: string) => (name === q ? 0 : name.startsWith(q) ? 1 : 2);
-    return [...rows].sort((a, b) => rank(a.name!.toLowerCase()) - rank(b.name!.toLowerCase()) || a.name!.localeCompare(b.name!)).slice(0, 80);
+    const rank = (drug: (typeof rows)[number]) => {
+      const name = drug.name!.toLowerCase();
+      if (name === q) return 0;
+      if ((drug.aliases ?? []).some((item) => item.toLowerCase() === q)) return 1;
+      if ((drug.street_names ?? []).some((item) => item.toLowerCase() === q)) return 2;
+      if (name.startsWith(q)) return 3;
+      return 4;
+    };
+    return [...rows].sort((a, b) => rank(a) - rank(b) || a.name!.localeCompare(b.name!)).slice(0, 80);
   }, [drugs, term]);
   const matchCount = useMemo(() => {
     const q = term.trim().toLowerCase();
     if (!q) return drugs.length;
-    return drugs.filter((drug) => drug.name?.toLowerCase().includes(q)).length;
+    return drugs.filter((drug) => [drug.name, ...(drug.aliases ?? []), ...(drug.street_names ?? [])].some((item) => item?.toLowerCase().includes(q))).length;
   }, [drugs, term]);
 
   if (!open) return null;
@@ -200,7 +212,7 @@ function SubstanceModal({
           <Text style={{ fontFamily: fonts.body, color: colors.red, letterSpacing: 1 }}>CLOSE</Text>
         </Pressable>
       </View>
-      <SearchField value={term} onChangeText={setTerm} placeholder="Filter by name" />
+      <SearchField value={term} onChangeText={setTerm} placeholder="Name, alias, or street name" />
       {loading ? <Status>Loading the index…</Status> : <Status>{filtered.length} shown · {matchCount} match</Status>}
       {error ? <QueryError error={error} /> : null}
       <FlatList
@@ -216,6 +228,11 @@ function SubstanceModal({
             style={{ paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.line, minHeight: 44 }}
           >
             <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 20 }]}>{item.name}</Text>
+            {term.trim() && item.name && !item.name.toLowerCase().includes(term.trim().toLowerCase()) ? (
+              <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 11 }}>
+                {(item.aliases ?? []).concat(item.street_names ?? []).find((alias) => alias.toLowerCase().includes(term.trim().toLowerCase()))}
+              </Text>
+            ) : null}
           </Pressable>
         )}
       />

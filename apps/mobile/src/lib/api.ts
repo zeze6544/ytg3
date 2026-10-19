@@ -3,6 +3,7 @@ import {
   localClasses,
   localCounts,
   localDrugBySlug,
+  localNeighbors,
   localDrugs,
   localInteraction,
   localPopular,
@@ -23,6 +24,58 @@ const POPULAR_SLUGS = [
   "heroin",
   "methamphetamine",
   "mdma",
+];
+
+const COMMON_SLUGS = [
+  "alcohol-ethanol",
+  "nicotine",
+  "caffeine",
+  "cannabis",
+  "thc",
+  "cocaine",
+  "heroin",
+  "fentanyl",
+  "morphine",
+  "oxycodone",
+  "codeine",
+  "tramadol",
+  "methadone",
+  "buprenorphine",
+  "xylazine",
+  "isotonitazene",
+  "methamphetamine",
+  "amphetamine",
+  "mdma",
+  "ketamine",
+  "lsd",
+  "psilocybin",
+  "liberty-cap",
+  "diazepam",
+  "alprazolam",
+  "clonazepam",
+  "etizolam",
+  "ghb",
+  "gbl",
+  "nitrous-oxide",
+  "kratom",
+  "kava",
+  "dxm",
+  "diphenhydramine",
+  "ibuprofen",
+  "paracetamol",
+  "naloxone",
+  "naltrexone",
+  "pregabalin",
+  "gabapentin",
+  "sertraline",
+  "fluoxetine",
+  "quetiapine",
+  "lithium",
+  "warfarin",
+  "sildenafil",
+  "nitroglycerin",
+  "amyl-nitrite",
+  "prazosin",
 ];
 
 const LIST_COLUMNS = "id,slug,name,category,summary,evidence_quality,aliases,brand_names,street_names";
@@ -65,6 +118,19 @@ export async function fetchPopularDrugs(): Promise<Partial<Drug>[]> {
     const map = new Map(rows.map((drug) => [drug.slug, drug]));
     return POPULAR_SLUGS.map((slug) => map.get(slug)).filter(Boolean) as Partial<Drug>[];
   }, localPopular(POPULAR_SLUGS), (rows) => rows.length > 0);
+}
+
+export async function fetchCommonDrugs(): Promise<Partial<Drug>[]> {
+  return remoteFirst(async (sb) => {
+    const { data, error } = await sb.from("drugs").select(LIST_COLUMNS).in("slug", COMMON_SLUGS);
+    if (error) throw error;
+    const map = new Map(((data ?? []) as Partial<Drug>[]).map((drug) => [drug.slug, drug]));
+    return COMMON_SLUGS.map((slug) => map.get(slug)).filter(Boolean) as Partial<Drug>[];
+  }, localPopular(COMMON_SLUGS), (rows) => rows.length > 0);
+}
+
+export function fetchNeighbors(slug: string) {
+  return localNeighbors(slug);
 }
 
 export async function fetchDrugBySlug(slug: string): Promise<Drug | null> {

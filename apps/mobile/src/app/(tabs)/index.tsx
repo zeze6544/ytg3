@@ -43,7 +43,7 @@ export default function HomeScreen() {
       {archiveConfigured ? null : <MissingArchive />}
       <Frame title="BOOT" code="MAIN">
         <Prose>
-          Honest files on drugs, cannabis strains, interactions, and history. Every entry says what the substance does and how people stay safer. Nothing here is dosing advice, a sale, or a green light.
+          Honest files on drugs, cannabis strains, interactions, and history. Files opens on a common shelf. Letters and All open the rest of the index. Nothing here is dosing advice, a sale, or a green light.
         </Prose>
         <View style={{ gap: 8 }}>
           <Action label="Browse files" onPress={() => router.push("/files")} />

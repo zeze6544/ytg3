@@ -1,6 +1,6 @@
 import { colors, fonts } from "@/constants/theme";
 import { ChipScroller, FileCard, FinePrint, LoadMore, MissingArchive, NameRow, PageTitle, QueryError, SearchField, Status, Tag, useScreenInsets } from "@/components/ui";
-import { fetchDrugs } from "@/lib/api";
+import { fetchCommonDrugs, fetchDrugs } from "@/lib/api";
 import { blurb } from "@/lib/reading";
 import { archiveConfigured } from "@/lib/supabase";
 import { CATEGORIES, CATEGORY_LABELS, CATEGORY_TONE, type DrugCategory } from "@/lib/types";
@@ -10,6 +10,12 @@ import { useEffect, useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
 
 const PAGE = 40;
+const LETTERS = ["common", "all", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""), "#"];
+
+function initial(name: string) {
+  const letter = name.trim().charAt(0).toUpperCase();
+  return /[A-Z]/.test(letter) ? letter : "#";
+}
 
 export default function FilesScreen() {
   const insets = useScreenInsets(true);
@@ -17,13 +23,20 @@ export default function FilesScreen() {
   const [search, setSearch] = useState("");
   const [term, setTerm] = useState("");
   const [cat, setCat] = useState<string>("all");
+  const [shelf, setShelf] = useState("common");
   const [shown, setShown] = useState(PAGE);
+  const commonShelf = shelf === "common" && !term;
   const query = useQuery({
-    queryKey: ["drugs", term, cat],
-    queryFn: () => fetchDrugs({ search: term, category: cat }),
+    queryKey: ["drugs", term, cat, commonShelf ? "common" : "index"],
+    queryFn: async () => {
+      if (!commonShelf) return fetchDrugs({ search: term, category: cat });
+      const rows = await fetchCommonDrugs();
+      return cat === "all" ? rows : rows.filter((drug) => drug.category === cat);
+    },
     enabled: archiveConfigured,
   });
-  const matches = query.data ?? [];
+  const pool = query.data ?? [];
+  const matches = !term && shelf !== "common" && shelf !== "all" ? pool.filter((drug) => initial(drug.name ?? "") === shelf) : pool;
   const rows = matches.slice(0, shown);
 
   useEffect(() => {
@@ -33,12 +46,15 @@ export default function FilesScreen() {
 
   useEffect(() => {
     const next = typeof params.cat === "string" ? params.cat : "";
-    if (next && (CATEGORIES as string[]).includes(next)) setCat(next);
+    if (next && (CATEGORIES as string[]).includes(next)) {
+      setCat(next);
+      setShelf("all");
+    }
   }, [params.cat]);
 
   useEffect(() => {
     setShown(PAGE);
-  }, [term, cat]);
+  }, [term, cat, shelf]);
 
   return (
     <FlatList
@@ -52,6 +68,17 @@ export default function FilesScreen() {
           <PageTitle>FILES</PageTitle>
           {archiveConfigured ? null : <MissingArchive />}
           <SearchField value={search} onChangeText={setSearch} placeholder="Name, alias, or street name" />
+          <ChipScroller>
+            {LETTERS.map((item) => {
+              const on = shelf === item && !term;
+              const label = item === "common" ? "Common" : item === "all" ? "All" : item;
+              return (
+                <Pressable key={item} accessibilityRole="button" onPress={() => { setShelf(item); setSearch(""); }} style={{ minHeight: 36, justifyContent: "center" }}>
+                  <Tag filled={on} tone={on ? "amber" : "phosphor"}>{label}</Tag>
+                </Pressable>
+              );
+            })}
+          </ChipScroller>
           <ChipScroller>
             {CATEGORIES.map((item) => {
               const on = cat === item;
@@ -68,8 +95,10 @@ export default function FilesScreen() {
             <Status>Loading records…</Status>
           ) : (
             <Status>
+              {commonShelf ? "Common shelf. " : shelf !== "all" && shelf !== "common" ? `${shelf}. ` : ""}
               {cat !== "all" ? `${CATEGORY_LABELS[cat] ?? cat}. ` : ""}
-              {matches.length > rows.length ? `Showing ${rows.length} of ${matches.length}.` : `${rows.length} results.`}
+              {matches.length > rows.length ? `Showing ${rows.length} of ${matches.length}.` : `${rows.length} files.`}
+              {commonShelf ? " All and the letters open the rest of the index." : ""}
             </Status>
           )}
           {query.error ? <QueryError error={query.error} /> : null}
@@ -79,7 +108,7 @@ export default function FilesScreen() {
         archiveConfigured && !query.isLoading ? (
           <View style={{ gap: 8 }}>
             <Status>No records match.</Status>
-            <LoadMore label="Clear the filter" onPress={() => { setSearch(""); setCat("all"); }} />
+            <LoadMore label="Back to the common shelf" onPress={() => { setSearch(""); setCat("all"); setShelf("common"); }} />
           </View>
         ) : undefined
       }

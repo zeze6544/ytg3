@@ -71,10 +71,19 @@ export function localDrugs(opts?: { search?: string; category?: string; limit?: 
     if (term) {
       const delta = searchRank(a, term) - searchRank(b, term);
       if (delta) return delta;
+    } else {
+      const delta = browseRank(a.name) - browseRank(b.name);
+      if (delta) return delta;
     }
     return a.name.localeCompare(b.name);
   });
   return opts?.limit ? sorted.slice(0, opts.limit) : sorted;
+}
+
+function browseRank(name: string) {
+  const trimmed = name.trim();
+  if (!/^[A-Za-z]/.test(trimmed)) return 2;
+  return /[a-z]/.test(trimmed) ? 0 : 1;
 }
 
 function searchRank(drug: ArchiveDrug, term: string) {
@@ -98,6 +107,16 @@ export function localPopular(slugs: string[]) {
 
 export function localDrugBySlug(slug: string) {
   return archive.drugs.find((drug) => drug.slug === slug) ?? null;
+}
+
+export function localNeighbors(slug: string, count = 5) {
+  const drug = localDrugBySlug(slug);
+  if (!drug) return [];
+  const same = archive.drugs.filter((item) => item.category === drug.category && item.slug !== drug.slug);
+  same.sort((a, b) => a.name.localeCompare(b.name));
+  const next = same.findIndex((item) => item.name.localeCompare(drug.name) > 0);
+  const at = next === -1 ? Math.max(0, same.length - count) : Math.max(0, next - 2);
+  return same.slice(at, at + count);
 }
 
 export function localRefs(drugId: string) {

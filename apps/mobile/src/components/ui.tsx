@@ -1,5 +1,5 @@
 import { colors, fonts, toneColor, type Tone } from "@/constants/theme";
-import type { ReactNode } from "react";
+import { forwardRef, type ReactNode } from "react";
 import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions, type ScrollViewProps, type TextInputProps, type TextStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -17,15 +17,16 @@ export function useScreenInsets(safeTop = false) {
   };
 }
 
-export function Screen({
-  children,
-  safeTop = false,
-  contentContainerStyle,
-  ...rest
-}: ScrollViewProps & { children: ReactNode; safeTop?: boolean }) {
+export type Scroller = { scrollTo: (options: { y: number; animated?: boolean }) => void };
+
+export const Screen = forwardRef<Scroller, ScrollViewProps & { children: ReactNode; safeTop?: boolean }>(function Screen(
+  { children, safeTop = false, contentContainerStyle, ...rest },
+  ref,
+) {
   const insets = useScreenInsets(safeTop);
   return (
     <ScrollView
+      ref={ref as never}
       style={styles.screen}
       contentContainerStyle={[insets, contentContainerStyle]}
       keyboardShouldPersistTaps="handled"
@@ -34,7 +35,7 @@ export function Screen({
       {children}
     </ScrollView>
   );
-}
+});
 
 export function Wordmark() {
   const { width } = useWindowDimensions();
