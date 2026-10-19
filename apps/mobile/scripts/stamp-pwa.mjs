@@ -39,9 +39,15 @@ const tags = `
     <meta name="apple-mobile-web-app-title" content="NARCØDEX" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 `;
+if (!html.includes("viewport-fit=cover")) {
+  html = html.replace(
+    /<meta name="viewport" content="[^"]*"\s*\/?>/,
+    '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover" />',
+  );
+}
 if (!html.includes("apple-mobile-web-app-capable")) {
   html = html.replace("</head>", `${tags}</head>`);
-  writeFileSync(indexPath, html);
 }
+writeFileSync(indexPath, html);
 copyFileSync(indexPath, join(dist, "200.html"));
 console.log("stamped", indexPath);

@@ -1,18 +1,21 @@
 import { colors, fonts } from "@/constants/theme";
-import { Action, Frame, MissingArchive, QueryError, Screen, Status, Tag } from "@/components/ui";
+import { Action, Frame, MissingArchive, NameRow, QueryError, Screen, Status, Wordmark } from "@/components/ui";
 import { fetchCounts, fetchPopularDrugs, fetchRandomDrug } from "@/lib/api";
 import { archiveConfigured } from "@/lib/supabase";
 import { CATEGORY_LABELS, CATEGORY_TONE } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, Text, View, useWindowDimensions } from "react-native";
 
 const WARNINGS =
   "Never mix opioids with benzodiazepines or alcohol  ·  Test your batch  ·  Fentanyl contamination is still everywhere  ·  If you are not sure, do not  ·  NARCØDEX does not tell anyone to use drugs  ·  ";
 
 export default function HomeScreen() {
+  const { width } = useWindowDimensions();
   const counts = useQuery({ queryKey: ["counts"], queryFn: fetchCounts, enabled: archiveConfigured });
   const featured = useQuery({ queryKey: ["featured"], queryFn: fetchPopularDrugs, enabled: archiveConfigured });
+  const statSize = width < 360 ? 22 : 28;
+  const subSize = width < 380 ? 10 : 11;
 
   async function surprise() {
     const row = await fetchRandomDrug();
@@ -20,11 +23,10 @@ export default function HomeScreen() {
   }
 
   return (
-    <Screen>
-      <Text style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: 58, lineHeight: 58 }}>
-        NARC<Text style={{ color: colors.cyan }}>Ø</Text>DEX
-      </Text>
-      <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 11, letterSpacing: 1 }}>
+    <Screen safeTop>
+      <Wordmark />
+      <View style={{ height: 1, width: 72, backgroundColor: colors.line }} />
+      <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: subSize, letterSpacing: 0.2 }}>
         A PUBLIC LIBRARY FOR SUBSTANCES
       </Text>
       {archiveConfigured ? null : <MissingArchive />}
@@ -34,7 +36,7 @@ export default function HomeScreen() {
           is known, how well it is known, and how people stay safer. Nothing here is dosing advice,
           a sale, or a green light.
         </Text>
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+        <View style={{ gap: 8 }}>
           <Action label="Browse files" onPress={() => router.push("/files")} />
           <Action label="Check a mix" tone="red" onPress={() => router.push("/mix")} />
           <Action label="Surprise file" tone="purple" disabled={!archiveConfigured} onPress={() => void surprise()} />
@@ -48,8 +50,11 @@ export default function HomeScreen() {
             ["STRAINS", counts.data?.strains],
             ["CLASSES", counts.data?.classes],
           ].map(([label, value]) => (
-            <View key={String(label)} style={{ flex: 1, borderWidth: 1, borderColor: colors.line, padding: 8 }}>
-              <Text style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: 32 }}>
+            <View key={String(label)} style={{ flex: 1, minWidth: 0, borderWidth: 1, borderColor: colors.line, padding: 8 }}>
+              <Text
+                numberOfLines={1}
+                style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: statSize, minWidth: 0 }}
+              >
                 {value ?? "·"}
               </Text>
               <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 10 }}>{label}</Text>
@@ -63,14 +68,11 @@ export default function HomeScreen() {
         {featured.error ? <QueryError error={featured.error} /> : null}
         {(featured.data ?? []).map((drug) => (
           <Pressable key={drug.slug} onPress={() => router.push(`/drug/${drug.slug}`)} style={{ gap: 4, paddingVertical: 6 }}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 8 }}>
-              <Text style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: 24, flex: 1 }} numberOfLines={1}>
-                {drug.name}
-              </Text>
-              <Tag tone={CATEGORY_TONE[drug.category ?? "other"] ?? "phosphor"}>
-                {CATEGORY_LABELS[drug.category ?? "other"]}
-              </Tag>
-            </View>
+            <NameRow
+              name={drug.name ?? "Untitled"}
+              tag={CATEGORY_LABELS[drug.category ?? "other"]}
+              tone={CATEGORY_TONE[drug.category ?? "other"] ?? "phosphor"}
+            />
             {drug.summary ? (
               <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 12 }} numberOfLines={2}>
                 {drug.summary}

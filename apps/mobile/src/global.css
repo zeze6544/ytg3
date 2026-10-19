@@ -4,3 +4,15 @@
   background: #07140c;
   color: #e7ffc4;
 }
+
+html,
+body,
+#root {
+  height: 100%;
+  background: #07140c;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+}

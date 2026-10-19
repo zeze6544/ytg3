@@ -1,5 +1,5 @@
 import { colors, fonts } from "@/constants/theme";
-import { Frame, Screen } from "@/components/ui";
+import { Frame, PageTitle, Screen, breakWord } from "@/components/ui";
 import { useSession } from "@/lib/session";
 import { router } from "expo-router";
 import { Pressable, Text } from "react-native";
@@ -17,13 +17,13 @@ const LINKS = [
 export default function MoreScreen() {
   const { user } = useSession();
   return (
-    <Screen>
-      <Text style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: 40 }}>MORE</Text>
+    <Screen safeTop>
+      <PageTitle>MORE</PageTitle>
       <Frame title="ACCOUNT" code="AUTH" tone="cyan">
-        <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 13 }}>
+        <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 13, lineHeight: 20 }]}>
           {user?.email ?? "Browsing without an account. The public archive does not require one."}
         </Text>
-        <Pressable onPress={() => router.push("/auth")}>
+        <Pressable onPress={() => router.push("/auth")} style={{ minHeight: 44, justifyContent: "center" }}>
           <Text style={{ fontFamily: fonts.body, color: colors.cyan, letterSpacing: 1 }}>
             {user ? "ACCOUNT" : "SIGN IN"}
           </Text>
@@ -33,9 +33,9 @@ export default function MoreScreen() {
         <Pressable
           key={link.href}
           onPress={() => router.push(link.href)}
-          style={{ borderWidth: 1, borderColor: colors.line, padding: 14, borderRadius: 4, backgroundColor: colors.panel }}
+          style={{ borderWidth: 1, borderColor: colors.line, padding: 14, borderRadius: 4, backgroundColor: colors.panel, minHeight: 64 }}
         >
-          <Text style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: 28 }}>{link.label}</Text>
+          <Text style={[breakWord, { fontFamily: fonts.display, color: colors.phosphor, fontSize: 26, lineHeight: 28 }]}>{link.label}</Text>
           <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 12 }}>{link.note}</Text>
         </Pressable>
       ))}

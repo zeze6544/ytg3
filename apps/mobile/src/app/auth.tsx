@@ -99,6 +99,9 @@ const inputStyle = {
   borderColor: colors.line,
   color: colors.phosphor,
   fontFamily: fonts.body,
-  padding: 12,
+  fontSize: 16,
+  paddingHorizontal: 12,
+  paddingVertical: 12,
+  minHeight: 48,
   borderRadius: 4,
 };

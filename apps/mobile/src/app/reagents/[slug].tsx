@@ -1,5 +1,5 @@
 import { colors, fonts } from "@/constants/theme";
-import { Frame, Screen, Status, Tag } from "@/components/ui";
+import { Frame, Screen, Status, Tag, breakWord } from "@/components/ui";
 import { KITS } from "@/lib/reagents";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { Text, View } from "react-native";
@@ -17,7 +17,7 @@ export default function ReagentKitScreen() {
   return (
     <Screen>
       <Stack.Screen options={{ title: kit.name }} />
-      <Text style={{ fontFamily: fonts.display, color: colors.cyan, fontSize: 42 }}>{kit.name}</Text>
+      <Text style={[breakWord, { fontFamily: fonts.display, color: colors.cyan, fontSize: 34, lineHeight: 38 }]}>{kit.name}</Text>
       <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 13, lineHeight: 20 }}>{kit.blurb}</Text>
       <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 12, lineHeight: 18 }}>{kit.use}</Text>
       <Frame title="COLOURS" code={kit.slug.slice(0, 4).toUpperCase()}>

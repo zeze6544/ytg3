@@ -1,5 +1,5 @@
 import { colors, fonts } from "@/constants/theme";
-import { Action, Frame, Screen, Status, Tag } from "@/components/ui";
+import { Action, Frame, Screen, Status, Tag, breakWord } from "@/components/ui";
 import { useSession } from "@/lib/session";
 import { requireClient } from "@/lib/supabase";
 import { useQuery } from "@tanstack/react-query";
@@ -92,7 +92,7 @@ export default function SavedScreen() {
         if (!file) return null;
         return (
           <Pressable key={item.id} onPress={() => item.drug && router.push(`/drug/${item.drug.slug}`)}>
-            <Text style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: 26 }}>{file.name}</Text>
+            <Text style={[breakWord, { fontFamily: fonts.display, color: colors.phosphor, fontSize: 26, lineHeight: 30 }]}>{file.name}</Text>
           </Pressable>
         );
       })}
@@ -101,7 +101,7 @@ export default function SavedScreen() {
         {(query.data?.history ?? []).map((item) =>
           item.drug ? (
             <Pressable key={item.id} onPress={() => router.push(`/drug/${item.drug!.slug}`)}>
-              <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 13 }}>{item.drug.name}</Text>
+              <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 13, lineHeight: 18 }]}>{item.drug.name}</Text>
             </Pressable>
           ) : null,
         )}

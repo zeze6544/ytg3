@@ -1,5 +1,5 @@
 import { colors, fonts } from "@/constants/theme";
-import { QueryError, Screen, Status, Tag } from "@/components/ui";
+import { QueryError, Screen, Status, Tag, breakWord } from "@/components/ui";
 import { fetchClasses, fetchDrugs } from "@/lib/api";
 import { CATEGORY_TONE } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
@@ -28,7 +28,7 @@ export default function ClassesScreen() {
           onPress={() => router.push("/files")}
           style={{ borderWidth: 1, borderColor: colors.line, padding: 12, borderRadius: 4, backgroundColor: colors.panel, gap: 6 }}
         >
-          <Text style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: 28 }}>{item.name}</Text>
+          <Text style={[breakWord, { fontFamily: fonts.display, color: colors.phosphor, fontSize: 28, lineHeight: 32 }]}>{item.name}</Text>
           <Tag tone={CATEGORY_TONE[item.slug] ?? "phosphor"}>{counts.get(item.slug) ?? 0} files</Tag>
           {item.description ? (
             <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 12, lineHeight: 18 }}>{item.description}</Text>

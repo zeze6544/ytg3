@@ -9,7 +9,7 @@ import { DarkTheme, Redirect, Stack, ThemeProvider } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
-import { View } from "react-native";
+import { Text, View, useWindowDimensions } from "react-native";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -30,10 +30,27 @@ const archiveTheme = {
   },
 };
 
+function ArchiveHeaderTitle({ children, tintColor }: { children: string; tintColor?: unknown }) {
+  const { width } = useWindowDimensions();
+  return (
+    <Text
+      numberOfLines={1}
+      style={{
+        fontFamily: fonts.display,
+        fontSize: 22,
+        color: typeof tintColor === "string" ? tintColor : colors.phosphor,
+        maxWidth: Math.min(width - 96, 320),
+      }}
+    >
+      {children}
+    </Text>
+  );
+}
+
 const headerOptions = {
   headerStyle: { backgroundColor: colors.bg },
   headerTintColor: colors.phosphor,
-  headerTitleStyle: { fontFamily: fonts.display, fontSize: 24 },
+  headerTitle: ArchiveHeaderTitle,
   headerShadowVisible: false,
   contentStyle: { backgroundColor: colors.bg },
 };
@@ -87,7 +104,11 @@ export default function RootLayout() {
         <SessionProvider>
           <ThemeProvider value={archiveTheme}>
             <StatusBar style="light" />
-            <RootStack />
+            <View style={{ flex: 1, backgroundColor: colors.bg, alignItems: "center" }}>
+              <View style={{ flex: 1, width: "100%", maxWidth: 480, backgroundColor: colors.bg }}>
+                <RootStack />
+              </View>
+            </View>
           </ThemeProvider>
         </SessionProvider>
       </GateProvider>

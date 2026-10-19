@@ -1,10 +1,11 @@
 import { colors, fonts, type Tone } from "@/constants/theme";
-import { Banner, Frame, MissingArchive, QueryError, Screen, Status, Tag } from "@/components/ui";
+import { Banner, Frame, MissingArchive, PageTitle, QueryError, Screen, SearchField, Status, Tag, breakWord } from "@/components/ui";
 import { fetchDrugs, fetchInteraction } from "@/lib/api";
 import { archiveConfigured } from "@/lib/supabase";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { FlatList, Modal, Pressable, Text, TextInput, View } from "react-native";
+import { FlatList, Pressable, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const SEV: Record<string, { tone: Tone; label: string }> = {
   low: { tone: "phosphor", label: "LOW" },
@@ -30,8 +31,9 @@ export default function MixScreen() {
   const sev = interaction.data ? (SEV[interaction.data.severity] ?? SEV.unknown) : null;
 
   return (
-    <Screen>
-      <Text style={{ fontFamily: fonts.display, color: colors.red, fontSize: 40 }}>MIX CHECK</Text>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
+    <Screen safeTop>
+      <PageTitle tone="red">MIX CHECK</PageTitle>
       {archiveConfigured ? null : <MissingArchive />}
       <Banner>
         Select two substances. A missing record is not evidence of safety. This is not medical advice and not a dosing tool.
@@ -44,6 +46,7 @@ export default function MixScreen() {
           setB(a);
           setA(nextA);
         }}
+        style={{ minHeight: 44, justifyContent: "center" }}
       >
         <Text style={{ fontFamily: fonts.body, color: colors.purple, letterSpacing: 1 }}>SWAP</Text>
       </Pressable>
@@ -56,7 +59,7 @@ export default function MixScreen() {
         {a && b && a.id !== b.id && !interaction.isLoading && interaction.data ? (
           <View style={{ gap: 8 }}>
             <Tag tone={sev?.tone}>{sev?.label}</Tag>
-            <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 20 }}>
+            <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 20 }]}>
               {interaction.data.note || "Catalogued. No further note is stored."}
             </Text>
           </View>
@@ -64,13 +67,14 @@ export default function MixScreen() {
         {a && b && a.id !== b.id && !interaction.isLoading && !interaction.data && !interaction.error ? (
           <View style={{ gap: 8 }}>
             <Tag tone="cyan">UNKNOWN</Tag>
-            <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 13, lineHeight: 18 }}>
+            <Text style={[breakWord, { fontFamily: fonts.body, color: colors.muted, fontSize: 13, lineHeight: 18 }]}>
               This combination is not catalogued. Assume unknown risk. A blank result is not a clearance.
             </Text>
           </View>
         ) : null}
       </Frame>
 
+    </Screen>
       <SubstanceModal
         open={which !== null}
         drugs={drugs.data ?? []}
@@ -83,15 +87,21 @@ export default function MixScreen() {
           setWhich(null);
         }}
       />
-    </Screen>
+    </View>
   );
 }
 
 function PickerButton({ label, value, onPress }: { label: string; value?: string; onPress: () => void }) {
+  const size = value && value.length > 22 ? 20 : 26;
   return (
-    <Pressable onPress={onPress} style={{ borderWidth: 1, borderColor: colors.line, padding: 12, borderRadius: 4, backgroundColor: colors.panel }}>
+    <Pressable
+      onPress={onPress}
+      style={{ borderWidth: 1, borderColor: colors.line, padding: 12, borderRadius: 4, backgroundColor: colors.panel, minHeight: 72 }}
+    >
       <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 10, letterSpacing: 1 }}>{label}</Text>
-      <Text style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: 28 }}>{value ?? "Select"}</Text>
+      <Text numberOfLines={3} style={[breakWord, { fontFamily: fonts.display, color: colors.phosphor, fontSize: size, lineHeight: size + 4 }]}>
+        {value ?? "Select"}
+      </Text>
     </Pressable>
   );
 }
@@ -111,39 +121,55 @@ function SubstanceModal({
   onClose: () => void;
   onPick: (pick: Pick) => void;
 }) {
+  const insets = useSafeAreaInsets();
   const [term, setTerm] = useState("");
   const filtered = useMemo(() => {
     const q = term.trim().toLowerCase();
     return drugs.filter((drug) => drug.id && drug.name && (!q || drug.name.toLowerCase().includes(q))).slice(0, 80);
   }, [drugs, term]);
 
+  if (!open) return null;
+
   return (
-    <Modal visible={open} animationType="slide" onRequestClose={onClose}>
-      <View style={{ flex: 1, backgroundColor: colors.bg, padding: 16, paddingTop: 48, gap: 10 }}>
-        <Text style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: 32 }}>SELECT</Text>
-        <TextInput
-          value={term}
-          onChangeText={setTerm}
-          placeholder="Filter by name"
-          placeholderTextColor={colors.muted}
-          autoCapitalize="none"
-          style={{ borderWidth: 1, borderColor: colors.cyan, color: colors.text, fontFamily: fonts.body, padding: 10 }}
-        />
-        {loading ? <Status>Loading the index…</Status> : null}
-        {error ? <QueryError error={error} /> : null}
-        <FlatList
-          data={filtered}
-          keyExtractor={(item) => item.id!}
-          renderItem={({ item }) => (
-            <Pressable onPress={() => onPick({ id: item.id!, name: item.name! })} style={{ paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.line }}>
-              <Text style={{ fontFamily: fonts.body, color: colors.text }}>{item.name}</Text>
-            </Pressable>
-          )}
-        />
-        <Pressable onPress={onClose}>
+    <View
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 30,
+        backgroundColor: colors.bg,
+        paddingTop: insets.top + 8,
+        paddingHorizontal: 16,
+        paddingBottom: insets.bottom + 12,
+        gap: 10,
+      }}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", minHeight: 44 }}>
+        <Text style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: 28 }}>SELECT</Text>
+        <Pressable onPress={onClose} style={{ minHeight: 44, justifyContent: "center", paddingHorizontal: 8 }}>
           <Text style={{ fontFamily: fonts.body, color: colors.red, letterSpacing: 1 }}>CLOSE</Text>
         </Pressable>
       </View>
-    </Modal>
+      <SearchField value={term} onChangeText={setTerm} placeholder="Filter by name" />
+      {loading ? <Status>Loading the index…</Status> : null}
+      {error ? <QueryError error={error} /> : null}
+      <FlatList
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: 72 }}
+        data={filtered}
+        keyboardShouldPersistTaps="handled"
+        keyExtractor={(item) => item.id!}
+        renderItem={({ item }) => (
+          <Pressable
+            onPress={() => onPick({ id: item.id!, name: item.name! })}
+            style={{ paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.line, minHeight: 44 }}
+          >
+            <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 20 }]}>{item.name}</Text>
+          </Pressable>
+        )}
+      />
+    </View>
   );
 }

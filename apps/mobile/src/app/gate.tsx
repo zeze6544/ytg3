@@ -1,5 +1,5 @@
 import { colors, fonts } from "@/constants/theme";
-import { Action, Frame, Screen } from "@/components/ui";
+import { Action, Frame, Screen, Wordmark } from "@/components/ui";
 import { useGate } from "@/lib/gate";
 import { Redirect } from "expo-router";
 import { Platform, Text } from "react-native";
@@ -9,10 +9,8 @@ export default function GateScreen() {
   if (gate.accepted) return <Redirect href="/" />;
 
   return (
-    <Screen contentContainerStyle={{ padding: 16, paddingTop: 72, gap: 14 }}>
-      <Text style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: 64, lineHeight: 64 }}>
-        NARC<Text style={{ color: colors.cyan }}>Ø</Text>DEX
-      </Text>
+    <Screen safeTop>
+      <Wordmark />
       <Frame title="ADULT ARCHIVE" code="18+" tone="amber">
         <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 13, lineHeight: 20 }}>
           NARCØDEX is a harm-reduction reference for adults. It describes substances, risks,

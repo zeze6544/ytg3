@@ -1,14 +1,15 @@
 import { colors, fonts } from "@/constants/theme";
-import { MissingArchive, QueryError, Status, Tag } from "@/components/ui";
+import { ChipWrap, MissingArchive, NameRow, PageTitle, QueryError, SearchField, Status, Tag, useScreenInsets } from "@/components/ui";
 import { fetchDrugs } from "@/lib/api";
 import { archiveConfigured } from "@/lib/supabase";
 import { CATEGORIES, CATEGORY_LABELS, CATEGORY_TONE, type DrugCategory } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { useState } from "react";
-import { FlatList, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { FlatList, Pressable, Text, View } from "react-native";
 
 export default function FilesScreen() {
+  const insets = useScreenInsets(true);
   const [search, setSearch] = useState("");
   const [cat, setCat] = useState<string>("all");
   const query = useQuery({
@@ -16,45 +17,40 @@ export default function FilesScreen() {
     queryFn: () => fetchDrugs({ search, category: cat }),
     enabled: archiveConfigured,
   });
+  const matches = query.data ?? [];
+  const rows = matches.slice(0, 60);
 
   return (
     <FlatList
       style={{ flex: 1, backgroundColor: colors.bg }}
-      contentContainerStyle={{ padding: 16, paddingBottom: 120, gap: 8 }}
-      data={query.data ?? []}
+      contentContainerStyle={{ ...insets, gap: 8 }}
+      data={rows}
       keyExtractor={(item) => item.id ?? item.slug ?? item.name ?? "row"}
       keyboardShouldPersistTaps="handled"
       ListHeaderComponent={
         <View style={{ gap: 10, marginBottom: 8 }}>
-          <Text style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: 40 }}>FILES</Text>
+          <PageTitle>FILES</PageTitle>
           {archiveConfigured ? null : <MissingArchive />}
-          <TextInput
-            value={search}
-            onChangeText={setSearch}
-            placeholder="SEARCH THE ARCHIVE"
-            placeholderTextColor={colors.muted}
-            autoCapitalize="none"
-            autoCorrect={false}
-            style={{
-              borderWidth: 1,
-              borderColor: colors.phosphor,
-              color: colors.phosphor,
-              fontFamily: fonts.body,
-              padding: 12,
-              borderRadius: 4,
-            }}
-          />
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>
+          <SearchField value={search} onChangeText={setSearch} placeholder="Search the archive" />
+          <ChipWrap>
             {CATEGORIES.map((item) => {
               const on = cat === item;
               return (
                 <Pressable key={item} onPress={() => setCat(item)}>
-                  <Tag tone={on ? "phosphor" : "cyan"}>{item === "all" ? "All" : CATEGORY_LABELS[item]}</Tag>
+                  <Tag filled={on} tone={on ? "phosphor" : "cyan"}>
+                    {item === "all" ? "All" : CATEGORY_LABELS[item]}
+                  </Tag>
                 </Pressable>
               );
             })}
-          </ScrollView>
-          {query.isLoading ? <Status>Loading records…</Status> : <Status>{query.data?.length ?? 0} results</Status>}
+          </ChipWrap>
+          {query.isLoading ? (
+            <Status>Loading records…</Status>
+          ) : (
+            <Status>
+              {matches.length > rows.length ? `${rows.length} shown · ${matches.length} match` : `${rows.length} results`}
+            </Status>
+          )}
           {query.error ? <QueryError error={query.error} /> : null}
         </View>
       }
@@ -64,14 +60,11 @@ export default function FilesScreen() {
           onPress={() => item.slug && router.push(`/drug/${item.slug}`)}
           style={{ borderWidth: 1, borderColor: colors.line, padding: 12, borderRadius: 4, gap: 6, backgroundColor: colors.panel }}
         >
-          <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 8 }}>
-            <Text style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: 26, flex: 1 }} numberOfLines={1}>
-              {item.name}
-            </Text>
-            <Tag tone={CATEGORY_TONE[item.category as DrugCategory] ?? "phosphor"}>
-              {CATEGORY_LABELS[item.category ?? "other"]}
-            </Tag>
-          </View>
+          <NameRow
+            name={item.name ?? "Untitled"}
+            tag={CATEGORY_LABELS[item.category ?? "other"]}
+            tone={CATEGORY_TONE[item.category as DrugCategory] ?? "phosphor"}
+          />
           {item.summary ? (
             <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 12 }} numberOfLines={3}>
               {item.summary}

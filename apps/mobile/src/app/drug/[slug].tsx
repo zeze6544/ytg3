@@ -1,5 +1,5 @@
 import { colors, fonts } from "@/constants/theme";
-import { Action, Banner, Field, Frame, QueryError, Screen, Status, Tag } from "@/components/ui";
+import { Action, Banner, Field, Frame, QueryError, Screen, Status, Tag, breakWord } from "@/components/ui";
 import { fetchDrugBySlug, fetchDrugRefs } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { requireClient } from "@/lib/supabase";
@@ -7,9 +7,10 @@ import { CATEGORY_LABELS, CATEGORY_TONE, EVIDENCE_TONE } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { Stack, router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { Linking, Text, View } from "react-native";
+import { Linking, Text, View, useWindowDimensions } from "react-native";
 
 export default function DrugScreen() {
+  const { width } = useWindowDimensions();
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const { user } = useSession();
   const [note, setNote] = useState<string | null>(null);
@@ -65,17 +66,22 @@ export default function DrugScreen() {
     );
   }
 
+  const long = drug.name.length > 24;
+  const titleSize = long ? (width < 360 ? 26 : 30) : width < 360 ? 34 : 40;
+
   return (
     <Screen>
       <Stack.Screen options={{ title: drug.name }} />
-      <Text style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: 48, lineHeight: 48 }}>{drug.name}</Text>
+      <Text style={[breakWord, { fontFamily: fonts.display, color: colors.phosphor, fontSize: titleSize, lineHeight: titleSize + 6 }]}>
+        {drug.name}
+      </Text>
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
         <Tag tone={CATEGORY_TONE[drug.category] ?? "phosphor"}>{CATEGORY_LABELS[drug.category]}</Tag>
         <Tag tone={EVIDENCE_TONE[drug.evidence_quality] ?? "cyan"}>evidence: {drug.evidence_quality}</Tag>
         {drug.discovered_year ? <Tag tone="amber">est. {drug.discovered_year}</Tag> : null}
       </View>
       {drug.summary ? (
-        <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 21 }}>{drug.summary}</Text>
+        <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 21 }]}>{drug.summary}</Text>
       ) : null}
       <Banner>Not medical advice. Not a dose, a source, or a reason to use this substance.</Banner>
       <Action label="Save" onPress={() => void save()} />
@@ -131,7 +137,7 @@ export default function DrugScreen() {
         </Text>
       </Frame>
       <Frame title="HISTORY" code="HIS" tone="purple">
-        <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 13, lineHeight: 20 }}>
+        <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 13, lineHeight: 20 }]}>
           {drug.history ?? "· unknown ·"}
         </Text>
       </Frame>
