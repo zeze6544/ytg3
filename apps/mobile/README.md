@@ -6,7 +6,7 @@ Not medical advice. Not a dosing tool. Not a shop.
 
 ## On an iPhone, no App Store
 
-Open https://narcodex-archive.surge.sh in Safari. Tap Share, then Add to Home Screen. The icon opens full screen from the home screen. iOS will not install an app file downloaded in Safari unless Apple has signed it, and that signature is a paid developer membership.
+Open https://narcodex.surge.sh in Safari. Tap Share, then Add to Home Screen. The icon opens full screen from the home screen. iOS will not install an app file downloaded in Safari unless Apple has signed it, and that signature is a paid developer membership.
 
 ## Run it here
 
