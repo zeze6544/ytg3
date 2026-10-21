@@ -1,4 +1,4 @@
-import { colors, fonts, toneColor, type Tone } from "@/constants/theme";
+import { colors, fonts, space, toneColor, type Tone } from "@/constants/theme";
 import { forwardRef, type ReactNode } from "react";
 import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions, type ScrollViewProps, type TextInputProps, type TextStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -10,10 +10,13 @@ export const breakWord: TextStyle = Platform.OS === "web"
 export function useScreenInsets(safeTop = false) {
   const insets = useSafeAreaInsets();
   return {
-    paddingTop: (safeTop ? insets.top : 0) + 12,
-    paddingBottom: insets.bottom + (safeTop ? 92 : 28),
-    paddingHorizontal: 16,
-    gap: 12,
+    paddingTop: (safeTop ? insets.top : 0) + 28,
+    paddingBottom: insets.bottom + (safeTop ? 96 : 36),
+    paddingHorizontal: space.page,
+    gap: space.section,
+    width: "100%" as const,
+    maxWidth: 720,
+    alignSelf: "center" as const,
   };
 }
 
@@ -39,9 +42,9 @@ export const Screen = forwardRef<Scroller, ScrollViewProps & { children: ReactNo
 
 export function Wordmark() {
   const { width } = useWindowDimensions();
-  const size = width < 360 ? 44 : 52;
+  const size = width < 360 ? 40 : 46;
   return (
-    <Text style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: size, lineHeight: size }}>
+    <Text style={{ fontFamily: fonts.display, fontWeight: "700", color: colors.phosphor, fontSize: size, lineHeight: Math.round(size * 1.15), letterSpacing: 0.4 }}>
       NARC<Text style={{ color: colors.cyan }}>Ø</Text>DEX
     </Text>
   );
@@ -49,12 +52,16 @@ export function Wordmark() {
 
 export function PageTitle({ children, tone = "phosphor" }: { children: string; tone?: Tone }) {
   const { width } = useWindowDimensions();
-  const size = width < 360 ? 34 : 40;
+  const size = width < 360 ? 32 : 36;
   return (
-    <Text numberOfLines={2} style={[styles.pageTitle, breakWord, { color: toneColor[tone], fontSize: size, lineHeight: size + 4 }]}>
+    <Text numberOfLines={3} style={[styles.pageTitle, breakWord, { color: toneColor[tone], fontSize: size, lineHeight: size + 8 }]}>
       {children}
     </Text>
   );
+}
+
+export function Lead({ children }: { children: string }) {
+  return <Text style={[styles.lead, breakWord]}>{children}</Text>;
 }
 
 export function SearchField(props: TextInputProps) {
@@ -78,7 +85,7 @@ export function SearchField(props: TextInputProps) {
           onPress={() => props.onChangeText?.("")}
           style={styles.clearBtn}
         >
-          <Text style={styles.clearText}>CLEAR</Text>
+          <Text style={styles.clearText}>Clear</Text>
         </Pressable>
       ) : null}
     </View>
@@ -131,9 +138,7 @@ export function Frame({
   return (
     <View style={styles.frame}>
       <View style={styles.frameHead}>
-        <Text style={[styles.frameTitle, { color: toneColor[tone] }]} numberOfLines={1}>
-          ◈ {title}
-        </Text>
+        <Text style={[styles.frameTitle, breakWord, { color: toneColor[tone] }]}>{title}</Text>
         {code ? <Text style={styles.frameCode}>{code}</Text> : null}
       </View>
       <View style={styles.frameBody}>{children}</View>
@@ -155,7 +160,7 @@ export function Field({ label, value }: { label: string; value?: string | number
   return (
     <View style={styles.field}>
       <Text style={styles.fieldLabel}>{label}</Text>
-      <Text style={[styles.fieldValue, breakWord]}>{text ?? "· see the class record ·"}</Text>
+      <Text style={[styles.fieldValue, breakWord]}>{text ?? "Not on this file."}</Text>
     </View>
   );
 }
@@ -195,7 +200,7 @@ export function Prose({ children }: { children: string }) {
 export function FinePrint() {
   return (
     <Text style={[styles.fine, breakWord]}>
-      Not a dose. Not a source. If someone is not breathing or will not wake, contact local emergency services.
+      This is not a dose and not a source. If someone is not breathing or will not wake, contact local emergency services.
     </Text>
   );
 }
@@ -248,124 +253,127 @@ export function QueryError({ error }: { error: unknown }) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
-  pageTitle: { fontFamily: fonts.display, color: colors.phosphor },
+  pageTitle: { fontFamily: fonts.display, fontWeight: "700", color: colors.phosphor },
+  lead: { fontFamily: fonts.body, color: colors.text, fontSize: 17, lineHeight: 28 },
   searchWrap: { position: "relative", justifyContent: "center" },
   search: {
     borderWidth: 1,
-    borderColor: colors.phosphor,
-    color: colors.phosphor,
+    borderColor: colors.line,
+    backgroundColor: colors.panel,
+    color: colors.text,
     fontFamily: fonts.body,
-    fontSize: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    borderRadius: 4,
-    minHeight: 48,
+    fontSize: 17,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 12,
+    minHeight: 52,
     ...(Platform.OS === "web" ? ({ outlineStyle: "none" } as object) : null),
   },
-  searchPad: { paddingRight: 76 },
+  searchPad: { paddingRight: 84 },
   clearBtn: {
     position: "absolute",
-    right: 8,
-    minHeight: 32,
+    right: 10,
+    minHeight: 36,
     justifyContent: "center",
-    paddingHorizontal: 6,
+    paddingHorizontal: 8,
   },
-  clearText: { fontFamily: fonts.body, color: colors.cyan, fontSize: 11, letterSpacing: 1 },
-  chips: { flexDirection: "row", flexWrap: "wrap", gap: 6, width: "100%" },
-  scroller: { flexGrow: 0, marginHorizontal: -16 },
-  scrollerContent: { gap: 6, paddingHorizontal: 16 },
+  clearText: { fontFamily: fonts.body, fontWeight: "600", color: colors.cyan, fontSize: 15 },
+  chips: { flexDirection: "row", flexWrap: "wrap", gap: 8, width: "100%" },
+  scroller: { flexGrow: 0, marginHorizontal: -space.page },
+  scrollerContent: { gap: 8, paddingHorizontal: space.page, paddingVertical: 2 },
   fileCard: {
     borderWidth: 1,
     borderColor: colors.line,
-    padding: 12,
-    borderRadius: 4,
-    gap: 6,
+    padding: space.card,
+    borderRadius: 14,
+    gap: 12,
     backgroundColor: colors.panel,
-    minHeight: 44,
+    minHeight: 56,
   },
   fileCardOn: { borderColor: colors.phosphor, backgroundColor: colors.panel2 },
   pointer: { cursor: "pointer" } as object,
-  nameRow: { gap: 6, minWidth: 0 },
-  cardTitle: { fontFamily: fonts.display, color: colors.phosphor, fontSize: 26, lineHeight: 28 },
+  nameRow: { gap: 8, minWidth: 0 },
+  cardTitle: { fontFamily: fonts.display, fontWeight: "700", color: colors.phosphor, fontSize: 28, lineHeight: 34 },
   frame: {
     borderWidth: 1,
     borderColor: colors.line,
     backgroundColor: colors.panel,
-    borderRadius: 4,
+    borderRadius: 14,
   },
   frameHead: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 8,
-    alignItems: "center",
+    gap: 12,
+    alignItems: "flex-start",
     borderBottomWidth: 1,
     borderBottomColor: colors.line,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: space.card,
+    paddingTop: 16,
+    paddingBottom: 12,
   },
-  frameTitle: { fontFamily: fonts.display, fontSize: 20, flex: 1, minWidth: 0 },
+  frameTitle: { fontFamily: fonts.display, fontWeight: "700", fontSize: 24, lineHeight: 30, flex: 1, minWidth: 0 },
   frameCode: {
     fontFamily: fonts.body,
     color: colors.muted,
-    fontSize: 10,
-    letterSpacing: 1,
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 6,
   },
-  frameBody: { padding: 12, gap: 8 },
+  frameBody: { padding: space.card, gap: 16 },
   tag: {
     borderWidth: 1,
-    borderRadius: 2,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
     alignSelf: "flex-start",
     maxWidth: "100%",
     flexShrink: 1,
   },
   tagText: {
     fontFamily: fonts.body,
-    fontSize: 10,
-    letterSpacing: 0.6,
-    textTransform: "uppercase",
+    fontSize: 15,
+    lineHeight: 20,
   },
   field: {
     borderBottomWidth: 1,
-    borderBottomColor: "#1d3a24",
-    paddingVertical: 6,
-    gap: 2,
+    borderBottomColor: "#24382c",
+    paddingVertical: 12,
+    gap: 6,
   },
   fieldLabel: {
     fontFamily: fonts.body,
+    fontWeight: "600",
     color: colors.muted,
-    fontSize: 10,
-    letterSpacing: 1,
-    textTransform: "uppercase",
+    fontSize: 13,
+    lineHeight: 18,
   },
-  fieldValue: { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 21, minWidth: 0 },
-  prose: { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 22 },
-  fine: { fontFamily: fonts.body, color: colors.muted, fontSize: 11, lineHeight: 16 },
-  banner: { borderWidth: 1, borderRadius: 4, padding: 10, backgroundColor: "#1a120f" },
-  bannerText: { fontFamily: fonts.body, fontSize: 12, lineHeight: 18 },
+  fieldValue: { fontFamily: fonts.body, color: colors.text, fontSize: 17, lineHeight: 28, minWidth: 0 },
+  prose: { fontFamily: fonts.body, color: colors.text, fontSize: 17, lineHeight: 28 },
+  fine: { fontFamily: fonts.body, color: colors.muted, fontSize: 15, lineHeight: 24 },
+  banner: { borderWidth: 1, borderRadius: 14, padding: 18, backgroundColor: "#241814" },
+  bannerText: { fontFamily: fonts.body, fontSize: 16, lineHeight: 26 },
   action: {
     borderWidth: 1,
-    borderRadius: 4,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     alignItems: "center",
     alignSelf: "stretch",
-    minHeight: 44,
+    minHeight: 52,
     justifyContent: "center",
+    backgroundColor: colors.panel,
   },
   actionText: {
     fontFamily: fonts.body,
-    fontSize: 12,
-    letterSpacing: 0.8,
-    textTransform: "uppercase",
+    fontWeight: "600",
+    fontSize: 16,
+    lineHeight: 24,
     textAlign: "center",
   },
   status: {
     fontFamily: fonts.body,
     color: colors.muted,
-    fontSize: 12,
-    lineHeight: 18,
-    letterSpacing: 0.2,
+    fontSize: 16,
+    lineHeight: 26,
   },
-  });
+});

@@ -21,7 +21,7 @@ const archive = {
   refs: [...(raw as Archive).refs, ...(extra.refs ?? [])],
   strains: [...(raw as Archive).strains, ...(extra.strains ?? [])],
 };
-export const ARCHIVE_ORIGIN = "https://narcodex.surge.sh";
+export const ARCHIVE_ORIGIN = "https://narcodex-archive.web.app";
 let indexStamp = String((raw as { generated_at?: string }).generated_at ?? "");
 
 function archiveUrl(path: string) {

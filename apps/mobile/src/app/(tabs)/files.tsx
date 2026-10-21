@@ -1,5 +1,5 @@
 import { colors, fonts } from "@/constants/theme";
-import { ChipScroller, FileCard, FinePrint, LoadMore, MissingArchive, NameRow, PageTitle, QueryError, SearchField, Status, Tag, useScreenInsets } from "@/components/ui";
+import { ChipWrap, FileCard, FinePrint, Lead, LoadMore, MissingArchive, NameRow, PageTitle, QueryError, SearchField, Status, Tag, useScreenInsets } from "@/components/ui";
 import { fetchCommonDrugs, fetchDrugs } from "@/lib/api";
 import { blurb } from "@/lib/reading";
 import { archiveConfigured } from "@/lib/supabase";
@@ -59,38 +59,39 @@ export default function FilesScreen() {
   return (
     <FlatList
       style={{ flex: 1, backgroundColor: colors.bg }}
-      contentContainerStyle={{ ...insets, gap: 8 }}
+      contentContainerStyle={{ ...insets, gap: 16 }}
       data={rows}
       keyExtractor={(item) => item.id ?? item.slug ?? item.name ?? "row"}
       keyboardShouldPersistTaps="handled"
       ListHeaderComponent={
-        <View style={{ gap: 10, marginBottom: 8 }}>
-          <PageTitle>FILES</PageTitle>
+        <View style={{ gap: 16, marginBottom: 8 }}>
+          <PageTitle>Substances</PageTitle>
+          <Lead>Search a name, an alias, or a street name. Each file describes risks. None of them is a dose.</Lead>
           {archiveConfigured ? null : <MissingArchive />}
           <SearchField value={search} onChangeText={setSearch} placeholder="Name, alias, or street name" />
-          <ChipScroller>
+          <ChipWrap>
             {LETTERS.map((item) => {
               const on = shelf === item && !term;
               const label = item === "common" ? "Common" : item === "all" ? "All" : item;
               return (
-                <Pressable key={item} accessibilityRole="button" onPress={() => { setShelf(item); setSearch(""); }} style={{ minHeight: 36, justifyContent: "center" }}>
+                <Pressable key={item} accessibilityRole="button" onPress={() => { setShelf(item); setSearch(""); }} style={{ minHeight: 44, justifyContent: "center" }}>
                   <Tag filled={on} tone={on ? "amber" : "phosphor"}>{label}</Tag>
                 </Pressable>
               );
             })}
-          </ChipScroller>
-          <ChipScroller>
+          </ChipWrap>
+          <ChipWrap>
             {CATEGORIES.map((item) => {
               const on = cat === item;
               return (
-                <Pressable key={item} accessibilityRole="button" onPress={() => setCat(item)} style={{ minHeight: 36, justifyContent: "center" }}>
+                <Pressable key={item} accessibilityRole="button" onPress={() => setCat(item)} style={{ minHeight: 44, justifyContent: "center" }}>
                   <Tag filled={on} tone={on ? "phosphor" : "cyan"}>
                     {item === "all" ? "All" : CATEGORY_LABELS[item]}
                   </Tag>
                 </Pressable>
               );
             })}
-          </ChipScroller>
+          </ChipWrap>
           {query.isLoading ? (
             <Status>Loading records…</Status>
           ) : (
@@ -131,12 +132,12 @@ export default function FilesScreen() {
             tone={CATEGORY_TONE[item.category as DrugCategory] ?? "phosphor"}
           />
           {blurb(item.summary) ? (
-            <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 12, lineHeight: 18 }} numberOfLines={3}>
+            <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 15, lineHeight: 24 }} numberOfLines={3}>
               {blurb(item.summary)}
             </Text>
           ) : null}
           {blurb(item.acute_risks, 220) ? (
-            <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 12, lineHeight: 18 }} numberOfLines={3}>
+            <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 15, lineHeight: 24 }} numberOfLines={3}>
               {blurb(item.acute_risks, 220)}
             </Text>
           ) : null}

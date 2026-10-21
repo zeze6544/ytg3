@@ -42,7 +42,7 @@ export default function AuthScreen() {
 
   return (
     <Screen>
-      <Frame title="ACCESS TERMINAL" code="AUTH" tone="cyan">
+      <Frame title="Account" tone="cyan">
         {user ? (
           <>
             <Text style={{ fontFamily: fonts.body, color: colors.text }}>{user.email}</Text>
@@ -50,8 +50,8 @@ export default function AuthScreen() {
           </>
         ) : (
           <>
-            <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 12, lineHeight: 18 }}>
-              Email and passphrase only. An account stores bookmarks and a private reading history. It is optional.
+            <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 16, lineHeight: 26 }}>
+              Email and password only. An account stores bookmarks and a private reading history. It is optional.
             </Text>
             <ViewRow mode={mode} setMode={setMode} />
             <TextInput
@@ -68,7 +68,7 @@ export default function AuthScreen() {
               value={password}
               onChangeText={setPassword}
               secureTextEntry
-              placeholder="Passphrase"
+              placeholder="Password"
               placeholderTextColor={colors.muted}
               style={inputStyle}
             />
@@ -97,11 +97,12 @@ function ViewRow({ mode, setMode }: { mode: "login" | "register"; setMode: (mode
 const inputStyle = {
   borderWidth: 1,
   borderColor: colors.line,
-  color: colors.phosphor,
+  backgroundColor: colors.panel,
+  color: colors.text,
   fontFamily: fonts.body,
-  fontSize: 16,
-  paddingHorizontal: 12,
-  paddingVertical: 12,
-  minHeight: 48,
-  borderRadius: 4,
+  fontSize: 17,
+  paddingHorizontal: 16,
+  paddingVertical: 14,
+  minHeight: 52,
+  borderRadius: 12,
 };

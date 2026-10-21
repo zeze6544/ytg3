@@ -1,5 +1,5 @@
 import { colors, fonts } from "@/constants/theme";
-import { Action, FileCard, FinePrint, Frame, MissingArchive, NameRow, Prose, QueryError, Screen, Status, Wordmark } from "@/components/ui";
+import { Action, FileCard, FinePrint, Frame, Lead, MissingArchive, NameRow, Prose, QueryError, Screen, Status, Wordmark } from "@/components/ui";
 import { fetchCounts, fetchPopularDrugs, fetchRandomDrug } from "@/lib/api";
 import { localIndexStamp } from "@/lib/localArchive";
 import { blurb } from "@/lib/reading";
@@ -9,11 +9,38 @@ import { CATEGORY_LABELS, CATEGORY_TONE } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
-import { Pressable, Text, View, useWindowDimensions } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 function formatCount(value?: number) {
   if (value === undefined) return "·";
   return value.toLocaleString("en-US");
+}
+
+function Destination({
+  label,
+  count,
+  note,
+  onPress,
+}: {
+  label: string;
+  count?: number;
+  note: string;
+  onPress: () => void;
+  tone?: "red";
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={{ borderWidth: 1, borderColor: colors.line, backgroundColor: colors.panel, borderRadius: 14, padding: 18, gap: 8, minHeight: 96 }}
+    >
+      <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 13, lineHeight: 18 }}>{label}</Text>
+      {count !== undefined ? (
+        <Text style={{ fontFamily: fonts.display, fontWeight: "700", color: colors.phosphor, fontSize: 36, lineHeight: 44 }}>{formatCount(count)}</Text>
+      ) : null}
+      <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 16, lineHeight: 24 }}>{note}</Text>
+    </Pressable>
+  );
 }
 
 const LINES = [
@@ -25,13 +52,9 @@ const LINES = [
 ];
 
 export default function HomeScreen() {
-  const { width } = useWindowDimensions();
   const counts = useQuery({ queryKey: ["counts"], queryFn: fetchCounts, enabled: archiveConfigured });
   const featured = useQuery({ queryKey: ["featured"], queryFn: fetchPopularDrugs, enabled: archiveConfigured });
   const [recent, setRecent] = useState<RecentFile[]>([]);
-  const statSize = width < 360 ? 64 : 76;
-  const subSize = width < 380 ? 10 : 11;
-  const files = counts.data ? counts.data.drugs + counts.data.strains : undefined;
   const stamp = localIndexStamp();
 
   useFocusEffect(useCallback(() => { setRecent(readRecent()); }, []));
@@ -44,70 +67,65 @@ export default function HomeScreen() {
   return (
     <Screen safeTop>
       <Wordmark />
-      <View style={{ height: 1, width: 72, backgroundColor: colors.line }} />
-      <Text style={{ fontFamily: fonts.body, color: colors.cyan, fontSize: subSize, letterSpacing: 1.4 }}>
-        PUBLIC SUBSTANCE ARCHIVE
-      </Text>
+      <Lead>
+        A harm-reduction reference for adults. It describes substances, risks, and interactions. It is not medical advice, and it does not tell anyone to use drugs.
+      </Lead>
       {archiveConfigured ? null : <MissingArchive />}
-      <Frame title="ARCHIVE" code="STAT" tone="cyan">
-        {(
-          [
-            ["DRUGS", counts.data?.drugs, "/files"],
-            ["CANNABIS STRAINS", counts.data?.strains, "/strains"],
-            ["CLASSES", counts.data?.classes, "/classes"],
-          ] as const
-        ).map(([label, value, href]) => (
-          <Pressable key={label} accessibilityRole="button" onPress={() => router.push(href)} style={{ minHeight: 72, justifyContent: "center" }}>
-            <Text numberOfLines={1} style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: statSize, lineHeight: statSize }}>
-              {formatCount(value)}
-            </Text>
-            <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 11, letterSpacing: 1 }}>{label}</Text>
-          </Pressable>
-        ))}
-        <Text style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: width < 360 ? 14 : 16, letterSpacing: 0.5 }}>
-          {"█".repeat(counts.data ? (width < 360 ? 16 : 20) : 4)}
-          <Text style={{ color: colors.line }}>{counts.data ? "" : "█".repeat(width < 360 ? 12 : 16)}</Text>
+
+      <Destination
+        label="Substances"
+        count={counts.data?.drugs}
+        note="Search a name, an alias, or a street name."
+        onPress={() => router.push("/files")}
+      />
+      <Destination
+        label="Cannabis strains"
+        count={counts.data?.strains}
+        note="Cultivars and registry products. A missing figure stays blank."
+        onPress={() => router.push("/strains")}
+      />
+      <Destination
+        label="Mix check"
+        note="See what two substances do together. No result is not a green light."
+        onPress={() => router.push("/mix")}
+        tone="red"
+      />
+
+      <View style={{ gap: 12 }}>
+        <Action label="Open a random substance" tone="purple" disabled={!archiveConfigured} onPress={() => void surprise()} />
+        <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 14, lineHeight: 22 }}>
+          {counts.data ? "Index ready." : "Index still loading."}
+          {stamp ? ` Last update ${stamp}.` : ""}
+          {counts.data ? ` ${formatCount(counts.data.classes)} classes.` : ""}
         </Text>
-        <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 12, lineHeight: 18 }}>DATABASE STATUS: {counts.data ? "ONLINE" : "INDEXING"}</Text>
-        <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 12, lineHeight: 18 }}>LAST INDEX UPDATE: {stamp || "·"}</Text>
-        <Text style={{ fontFamily: fonts.body, color: colors.phosphor, fontSize: 12, lineHeight: 18 }}>FILES AVAILABLE: {formatCount(files)}</Text>
-        <View style={{ gap: 8 }}>
-          <Action label="Browse files" onPress={() => router.push("/files")} />
-          <Action label="Check a mix" tone="red" onPress={() => router.push("/mix")} />
-          <Action label="Surprise file" tone="purple" disabled={!archiveConfigured} onPress={() => void surprise()} />
-        </View>
-        <Prose>Nothing here is dosing advice, a sale, or a green light.</Prose>
-        <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 12, lineHeight: 18 }}>
-          This browser is the public archive. There is no signed iPhone install on this site.
-        </Text>
-      </Frame>
+      </View>
 
       {recent.length ? (
-        <Frame title="ON THIS DEVICE" code="LAST" tone="purple">
+        <Frame title="Opened on this device" tone="purple">
           {recent.map((file) => (
-            <Pressable key={file.slug} accessibilityRole="button" onPress={() => router.push(`/drug/${file.slug}`)} style={{ minHeight: 36, justifyContent: "center" }}>
-              <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 14 }}>{file.name}</Text>
+            <Pressable key={file.slug} accessibilityRole="button" onPress={() => router.push(`/drug/${file.slug}`)} style={{ minHeight: 48, justifyContent: "center" }}>
+              <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 16, lineHeight: 24 }}>{file.name}</Text>
             </Pressable>
           ))}
         </Frame>
       ) : null}
 
-      <Frame title="OPEN THESE" code="GO" tone="cyan">
+      <Frame title="Also in the archive" tone="cyan">
         {[
-          ["/classes", "Classes", "What each pharmacological group does"],
-          ["/timeline", "Timeline", "Years, not a lecture"],
-          ["/reagents", "Reagents", "Colour checks and what they miss"],
-          ["/saved", "Saved", "Bookmarks, plus files opened on this device"],
+          ["/classes", "Classes", "What each pharmacological group does in the body."],
+          ["/timeline", "Timeline", "A short history of the archive."],
+          ["/reagents", "Reagents", "Colour checks, and what a colour cannot prove."],
+          ["/saved", "Saved", "Bookmarks, and files opened on this device."],
         ].map(([href, label, note]) => (
-          <Pressable key={href} accessibilityRole="button" onPress={() => router.push(href as "/classes")} style={{ minHeight: 44, justifyContent: "center" }}>
-            <Text style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: 24, lineHeight: 26 }}>{label}</Text>
-            <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 12 }}>{note}</Text>
+          <Pressable key={href} accessibilityRole="button" onPress={() => router.push(href as "/classes")} style={{ minHeight: 64, justifyContent: "center", gap: 4 }}>
+            <Text style={{ fontFamily: fonts.display, fontWeight: "700", color: colors.phosphor, fontSize: 26, lineHeight: 32 }}>{label}</Text>
+            <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 15, lineHeight: 24 }}>{note}</Text>
           </Pressable>
         ))}
       </Frame>
 
-      <Frame title="FEATURED FILES" code="F-01" tone="amber">
-        {featured.isLoading ? <Status>Loading files…</Status> : null}
+      <Frame title="Start here" tone="amber">
+        {featured.isLoading ? <Status>Loading a few common files…</Status> : null}
         {featured.error ? <QueryError error={featured.error} /> : null}
         {(featured.data ?? []).map((drug) => (
           <FileCard key={drug.slug} onPress={() => router.push(`/drug/${drug.slug}`)}>
@@ -117,7 +135,7 @@ export default function HomeScreen() {
               tone={CATEGORY_TONE[drug.category ?? "other"] ?? "phosphor"}
             />
             {blurb(drug.summary, 180) ? (
-              <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 12, lineHeight: 18 }} numberOfLines={3}>
+              <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 15, lineHeight: 24 }} numberOfLines={3}>
                 {blurb(drug.summary, 180)}
               </Text>
             ) : null}
@@ -125,12 +143,13 @@ export default function HomeScreen() {
         ))}
       </Frame>
 
-      <Frame title="TRANSMISSION" code="MOTD" tone="red">
+      <Frame title="Read this first" tone="red">
         {LINES.map((line) => (
-          <Text key={line} style={{ fontFamily: fonts.body, color: colors.red, fontSize: 13, lineHeight: 19 }}>
+          <Text key={line} style={{ fontFamily: fonts.body, color: colors.text, fontSize: 16, lineHeight: 26 }}>
             {line}
           </Text>
         ))}
+        <Prose>Nothing here is dosing advice, a sale, or permission.</Prose>
       </Frame>
       <FinePrint />
     </Screen>

@@ -9,6 +9,7 @@ import { FOLD_ROWS, FOLD_STRAINS, FOLD_TIMELINE, FOLD_RULES, FOLD_GROUPS } from 
 import { TRIPLE_ROWS, TRIPLE_STRAINS, TRIPLE_TIMELINE, TRIPLE_RULES, TRIPLE_GROUPS } from "./substances-triple.mjs";
 import { QUAD_ROWS, QUAD_STRAINS } from "./substances-quad.mjs";
 import { MAX_ROWS, MAX_STRAINS } from "./substances-max.mjs";
+import { prunePublishedFiles } from "./prune-files.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -1418,3 +1419,4 @@ for (const rel of catalogueDirs) {
 }
 console.log(`drugs ${drugs.length} strains ${strains.length} classes ${classes.length} rules ${rules.length}`);
 console.log(`archive ${Buffer.byteLength(json)} extra ${Buffer.byteLength(extraJson)} maxDrugs ${maxDrugs.length} maxStrains ${maxStrains.length} shards ${manifest.drugs.length}`);
+prunePublishedFiles();

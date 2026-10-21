@@ -70,8 +70,8 @@ function Chip({ on, tone = "cyan", onPress, children }: { on: boolean; tone?: To
 
 function Group({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <View style={{ gap: 6 }}>
-      <Text style={{ fontFamily: fonts.body, color: colors.cyan, fontSize: 11, letterSpacing: 1 }}>{label}</Text>
+    <View style={{ gap: 10 }}>
+      <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 13, lineHeight: 18 }}>{label}</Text>
       <ChipWrap>{children}</ChipWrap>
     </View>
   );
@@ -83,7 +83,8 @@ const statusOf = (complete: number) => (complete >= 60 ? "documented" : complete
 export default function StrainsScreen() {
   const insets = useScreenInsets(true);
   const { width } = useWindowDimensions();
-  const columns = width >= 980 ? 5 : width >= 720 ? 4 : width >= 480 ? 3 : 2;
+  const content = Math.min(width - 40, 720);
+  const columns = content >= 640 ? 2 : 1;
   const [q, setQ] = useState<StrainQuery>(DEFAULT_QUERY);
   const [searchText, setSearchText] = useState("");
   const [breederText, setBreederText] = useState("");
@@ -113,23 +114,23 @@ export default function StrainsScreen() {
   return (
     <FlatList
       style={{ flex: 1, backgroundColor: colors.bg }}
-      contentContainerStyle={{ ...insets, gap: 10 }}
+      contentContainerStyle={{ ...insets, gap: 16 }}
       data={data?.rows ?? []}
       key={columns}
       numColumns={columns}
-      columnWrapperStyle={{ gap: 8 }}
+      columnWrapperStyle={columns > 1 ? { gap: 14 } : undefined}
       keyExtractor={(item) => item.slug}
       keyboardShouldPersistTaps="handled"
       initialNumToRender={12}
       windowSize={7}
       ListHeaderComponent={
-        <View style={{ gap: 10 }}>
-          <PageTitle>STRAINS</PageTitle>
-          <Text style={[breakWord, { fontFamily: fonts.body, color: colors.muted, fontSize: 12, lineHeight: 18 }]}>
-            Cultivar files and registry product files. Every figure names its source; a missing figure says so. Specimen images are illustrative renders, unique per file, not photographs.
+        <View style={{ gap: 16 }}>
+          <PageTitle>Strains</PageTitle>
+          <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 17, lineHeight: 28 }]}>
+            Cultivar files and registry product files. Every figure names its source. A missing figure says so. The pictures are illustrative renders, one per file, not photographs.
           </Text>
           <SearchField value={searchText} onChangeText={setSearchText} placeholder="Name, alias, parent, or breeder" />
-          <Group label="TYPE">
+          <Group label="Type">
             {TYPES.map((item) => (
               <Chip key={item} on={q.type === item} onPress={() => set("type", item)}>
                 {item}
@@ -137,21 +138,22 @@ export default function StrainsScreen() {
               </Chip>
             ))}
           </Group>
-          <Group label="SORT">
+          <Group label="Sort">
             {SORTS.map(([value, label]) => (
               <Chip key={value} on={q.sort === value} tone="purple" onPress={() => set("sort", value)}>
                 {label}
               </Chip>
             ))}
           </Group>
-          <Pressable accessibilityRole="button" onPress={() => setOpen((v) => !v)} style={{ paddingVertical: 6 }}>
-            <Text style={{ fontFamily: fonts.bodyMedium, color: colors.cyan, fontSize: 13 }}>
-              {open ? "▾" : "▸"} MORE FILTERS{activeFilters ? ` · ${activeFilters} active` : ""}
+          <Pressable accessibilityRole="button" onPress={() => setOpen((v) => !v)} style={{ minHeight: 48, justifyContent: "center" }}>
+            <Text style={{ fontFamily: fonts.body, fontWeight: "600", color: colors.cyan, fontSize: 16, lineHeight: 24 }}>
+              {open ? "Hide filters" : "More filters"}
+              {activeFilters ? ` · ${activeFilters} on` : ""}
             </Text>
           </Pressable>
           {open ? (
-            <View style={{ gap: 10, borderWidth: 1, borderColor: colors.line, padding: 10 }}>
-              <Group label="FILE KIND">
+            <View style={{ gap: 18, borderWidth: 1, borderColor: colors.line, borderRadius: 14, padding: 16, backgroundColor: colors.panel }}>
+              <Group label="Kind of file">
                 {(["all", "cultivar", "product"] as const).map((item) => (
                   <Chip key={item} on={q.kind === item} onPress={() => set("kind", item)}>
                     {item === "product" ? "registry product" : item}
@@ -159,7 +161,7 @@ export default function StrainsScreen() {
                   </Chip>
                 ))}
               </Group>
-              <Group label="COMPLETENESS">
+              <Group label="How complete the file is">
                 {STATUS.map(([value, label]) => (
                   <Chip key={value} on={q.status === value} tone={value === "any" ? "cyan" : STATUS_TONE[value]} onPress={() => set("status", value)}>
                     {label}
@@ -167,14 +169,14 @@ export default function StrainsScreen() {
                   </Chip>
                 ))}
               </Group>
-              <Group label="CANNABINOID DATA">
+              <Group label="Cannabinoid figures">
                 {CHEM.map(([value, label]) => (
                   <Chip key={value} on={q.chem === value} onPress={() => set("chem", value)}>
                     {label}
                   </Chip>
                 ))}
               </Group>
-              <Group label="TERPENE (MEASURED OR MENTIONED)">
+              <Group label="Terpenes, measured or only mentioned">
                 {TERPS.map((terp) => (
                   <Chip
                     key={terp}
@@ -189,21 +191,21 @@ export default function StrainsScreen() {
                   {q.terpMode === "all" ? "match all" : "match any"}
                 </Chip>
               </Group>
-              <Group label="BEST EVIDENCE">
+              <Group label="Best evidence on the file">
                 {EVIDENCE.map(([value, label]) => (
                   <Chip key={value} on={q.evidence === value} tone="amber" onPress={() => set("evidence", value)}>
                     {label}
                   </Chip>
                 ))}
               </Group>
-              <Group label="LINEAGE">
+              <Group label="Lineage">
                 {LINEAGE.map(([value, label]) => (
                   <Chip key={value} on={q.lineage === value} onPress={() => set("lineage", value)}>
                     {label}
                   </Chip>
                 ))}
               </Group>
-              <Group label="MEDICAL / REGISTRY">
+              <Group label="Registry and duplicates">
                 <Chip on={q.medical} tone="amber" onPress={() => set("medical", !q.medical)}>
                   registry or TGA association
                 </Chip>
@@ -211,23 +213,23 @@ export default function StrainsScreen() {
                   suspected duplicates
                 </Chip>
               </Group>
-              <Group label="IMAGE STATUS">
+              <Group label="Specimen image">
                 {IMAGE.map(([value, label]) => (
                   <Chip key={value} on={q.image === value} onPress={() => set("image", value)}>
                     {label}
                   </Chip>
                 ))}
               </Group>
-              <View style={{ gap: 6 }}>
-                <Text style={{ fontFamily: fonts.body, color: colors.cyan, fontSize: 11, letterSpacing: 1 }}>BREEDER OR PRODUCER</Text>
+              <View style={{ gap: 10 }}>
+                <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 13, lineHeight: 18 }}>Breeder or producer</Text>
                 <TextInput
                   value={breederText}
                   onChangeText={setBreederText}
-                  placeholder="e.g. Sensi Seeds"
+                  placeholder="For example, Sensi Seeds"
                   placeholderTextColor={colors.muted}
                   autoCapitalize="none"
                   autoCorrect={false}
-                  style={{ borderWidth: 1, borderColor: colors.line, color: colors.phosphor, fontFamily: fonts.body, fontSize: 14, padding: 10 }}
+                  style={{ borderWidth: 1, borderColor: colors.line, backgroundColor: colors.bg, color: colors.text, fontFamily: fonts.body, fontSize: 17, lineHeight: 24, paddingHorizontal: 14, paddingVertical: 12, borderRadius: 12, minHeight: 52 }}
                 />
               </View>
             </View>
@@ -277,27 +279,25 @@ function StrainCard({ item }: { item: StrainRow }) {
       accessibilityRole="button"
       accessibilityLabel={`${item.name}, ${item.type}, ${kind}`}
       onPress={() => router.push(`/strain/${item.slug}`)}
-      style={{ flex: 1, minWidth: 0, borderWidth: 1, borderColor: colors.phosphor, backgroundColor: "#000", padding: 4, gap: 4 }}
+      style={{ flex: 1, minWidth: 0, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.panel, borderRadius: 14, padding: 16, gap: 10 }}
     >
       <NugMark slug={item.slug} id={item.id} name={item.name} type={item.type} stored={item.image === 1} compact />
-      <Text numberOfLines={3} style={[breakWord, { fontFamily: fonts.display, color: colors.phosphor, fontSize: 16, lineHeight: 18 }]}>
+      <Text numberOfLines={3} style={[breakWord, { fontFamily: fonts.display, fontWeight: "700", color: colors.phosphor, fontSize: 22, lineHeight: 28 }]}>
         {item.name}
       </Text>
       {item.aliases.length ? (
-        <Text numberOfLines={1} style={[breakWord, { fontFamily: fonts.body, color: colors.muted, fontSize: 9 }]}>
-          aka {item.aliases.join(", ")}
+        <Text numberOfLines={2} style={[breakWord, { fontFamily: fonts.body, color: colors.muted, fontSize: 13, lineHeight: 18 }]}>
+          Also called {item.aliases.join(", ")}
         </Text>
       ) : null}
-      <Text numberOfLines={2} style={[breakWord, { fontFamily: fonts.body, color: colors.cyan, fontSize: 9 }]}>
+      <Text numberOfLines={3} style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 15, lineHeight: 22 }]}>
         {item.type} · {kind}
         {item.breeder ? ` · ${item.breeder}` : ""}
       </Text>
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 4 }}>
-        <Text style={{ fontFamily: fonts.body, color: toneColor[STATUS_TONE[status]], fontSize: 9 }}>
-          {item.complete}% {status.replace("_", " ")}
-        </Text>
-        {item.rank <= 3 ? <Text style={{ fontFamily: fonts.body, color: colors.amber, fontSize: 9 }}>◆ R{item.rank}</Text> : null}
-      </View>
+      <Text style={{ fontFamily: fonts.body, color: toneColor[STATUS_TONE[status]], fontSize: 13, lineHeight: 18 }}>
+        {item.complete}% complete · {status.replaceAll("_", " ")}
+        {item.rank <= 3 ? " · stronger evidence" : ""}
+      </Text>
     </Pressable>
   );
 }

@@ -49,7 +49,6 @@ if (!html.includes("apple-mobile-web-app-capable")) {
   html = html.replace("</head>", `${tags}</head>`);
 }
 writeFileSync(indexPath, html);
-copyFileSync(indexPath, join(dist, "200.html"));
 const dataDir = join(dist, "data");
 mkdirSync(dataDir, { recursive: true });
 const mobileRoot = join(dist, "..");

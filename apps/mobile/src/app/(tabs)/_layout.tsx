@@ -16,14 +16,14 @@ export default function TabLayout() {
       backgroundColor={colors.panel}
       indicatorColor={colors.panel2}
       disableTransparentOnScrollEdge
-      labelStyle={{ color: colors.muted, fontSize: 11 }}
+      labelStyle={{ color: colors.muted, fontSize: 14 }}
     >
       <NativeTabs.Trigger name="index" contentStyle={tabStyle} disableTransparentOnScrollEdge>
         <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf={{ default: "terminal", selected: "terminal.fill" }} md="home" />
+        <NativeTabs.Trigger.Icon sf={{ default: "house", selected: "house.fill" }} md="home" />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="files" contentStyle={tabStyle} disableTransparentOnScrollEdge>
-        <NativeTabs.Trigger.Label>Files</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>Substances</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf={{ default: "doc.text", selected: "doc.text.fill" }} md="folder" />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="mix" contentStyle={tabStyle} disableTransparentOnScrollEdge>

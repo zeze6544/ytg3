@@ -46,7 +46,7 @@ export default function SavedScreen() {
   if (loading) {
     return (
       <Screen>
-        <Status>Booting…</Status>
+        <Status>Opening your account…</Status>
       </Screen>
     );
   }
@@ -54,17 +54,17 @@ export default function SavedScreen() {
     const recent = readRecent();
     return (
       <Screen>
-        <Frame title="ACCESS" tone="red">
-          <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 22 }}>
+        <Frame title="Sign in to save" tone="red">
+          <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 17, lineHeight: 28 }}>
             Sign in to keep saved files and a private reading history. The public archive stays open without an account.
           </Text>
           <Action label="Sign in" tone="cyan" onPress={() => router.push("/auth")} />
         </Frame>
-        <Frame title="ON THIS DEVICE" code="LAST" tone="purple">
+        <Frame title="On this device" tone="purple">
           {recent.length === 0 ? <Status>Open a file and it will be listed here.</Status> : null}
           {recent.map((file) => (
-            <Pressable key={file.slug} accessibilityRole="button" onPress={() => router.push(`/drug/${file.slug}`)} style={{ minHeight: 40, justifyContent: "center" }}>
-              <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 14 }]}>{file.name}</Text>
+            <Pressable key={file.slug} accessibilityRole="button" onPress={() => router.push(`/drug/${file.slug}`)} style={{ minHeight: 48, justifyContent: "center" }}>
+              <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 17, lineHeight: 26 }]}>{file.name}</Text>
             </Pressable>
           ))}
         </Frame>
@@ -75,18 +75,18 @@ export default function SavedScreen() {
   const savedCount = query.data?.saved.length ?? 0;
   const historyCount = query.data?.history.length ?? 0;
   const badges = [
-    { label: "ARCHIVIST", earned: savedCount >= 1, desc: "Save 1 file" },
-    { label: "COLLECTOR", earned: savedCount >= 10, desc: "Save 10 files" },
-    { label: "CARTOGRAPHER", earned: savedCount >= 25, desc: "Save 25 files" },
-    { label: "SAFETY READER", earned: historyCount >= 5, desc: "Open 5 records" },
-    { label: "DEEP RESEARCHER", earned: historyCount >= 25, desc: "Open 25 records" },
+    { label: "Archivist", earned: savedCount >= 1, desc: "Save 1 file" },
+    { label: "Collector", earned: savedCount >= 10, desc: "Save 10 files" },
+    { label: "Cartographer", earned: savedCount >= 25, desc: "Save 25 files" },
+    { label: "Safety reader", earned: historyCount >= 5, desc: "Open 5 records" },
+    { label: "Deep researcher", earned: historyCount >= 25, desc: "Open 25 records" },
   ];
 
   return (
     <Screen>
-      <Frame title="BADGES" code="ACHV" tone="amber">
-        <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 11 }}>
-          Badges mark reading. They do not mark use.
+      <Frame title="Reading marks" tone="amber">
+        <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 15, lineHeight: 24 }}>
+          These marks count files you save and open. They do not mark use.
         </Text>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
           {badges.map((badge) => (
@@ -101,17 +101,17 @@ export default function SavedScreen() {
         const file = item.drug ?? item.strain;
         if (!file) return null;
         return (
-          <Pressable key={item.id} onPress={() => item.drug && router.push(`/drug/${item.drug.slug}`)}>
-            <Text style={[breakWord, { fontFamily: fonts.display, color: colors.phosphor, fontSize: 26, lineHeight: 30 }]}>{file.name}</Text>
+          <Pressable key={item.id} accessibilityRole="button" onPress={() => item.drug && router.push(`/drug/${item.drug.slug}`)} style={{ minHeight: 48, justifyContent: "center" }}>
+            <Text style={[breakWord, { fontFamily: fonts.display, fontWeight: "700", color: colors.phosphor, fontSize: 26, lineHeight: 32 }]}>{file.name}</Text>
           </Pressable>
         );
       })}
       {(query.data?.saved.length ?? 0) === 0 && !query.isLoading ? <Status>No saved entries.</Status> : null}
-      <Frame title="RECENT" code="HIS">
+      <Frame title="Recent">
         {(query.data?.history ?? []).map((item) =>
           item.drug ? (
-            <Pressable key={item.id} onPress={() => router.push(`/drug/${item.drug!.slug}`)}>
-              <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 13, lineHeight: 18 }]}>{item.drug.name}</Text>
+            <Pressable key={item.id} accessibilityRole="button" onPress={() => router.push(`/drug/${item.drug!.slug}`)} style={{ minHeight: 48, justifyContent: "center" }}>
+              <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 17, lineHeight: 28 }]}>{item.drug.name}</Text>
             </Pressable>
           ) : null,
         )}
