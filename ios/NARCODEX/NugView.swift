@@ -6,7 +6,7 @@ struct NugMark: View {
 
     var body: some View {
         Canvas { context, size in
-            var random = Seed(seed(from: slug))
+            var random = Seed(state: seed(from: slug))
             let base = Theme.strainTone(type)
             context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Theme.panel))
             for index in 0..<7 {
