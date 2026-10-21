@@ -25,6 +25,7 @@ const config: ExpoConfig = {
   },
   android: {
     package: "com.narcodex.archive",
+    versionCode: 1,
     predictiveBackGestureEnabled: false,
     adaptiveIcon: {
       backgroundColor: "#07140c",

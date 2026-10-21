@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 
 const config = getDefaultConfig(__dirname);
+config.resolver.assetExts.push("catalogue");
 const thin = fs.existsSync(path.join(__dirname, ".thin-bundle"));
 
 if (thin) {

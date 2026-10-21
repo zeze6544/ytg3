@@ -30,6 +30,14 @@ export default function MoreScreen() {
           <Text style={{ fontFamily: fonts.body, color: colors.cyan, fontSize: 13 }}>Install steps</Text>
         </Pressable>
       </Frame>
+      <Frame title="ANDROID APP" code="APK" tone="phosphor">
+        <Prose>
+          Samsung and other Android phones can install the APK from Chrome. Allow Chrome to install unknown apps when the phone asks. The file is a signed app, not the website.
+        </Prose>
+        <Pressable accessibilityRole="link" onPress={() => Linking.openURL("https://raw.githubusercontent.com/zeze6544/ytg3/cursor/android-apk-a3e1/apps/mobile/public/narcodex.apk")} style={{ minHeight: 44, justifyContent: "center" }}>
+          <Text style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: 28, lineHeight: 30 }}>DOWNLOAD APK</Text>
+        </Pressable>
+      </Frame>
       <Frame title="ACCOUNT" code="AUTH" tone="cyan">
         <Prose>
           {user?.email ?? "Browsing without an account. The public archive does not require one. Files you open are remembered on this device until you clear the browser."}
