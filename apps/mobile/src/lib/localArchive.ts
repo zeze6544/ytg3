@@ -1,5 +1,6 @@
 import raw from "@/data/archive.json";
 import extraRaw from "@/data/drugs-extra.json";
+import { loadBundledCatalogue } from "@/lib/bundledCatalogue";
 import { CATEGORY_LABELS, type Drug, type DrugClass, type Strain } from "@/lib/types";
 
 export type ArchiveDrug = Drug & { risk_classes?: string[] };
@@ -411,12 +412,17 @@ function adoptBase(main: Archive & { generated_at?: string }, extraPart: { drugs
 async function loadMax() {
   if (typeof fetch !== "function") return;
   if (archive.drugs.length < 1000) {
-    const [mainResponse, extraResponse] = await Promise.all([
-      fetch(archiveUrl("/data/archive.json")),
-      fetch(archiveUrl("/data/drugs-extra.json")),
-    ]);
-    if (!mainResponse.ok || !extraResponse.ok) throw new Error("archive files missing");
-    adoptBase(await mainResponse.json(), await extraResponse.json());
+    const bundled = await loadBundledCatalogue();
+    if (bundled) {
+      adoptBase(bundled.main, bundled.extra);
+    } else {
+      const [mainResponse, extraResponse] = await Promise.all([
+        fetch(archiveUrl("/data/archive.json")),
+        fetch(archiveUrl("/data/drugs-extra.json")),
+      ]);
+      if (!mainResponse.ok || !extraResponse.ok) throw new Error("archive files missing");
+      adoptBase(await mainResponse.json(), await extraResponse.json());
+    }
   }
   const response = await fetch(archiveUrl("/catalogue/manifest.json"));
   if (!response.ok) throw new Error("catalogue manifest " + response.status);
