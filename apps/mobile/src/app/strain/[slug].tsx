@@ -31,40 +31,43 @@ const CLASS_ADVERSE = [
   "Cannabis use disorder with regular use",
 ];
 
-const body = { fontFamily: fonts.body, color: colors.text, fontSize: 13, lineHeight: 20 } as const;
-const muted = { fontFamily: fonts.body, color: colors.muted, fontSize: 12, lineHeight: 18 } as const;
-const label = { fontFamily: fonts.body, color: colors.cyan, fontSize: 11, letterSpacing: 1 } as const;
+const body = { fontFamily: fonts.body, color: colors.text, fontSize: 17, lineHeight: 28 } as const;
+const muted = { fontFamily: fonts.body, color: colors.muted, fontSize: 15, lineHeight: 24 } as const;
+const label = { fontFamily: fonts.body, fontWeight: "600" as const, color: colors.muted, fontSize: 13, lineHeight: 18 } as const;
 
-function Section({ n, title, code, tone = "phosphor", children, startOpen = true }: { n: number; title: string; code: string; tone?: Tone; children: ReactNode; startOpen?: boolean }) {
+function Section({ title, tone = "phosphor", children, startOpen = true }: { title: string; tone?: Tone; children: ReactNode; startOpen?: boolean }) {
   const [open, setOpen] = useState(startOpen);
   return (
-    <View style={{ borderWidth: 1, borderColor: colors.line, backgroundColor: colors.panel }}>
+    <View style={{ borderWidth: 1, borderColor: colors.line, backgroundColor: colors.panel, borderRadius: 14, overflow: "hidden" }}>
       <Pressable
         accessibilityRole="button"
         accessibilityState={{ expanded: open }}
+        accessibilityLabel={`${open ? "Hide" : "Show"} ${title}`}
         onPress={() => setOpen((v) => !v)}
-        style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 12, paddingVertical: 10, borderBottomWidth: open ? 1 : 0, borderBottomColor: colors.line }}
+        style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 12, paddingHorizontal: 18, paddingVertical: 16, minHeight: 56, borderBottomWidth: open ? 1 : 0, borderBottomColor: colors.line }}
       >
-        <Text numberOfLines={1} style={{ flex: 1, fontFamily: fonts.display, color: toneColor[tone], fontSize: 22 }}>
-          {open ? "▾" : "▸"} {String(n).padStart(2, "0")} {title}
+        <Text style={[breakWord, { flex: 1, fontFamily: fonts.display, fontWeight: "700", color: toneColor[tone], fontSize: 22, lineHeight: 28 }]}>
+          {title}
         </Text>
-        <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 10 }}>{code}</Text>
+        <Text style={{ fontFamily: fonts.body, fontWeight: "600", color: colors.muted, fontSize: 15, lineHeight: 28 }}>
+          {open ? "Hide" : "Show"}
+        </Text>
       </Pressable>
-      {open ? <View style={{ padding: 12, gap: 10 }}>{children}</View> : null}
+      {open ? <View style={{ padding: 18, gap: 16 }}>{children}</View> : null}
     </View>
   );
 }
 
 function Row({ k, children }: { k: string; children: ReactNode }) {
   return (
-    <View style={{ gap: 2, paddingVertical: 4, borderTopWidth: 1, borderTopColor: colors.line }}>
+    <View style={{ gap: 6, paddingVertical: 12, borderTopWidth: 1, borderTopColor: colors.line }}>
       <Text style={label}>{k}</Text>
       {typeof children === "string" ? <Text style={[body, breakWord]}>{children}</Text> : children}
     </View>
   );
 }
 
-function Missing({ children = "not on file" }: { children?: string }) {
+function Missing({ children = "Not on this file." }: { children?: string }) {
   return <Text style={[muted, breakWord, { fontStyle: "italic" }]}>{children}</Text>;
 }
 
@@ -87,7 +90,7 @@ function resolveSource(file: StrainFile, meta: StrainMeta | undefined, key: stri
 
 function Cite({ file, meta, k }: { file: StrainFile; meta?: StrainMeta; k: string }) {
   const s = resolveSource(file, meta, k);
-  const text = `[R${s.rank}] ${s.label}${s.date ? ` · ${s.date}` : ""}${s.link && s.link !== "ok" && s.link !== "unchecked" ? ` · ${s.link}` : ""}`;
+  const text = `Rank ${s.rank} · ${s.label}${s.date ? ` · ${s.date}` : ""}${s.link && s.link !== "ok" && s.link !== "unchecked" ? ` · ${s.link}` : ""}`;
   if (!s.url) return <Text style={[muted, breakWord, { color: s.rank >= 8 ? colors.red : colors.amber }]}>{text}</Text>;
   return (
     <Text accessibilityRole="link" onPress={() => Linking.openURL(s.url!)} style={[muted, breakWord, { color: colors.amber, textDecorationLine: "underline" }]}>
@@ -104,7 +107,7 @@ function pct(v: number | undefined | null) {
 function RangeBar({ low, high, p25, median, p75, scale }: { low: number; high: number; p25?: number; median?: number; p75?: number; scale: number }) {
   const x = (v: number) => `${Math.max(0, Math.min(100, (v / scale) * 100))}%` as const;
   return (
-    <View style={{ height: 14, backgroundColor: "#000", borderWidth: 1, borderColor: colors.line, position: "relative", overflow: "hidden" }}>
+    <View style={{ height: 18, backgroundColor: colors.panel2, borderWidth: 1, borderColor: colors.line, borderRadius: 6, position: "relative", overflow: "hidden" }}>
       <View style={{ position: "absolute", top: 6, height: 1, left: x(low), width: `${Math.max(0.5, ((high - low) / scale) * 100)}%`, backgroundColor: colors.muted }} />
       {p25 !== undefined && p75 !== undefined ? (
         <View style={{ position: "absolute", top: 2, height: 9, left: x(p25), width: `${Math.max(0.8, ((p75 - p25) / scale) * 100)}%`, backgroundColor: colors.phosphor, opacity: 0.45 }} />
@@ -153,8 +156,8 @@ function Range({ file, meta, field, unit }: { file: StrainFile; meta?: StrainMet
 
 function LineageNode({ item, tone = "cyan", self = false }: { item: Named; tone?: Tone; self?: boolean }) {
   const content = (
-    <View style={{ borderWidth: 1, borderColor: self ? colors.phosphor : toneColor[tone], paddingHorizontal: 8, paddingVertical: 6, backgroundColor: self ? "#0b2412" : "#000", maxWidth: 220 }}>
-      <Text numberOfLines={3} style={[breakWord, { fontFamily: fonts.body, fontSize: 12, color: self ? colors.phosphor : item.slug ? toneColor[tone] : colors.muted }]}>
+    <View style={{ borderWidth: 1, borderColor: self ? colors.phosphor : toneColor[tone], borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, backgroundColor: self ? colors.panel2 : colors.bg, maxWidth: 280 }}>
+      <Text numberOfLines={3} style={[breakWord, { fontFamily: fonts.body, fontSize: 15, lineHeight: 22, color: self ? colors.phosphor : item.slug ? toneColor[tone] : colors.muted }]}>
         {item.name}
         {!self && !item.slug ? " ·" : ""}
       </Text>
@@ -181,10 +184,10 @@ function LineageTree({ file }: { file: StrainFile }) {
       {lin && lin.grandparents.length
         ? tier(
             lin.grandparents.flatMap((g) => g.parents.map((p) => <LineageNode key={`${g.of}-${p.name}`} item={p} tone="purple" />)),
-            "GRANDPARENTS (AS LISTED FOR EACH PARENT)",
+            "Grandparents, as listed for each parent",
           )
         : null}
-      {lin ? tier(lin.parents.map((p) => <LineageNode key={p.name} item={p} />), "PARENTS") : null}
+      {lin ? tier(lin.parents.map((p) => <LineageNode key={p.name} item={p} />), "Parents") : null}
       {lin ? <Text style={[muted, { textAlign: "center" }]}>│ ×</Text> : null}
       <View style={{ flexDirection: "row" }}>
         <LineageNode item={{ name: file.name, slug: file.slug }} self />
@@ -192,7 +195,7 @@ function LineageTree({ file }: { file: StrainFile }) {
       {file.children.length ? (
         <>
           <Text style={[muted, { textAlign: "center" }]}>│</Text>
-          {tier(file.children.map((c) => <LineageNode key={c.slug} item={c} tone="phosphor" />), `LISTED AS A PARENT OF (${file.children_total})`)}
+          {tier(file.children.map((c) => <LineageNode key={c.slug} item={c} tone="phosphor" />), `Listed as a parent of (${file.children_total})`)}
         </>
       ) : null}
     </View>
@@ -245,8 +248,8 @@ export default function StrainScreen() {
     <Screen>
       <Stack.Screen options={{ title: f.name }} />
       <NugMark slug={f.slug} id={f.id} name={f.name} type={f.type} stored={f.image.status === "stored"} />
-      <Text style={[breakWord, { fontFamily: fonts.display, color: colors.phosphor, fontSize: 34, lineHeight: 38 }]}>{f.name}</Text>
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
+      <Text style={[breakWord, { fontFamily: fonts.display, fontWeight: "700", color: colors.phosphor, fontSize: 34, lineHeight: 42 }]}>{f.name}</Text>
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
         <Tag tone="cyan">{f.type}</Tag>
         <Tag tone={product ? "amber" : "phosphor"}>{kindName}</Tag>
         <Tag tone={STATUS_TONE[f.status]}>{`${f.completeness}% ${f.status.replace("_", " ")}`}</Tag>
@@ -255,34 +258,34 @@ export default function StrainScreen() {
       </View>
       <Banner>Not medical advice. Not a dose. Figures describe what a source printed or a lab measured on a sample; the next batch can differ.</Banner>
 
-      <Section n={1} title="IDENTITY" code="ID">
-        <Row k="NAME">{f.name}</Row>
-        <Row k="ALIASES">
+      <Section title="Identity">
+        <Row k="Name">{f.name}</Row>
+        <Row k="Aliases">
           {f.aliases.length ? f.aliases.map((a) => (
             <View key={a.name}>
               <Text style={body}>{a.name}</Text>
               <Cite file={f} meta={meta} k={a.source} />
             </View>
-          )) : <Missing>no alias on file</Missing>}
+          )) : <Missing />}
         </Row>
-        <Row k="CLASSIFICATION">
-          <Text style={body}>{f.type === "unspecified" ? "unspecified" : `${f.type} (as filed)`}</Text>
+        <Row k="Classification">
+          <Text style={body}>{f.type === "unspecified" ? "Unspecified" : `${f.type} (as filed)`}</Text>
           {f.genetics.length ? <Text style={muted}>Seller wording: {f.genetics.join("; ")}</Text> : null}
         </Row>
-        <Row k={product ? "PRODUCER / SPONSOR" : "BREEDER"}>
+        <Row k={product ? "Producer or sponsor" : "Breeder"}>
           {product ? f.producer ? <Text style={body}>{f.producer}</Text> : <Missing /> : f.breeders.length ? (
             <Text style={[body, breakWord]}>{f.breeders.map((b) => `${b.name}${b.listings > 1 ? ` (${b.listings} listings)` : ""}`).join(" · ")}</Text>
-          ) : <Missing>no breeder on file</Missing>}
+          ) : <Missing />}
           {f.breeders.length > 1 ? <Text style={muted}>Several breeders release a seed line under this name. They are not assumed to be the same genetics.</Text> : null}
         </Row>
-        <Row k="RECORD ORIGIN">{ORIGIN_LABEL[f.origin] ?? f.origin}</Row>
-        <Row k="NAME FAMILY">
+        <Row k="Where this record came from">{ORIGIN_LABEL[f.origin] ?? f.origin}</Row>
+        <Row k="Related names">
           {f.family?.canonical ? (
             <Text style={body}>Variant of <NameLink item={f.family.canonical} /></Text>
           ) : f.family && f.family.variant_total ? (
             <Text style={body}>Canonical file for “{f.family.key}”</Text>
           ) : (
-            <Missing>no related name on file</Missing>
+            <Missing />
           )}
           {f.family && f.family.variants.length ? (
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
@@ -293,18 +296,18 @@ export default function StrainScreen() {
           <Text style={muted}>Variants share a cleaned name. They are linked, never merged.</Text>
         </Row>
         {f.duplicates.length ? (
-          <Row k="SUSPECTED DUPLICATES">
+          <Row k="Suspected duplicates">
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>{f.duplicates.map((d) => <NameLink key={d.slug} item={d} />)}</View>
             <Text style={muted}>Same cleaned name, same autoflower flag, same or no breeder. Queued for review; not merged.</Text>
           </Row>
         ) : null}
-        <Row k="SPECIMEN ID">{`${specimenCode(f.id)} · archive id ${f.id}`}</Row>
-        <Row k="LAST DATED EVIDENCE">{f.updated ?? "no dated source"}</Row>
-        <Row k="COMPLETENESS">{`${f.completeness} / 100 · ${f.status.replace("_", " ")}`}</Row>
+        <Row k="Specimen id">{`${specimenCode(f.id)} · archive id ${f.id}`}</Row>
+        <Row k="Last dated evidence">{f.updated ?? "Not on this file."}</Row>
+        <Row k="How complete">{`${f.completeness} / 100 · ${f.status.replace("_", " ")}`}</Row>
       </Section>
 
       {product ? null : (
-        <Section n={2} title="GENETICS & LINEAGE" code="GEN" tone="purple">
+        <Section title="Genetics and lineage" tone="purple">
           {f.lineage ? (
             <>
               <LineageTree file={f} />
@@ -331,41 +334,41 @@ export default function StrainScreen() {
         </Section>
       )}
 
-      <Section n={3} title="CANNABINOIDS" code="CB" tone="amber">
+      <Section title="Cannabinoids" tone="amber">
         {f.cannabinoids.length === 0 ? <Missing>No cannabinoid figure with a source is on file.</Missing> : null}
         {lab.length ? (
           <View style={{ gap: 4 }}>
-            <Text style={label}>LAB RESULTS FOR FLOWER SOLD UNDER THIS NAME</Text>
+            <Text style={label}>Lab results for flower sold under this name</Text>
             <Text style={muted}>Aggregated tested lots from state traceability data. They describe product on shelves, not the cultivar. Bars: line = range, block = middle half, tick = median, scale 0–35%.</Text>
             {lab.map((m, i) => <MeasureBlock key={`lab-${i}`} file={f} meta={meta} m={m} scale={35} />)}
           </View>
         ) : null}
         {filed.length ? (
           <View style={{ gap: 4 }}>
-            <Text style={label}>{f.slug.startsWith("au-") ? "TGA LABEL STRENGTH" : "AS FILED ON THE REGISTRATION"}</Text>
+            <Text style={label}>{f.slug.startsWith("au-") ? "TGA label strength" : "As filed on the registration"}</Text>
             {filed.map((m, i) => <MeasureBlock key={`f-${i}`} file={f} meta={meta} m={m} scale={35} />)}
           </View>
         ) : null}
         {claims.length ? (
           <View style={{ gap: 4 }}>
-            <Text style={label}>SELLER LISTING CLAIMS</Text>
+            <Text style={label}>Seller listing claims</Text>
             <Text style={muted}>Printed on seed-bank pages. Not an assay.</Text>
             {claims.map((m, i) => <MeasureBlock key={`c-${i}`} file={f} meta={meta} m={m} scale={35} />)}
           </View>
         ) : null}
         {legacy.length ? (
           <View style={{ gap: 4 }}>
-            <Text style={[label, { color: colors.red }]}>LEGACY RANGE</Text>
+            <Text style={[label, { color: colors.red }]}>Legacy range</Text>
             {legacy.map((m, i) => <MeasureBlock key={`l-${i}`} file={f} meta={meta} m={m} scale={35} />)}
           </View>
         ) : null}
         <Text style={muted}>Not on file unless listed: {["THC", "THCA", "CBD", "CBDA", "CBG", "CBGA", "CBC", "CBN"].filter((a) => !f.cannabinoids.some((m) => m.analyte.toUpperCase().includes(a.replace("Δ9-", "")))).join(", ") || "none"}.</Text>
       </Section>
 
-      <Section n={4} title="TERPENES" code="TRP" tone="cyan">
+      <Section title="Terpenes" tone="cyan">
         {terpMeasured.length ? (
           <View style={{ gap: 4 }}>
-            <Text style={label}>MEASURED</Text>
+            <Text style={label}>Measured</Text>
             {terpMeasured.map((m, i) => <MeasureBlock key={`t-${i}`} file={f} meta={meta} m={m} scale={m.name === "total terpenes" ? 5 : terpScale} />)}
           </View>
         ) : (
@@ -373,7 +376,7 @@ export default function StrainScreen() {
         )}
         {f.terpenes.mentioned.length ? (
           <View style={{ gap: 6 }}>
-            <Text style={label}>MENTIONED WITHOUT A PERCENTAGE</Text>
+            <Text style={label}>Mentioned without a percentage</Text>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
               {f.terpenes.mentioned.map((t) => <Tag key={t.name} tone={t.kind === "legacy" ? "red" : "cyan"}>{`${t.name}${t.kind === "legacy" ? " · legacy" : " · seller"}`}</Tag>)}
             </View>
@@ -383,19 +386,19 @@ export default function StrainScreen() {
       </Section>
 
       {product ? null : (
-        <Section n={5} title="BOTANICAL CHARACTERISTICS" code="BOT">
+        <Section title="Botanical characteristics">
           <Text style={muted}>Seller-stated growing figures. Not measured by this archive.</Text>
-          <Row k="FLOWERING TIME"><Range file={f} meta={meta} field={f.botany?.flowering_days ?? null} unit="days" /></Row>
-          <Row k="INDICA SHARE (SELLER)"><Range file={f} meta={meta} field={f.botany?.indica_pct ?? null} unit="%" /></Row>
-          <Row k="HEIGHT INDOORS"><Range file={f} meta={meta} field={f.botany?.height_indoor_cm ?? null} unit="cm" /></Row>
-          <Row k="HEIGHT OUTDOORS"><Range file={f} meta={meta} field={f.botany?.height_outdoor_cm ?? null} unit="cm" /></Row>
-          <Row k="HARVEST">{f.botany?.harvest.length ? f.botany.harvest.join(" · ") : <Missing />}</Row>
-          <Row k="FLOWERING HABIT">{f.botany?.auto === true ? "autoflowering (seller)" : f.botany?.auto === false ? "photoperiod (seller)" : <Missing />}</Row>
-          <Row k="SEED TYPE">{f.botany?.feminized === true ? "feminized seed offered" : f.botany?.feminized === false ? "regular seed" : <Missing />}</Row>
+          <Row k="Flowering time"><Range file={f} meta={meta} field={f.botany?.flowering_days ?? null} unit="days" /></Row>
+          <Row k="Indica share, as a seller stated it"><Range file={f} meta={meta} field={f.botany?.indica_pct ?? null} unit="%" /></Row>
+          <Row k="Height indoors"><Range file={f} meta={meta} field={f.botany?.height_indoor_cm ?? null} unit="cm" /></Row>
+          <Row k="Height outdoors"><Range file={f} meta={meta} field={f.botany?.height_outdoor_cm ?? null} unit="cm" /></Row>
+          <Row k="Harvest">{f.botany?.harvest.length ? f.botany.harvest.join(" · ") : <Missing />}</Row>
+          <Row k="Flowering habit">{f.botany?.auto === true ? "Autoflowering (seller)" : f.botany?.auto === false ? "Photoperiod (seller)" : <Missing />}</Row>
+          <Row k="Seed type">{f.botany?.feminized === true ? "Feminized seed offered" : f.botany?.feminized === false ? "Regular seed" : <Missing />}</Row>
         </Section>
       )}
 
-      <Section n={6} title="AROMA & FLAVOUR" code="ARO" tone="cyan">
+      <Section title="Aroma and flavour" tone="cyan">
         {f.aroma.length ? (
           <>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>{f.aroma.map((a) => <Tag key={a.name} tone="cyan">{`${a.name}${a.listings > 1 ? ` ×${a.listings}` : ""}`}</Tag>)}</View>
@@ -407,8 +410,8 @@ export default function StrainScreen() {
         )}
       </Section>
 
-      <Section n={7} title="EFFECTS & ADVERSE EFFECTS" code="FX" tone="red">
-        <Text style={label}>REPORTED EFFECTS · ANECDOTAL</Text>
+      <Section title="Effects and adverse effects" tone="red">
+        <Text style={label}>Reported effects, anecdotal</Text>
         {f.effects.length ? (
           <>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>{f.effects.map((e) => <Tag key={e.name}>{e.name}</Tag>)}</View>
@@ -418,13 +421,13 @@ export default function StrainScreen() {
         ) : (
           <Missing>No sourced effect report is on file.</Missing>
         )}
-        <Text style={[label, { color: colors.red }]}>ADVERSE EFFECTS · CLASS-LEVEL</Text>
+        <Text style={[label, { color: colors.red }]}>Adverse effects, class level</Text>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>{CLASS_ADVERSE.map((a) => <Tag key={a} tone="red">{a}</Tag>)}</View>
         <Text style={muted}>These apply to cannabis in general. No source on file ties a specific risk to this name.</Text>
         <Cite file={f} meta={meta} k="nida" />
       </Section>
 
-      <Section n={8} title={product ? "PRODUCER & FILING" : "BREEDER & CULTIVATION"} code="SRC" startOpen={!product}>
+      <Section title={product ? "Producer and filing" : "Breeder and cultivation"} startOpen={!product}>
         {f.sellers.length ? (
           f.sellers.map((s, i) => (
             <View key={`${s.url}-${i}`} style={{ gap: 2, paddingVertical: 4, borderTopWidth: 1, borderTopColor: colors.line }}>
@@ -451,7 +454,7 @@ export default function StrainScreen() {
         {!product ? <Text style={muted}>No grow-yield or cultivation advice is given here.</Text> : null}
       </Section>
 
-      <Section n={9} title="AUSTRALIAN MEDICAL REFERENCES" code="AU-RX" tone="amber">
+      <Section title="Australian medical references" tone="amber">
         <Text style={[body, breakWord]}>
           {f.medical.au === "tga_product"
             ? "This is a product line on the TGA medicinal cannabis product list. It is sponsor-declared and names no cultivar."
@@ -468,7 +471,7 @@ export default function StrainScreen() {
         ))}
         {f.medical.registry_products.length ? (
           <View style={{ gap: 4 }}>
-            <Text style={label}>CONNECTICUT REGISTRY PRODUCTS USING THIS NAME ({f.medical.registry_total})</Text>
+            <Text style={label}>Connecticut registry products using this name ({f.medical.registry_total})</Text>
             <Text style={muted}>Each is one registered product. Its figures belong to that product, not to this cultivar.</Text>
             {f.medical.registry_products.map((p) => (
               <Text key={p.slug} style={[body, breakWord]}>
@@ -479,7 +482,7 @@ export default function StrainScreen() {
         ) : null}
       </Section>
 
-      <Section n={10} title="SOURCES & EVIDENCE" code="EVD" tone="amber">
+      <Section title="Sources and evidence" tone="amber">
         <Text style={muted}>Ranked 1 (regulatory) to 8 (unsourced). Disagreements stay visible in each section.</Text>
         {sources.map((s, i) => {
           const m = meta?.sources[s.id];
@@ -492,19 +495,19 @@ export default function StrainScreen() {
         })}
         {f.sources.length > 10 ? (
           <Pressable accessibilityRole="button" onPress={() => setAllSources((v) => !v)}>
-            <Text style={{ fontFamily: fonts.body, color: colors.cyan, fontSize: 13, paddingVertical: 6 }}>{allSources ? "Show fewer" : `Show all ${f.sources.length} sources`}</Text>
+            <Text style={{ fontFamily: fonts.body, fontWeight: "600", color: colors.cyan, fontSize: 16, lineHeight: 24, paddingVertical: 8 }}>{allSources ? "Show fewer" : `Show all ${f.sources.length} sources`}</Text>
           </Pressable>
         ) : null}
-        <Text style={label}>OPEN QUESTIONS</Text>
-        {f.questions.length ? f.questions.map((q) => <Text key={q} style={[body, breakWord]}>› {q}</Text>) : <Missing>none recorded</Missing>}
-        <Text style={label}>RESEARCH QUEUE</Text>
+        <Text style={label}>Open questions</Text>
+        {f.questions.length ? f.questions.map((q) => <Text key={q} style={[body, breakWord]}>{q}</Text>) : <Missing />}
+        <Text style={label}>Research queue</Text>
         {f.research ? (
           <Text style={[body, breakWord]}>
             Checked {f.research.attempted}: {f.research.outcome.replaceAll("_", " ")}
             {f.research.proposals.length ? ` (${f.research.proposals.length} candidate match${f.research.proposals.length === 1 ? "" : "es"} awaiting review)` : ""}.
           </Text>
         ) : (
-          <Missing>{f.status === "needs_research" ? "queued, not yet checked" : "not queued"}</Missing>
+          <Missing>{f.status === "needs_research" ? "Queued, not yet checked." : "Not on this file."}</Missing>
         )}
       </Section>
       <FinePrint />

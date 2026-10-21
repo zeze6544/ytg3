@@ -122,7 +122,7 @@ type Index = {
 };
 
 export const TYPE_NAMES = ["hybrid", "indica", "sativa", "ruderalis", "unspecified"] as const;
-export const KIND_NAMES = ["cultivar", "CT registry product", "TGA product line"] as const;
+export const KIND_NAMES = ["cultivar", "Connecticut registry product", "Australian TGA product"] as const;
 
 export type StrainRow = {
   i: number;

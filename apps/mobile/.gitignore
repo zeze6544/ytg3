@@ -43,3 +43,8 @@ example
 /ios
 /android
 .thin-bundle
+
+# Firebase CLI local state and token-bearing debug logs
+.firebase/
+firebase-debug.log
+firebase-debug.*.log

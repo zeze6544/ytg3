@@ -1,28 +1,28 @@
 {
  "built": "2026-10-21",
  "counts": {
-  "records": 47929,
-  "cultivars": 30394,
-  "products": 17535,
+  "records": 42834,
+  "cultivars": 28330,
+  "products": 14504,
   "status": {
-   "documented": 10978,
-   "partial": 25496,
-   "needs_research": 11455
+   "documented": 11302,
+   "partial": 20298,
+   "needs_research": 11234
   },
-  "with_sources": 38747,
-  "with_cannabinoids": 28973,
-  "with_sourced_cannabinoids": 28921,
-  "with_lab": 3695,
-  "with_terpenes_measured": 8319,
-  "with_terpenes_any": 9109,
-  "with_lineage": 17652,
-  "with_lineage_conflict": 2787,
-  "with_breeder": 18939,
-  "suspected_duplicates": 3810,
-  "image_stored": 1000,
+  "with_sources": 33682,
+  "with_cannabinoids": 25064,
+  "with_sourced_cannabinoids": 25007,
+  "with_lab": 3263,
+  "with_terpenes_measured": 7170,
+  "with_terpenes_any": 7949,
+  "with_lineage": 15778,
+  "with_lineage_conflict": 2070,
+  "with_breeder": 17029,
+  "suspected_duplicates": 0,
+  "image_stored": 894,
   "image_failed": 0,
-  "image_on_device": 46929,
-  "families_multi": 4468
+  "image_on_device": 41940,
+  "families_multi": 3658
  },
  "excluded": [
   {
@@ -38,14 +38,18 @@
    "reason": "scraped page text, not a cultivar name"
   }
  ],
+ "deduped": {
+  "cultivars": 2064,
+  "products": 3031
+ },
  "queues": {
-  "images_missing": 46929,
+  "images_missing": 41940,
   "images_failed": 0,
-  "missing_sources": 9182,
-  "incomplete": 11455,
-  "duplicates": 1126,
-  "lineage_conflicts": 2787,
+  "missing_sources": 9152,
+  "incomplete": 11234,
+  "duplicates": 0,
+  "lineage_conflicts": 2070,
   "broken_links": 19,
-  "medical_outdated": 497
+  "medical_outdated": 483
  }
 }

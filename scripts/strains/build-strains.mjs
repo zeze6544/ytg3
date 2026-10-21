@@ -3,14 +3,18 @@
 //   node scripts/strains/build-strains.mjs
 import { existsSync, mkdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
+import { collapseDuplicates } from "./dedupe.mjs";
 import { DATA, OUT, TODAY, bucketOf, cultivarKey, excludedBase, familyKeys, loadBase, nameKey, readJson, splitCross, writeJson } from "./lib.mjs";
 import { RANKS, SOURCES } from "./sources.mjs";
 
 export const BUCKETS = 1024;
 const INDEX_VERSION = 1;
 
-const base = loadBase();
+const loaded = loadBase();
 const listings = readJson(join(DATA, "listings.json"), { records: {} }).records;
+const collapsed = collapseDuplicates(loaded, listings, familyKeys(loaded, listings));
+const base = collapsed.base;
+const mergedNames = collapsed.names;
 const labs = readJson(join(DATA, "labs.json"), { keys: {} }).keys;
 const links = readJson(join(DATA, "links.json"), { checked: {} }).checked;
 const images = readJson(join(DATA, "images.json"), { renderer: null, assets: {} });
@@ -190,6 +194,11 @@ function assemble(row) {
   // identity
   const aliases = [];
   for (const l of own) if (l.aka && nameKey(l.aka) !== nameKey(row.name)) aliases.push({ name: l.aka, source: cite("ci_strains", { url: l.url, label: `${l.seller ?? "Seller"} listing`, date: l.scraped }) });
+  for (const name of mergedNames.get(slug) ?? []) {
+    if (nameKey(name) !== nameKey(row.name) && !aliases.some((alias) => nameKey(alias.name) === nameKey(name))) {
+      aliases.push({ name, source: cite("legacy") });
+    }
+  }
   const dupes = fam?.dupes.get(slug) ?? [];
   if (dupes.length) flags |= F.duplicate;
   const product = isProduct(row);
@@ -531,5 +540,5 @@ writeJson(join(OUT, "admin", "queues.json"), {
   medical_outdated: cap(queues.medical_outdated, 50),
   jobs: readJson(join(DATA, "state.json"), { runs: [] }).runs.slice(-30),
 });
-writeJson(join(DATA, "report.json"), { built: TODAY, counts: counters, excluded: excludedBase, queues: Object.fromEntries(Object.entries(queues).map(([k, v]) => [k, v.length])) }, true);
-console.log(JSON.stringify(counters, null, 1));
+writeJson(join(DATA, "report.json"), { built: TODAY, counts: counters, excluded: excludedBase, deduped: { cultivars: collapsed.droppedCultivars, products: collapsed.droppedProducts }, queues: Object.fromEntries(Object.entries(queues).map(([k, v]) => [k, v.length])) }, true);
+console.log(JSON.stringify({ ...counters, deduped: { cultivars: collapsed.droppedCultivars, products: collapsed.droppedProducts } }, null, 1));

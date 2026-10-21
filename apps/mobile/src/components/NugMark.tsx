@@ -67,11 +67,11 @@ export function NugMark({
             () => setState({ kind: "failed" }),
           );
         }}
-        style={{ width: "100%", aspectRatio: ratio, backgroundColor: "#000" }}
+        style={{ width: "100%", aspectRatio: ratio, backgroundColor: colors.panel, borderRadius: 14 }}
       />
       {compact ? null : (
-        <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 10, marginTop: 4 }}>
-          ILLUSTRATIVE RENDER · {specimenCode(key)} · {state.source.origin === "stored" ? "stored asset" : "rendered on this device"} · not a photograph of any batch
+        <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 15, lineHeight: 22, marginTop: 10 }}>
+          Drawn for this file ({specimenCode(key)}). {state.source.origin === "stored" ? "Stored with the archive." : "Drawn on this device."} Not a photograph of any batch.
         </Text>
       )}
     </View>
@@ -82,12 +82,12 @@ function Placeholder({ ratio, code, failed, compact }: { ratio: number; code: st
   return (
     <View
       accessibilityLabel={failed ? "Specimen image unavailable" : "Specimen image queued"}
-      style={{ width: "100%", aspectRatio: ratio, backgroundColor: "#000", borderWidth: 1, borderColor: failed ? colors.red : colors.line, alignItems: "center", justifyContent: "center", gap: 4 }}
+      style={{ width: "100%", aspectRatio: ratio, backgroundColor: colors.panel, borderWidth: 1, borderColor: failed ? colors.red : colors.line, borderRadius: 14, alignItems: "center", justifyContent: "center", gap: 8, padding: 16 }}
     >
-      <Text style={{ fontFamily: fonts.display, color: failed ? colors.red : colors.phosphor, fontSize: compact ? 18 : 28, opacity: 0.85 }}>
-        {failed ? "SPECIMEN UNAVAILABLE" : "SPECIMEN QUEUED"}
+      <Text style={{ fontFamily: fonts.display, fontWeight: "700", color: failed ? colors.red : colors.phosphor, fontSize: compact ? 18 : 24, lineHeight: compact ? 24 : 30, textAlign: "center" }}>
+        {failed ? "Image unavailable" : "Drawing this specimen"}
       </Text>
-      <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: compact ? 9 : 11 }}>{code}</Text>
+      {compact ? null : <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 15, lineHeight: 22, textAlign: "center" }}>{code}. Not a photograph.</Text>}
     </View>
   );
 }

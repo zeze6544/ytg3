@@ -17,15 +17,15 @@ export default function ReagentKitScreen() {
   return (
     <Screen>
       <Stack.Screen options={{ title: kit.name }} />
-      <Text style={[breakWord, { fontFamily: fonts.display, color: colors.cyan, fontSize: 34, lineHeight: 38 }]}>{kit.name}</Text>
-      <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 13, lineHeight: 20 }}>{kit.blurb}</Text>
-      <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 12, lineHeight: 18 }}>{kit.use}</Text>
-      <Frame title="COLOURS" code={kit.slug.slice(0, 4).toUpperCase()}>
+      <Text style={[breakWord, { fontFamily: fonts.display, fontWeight: "700", color: colors.cyan, fontSize: 34, lineHeight: 42 }]}>{kit.name}</Text>
+      <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 17, lineHeight: 28 }}>{kit.blurb}</Text>
+      <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 15, lineHeight: 24 }}>{kit.use}</Text>
+      <Frame title="Colours">
         {kit.rows.map((row) => (
-          <View key={row.substance} style={{ gap: 4, paddingVertical: 6 }}>
-            <Text style={{ fontFamily: fonts.body, color: colors.phosphor, fontSize: 13 }}>{row.substance}</Text>
+          <View key={row.substance} style={{ gap: 8, paddingVertical: 12, borderTopWidth: 1, borderTopColor: colors.line }}>
+            <Text style={{ fontFamily: fonts.body, fontWeight: "600", color: colors.phosphor, fontSize: 17, lineHeight: 26 }}>{row.substance}</Text>
             <Tag tone={row.tone}>{row.color}</Tag>
-            {row.note ? <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 12 }}>{row.note}</Text> : null}
+            {row.note ? <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 15, lineHeight: 24 }}>{row.note}</Text> : null}
           </View>
         ))}
       </Frame>

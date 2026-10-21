@@ -20,13 +20,13 @@ export default function ClassesScreen() {
       {classes.error ? <QueryError error={classes.error} /> : null}
       {(classes.data ?? []).map((item) => (
         <FileCard key={item.id} onPress={() => router.push({ pathname: "/files", params: { cat: item.slug } })}>
-          <Text style={[breakWord, { fontFamily: fonts.display, color: colors.phosphor, fontSize: 28, lineHeight: 32 }]}>{item.name}</Text>
+          <Text style={[breakWord, { fontFamily: fonts.display, fontWeight: "700", color: colors.phosphor, fontSize: 28, lineHeight: 34 }]}>{item.name}</Text>
           <Tag tone={CATEGORY_TONE[item.slug] ?? "phosphor"}>{counts[item.slug] ?? 0} files</Tag>
           {item.description ? (
-            <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 13, lineHeight: 20 }}>{item.description}</Text>
+            <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 17, lineHeight: 28 }}>{item.description}</Text>
           ) : null}
           {(readingFor(item.slug, [])[0]?.paragraphs ?? []).map((paragraph) => (
-            <Text key={paragraph.slice(0, 40)} style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 22 }]}>
+            <Text key={paragraph.slice(0, 40)} style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 17, lineHeight: 28 }]}>
               {paragraph}
             </Text>
           ))}

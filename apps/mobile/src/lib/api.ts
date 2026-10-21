@@ -60,7 +60,7 @@ const COMMON_SLUGS = [
   "nitrous-oxide",
   "kratom",
   "kava",
-  "dxm",
+  "dextromethorphan",
   "diphenhydramine",
   "ibuprofen",
   "paracetamol",

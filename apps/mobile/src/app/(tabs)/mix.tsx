@@ -1,7 +1,7 @@
 import { colors, fonts, toneColor, type Tone } from "@/constants/theme";
-import { Banner, FinePrint, Frame, MissingArchive, PageTitle, QueryError, Screen, SearchField, Status, Tag, breakWord } from "@/components/ui";
+import { FinePrint, Frame, Lead, MissingArchive, PageTitle, QueryError, Screen, SearchField, Status, Tag, breakWord } from "@/components/ui";
 import { fetchDrugs, fetchInteraction } from "@/lib/api";
-import { cleanProse } from "@/lib/reading";
+import { cleanNames, cleanProse } from "@/lib/reading";
 import { archiveConfigured } from "@/lib/supabase";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
@@ -10,11 +10,11 @@ import { FlatList, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const SEV: Record<string, { tone: Tone; label: string; gloss: string }> = {
-  low: { tone: "phosphor", label: "LOW", gloss: "Mildest stored rank. This is not a clearance." },
-  moderate: { tone: "amber", label: "MODERATE", gloss: "Both substances still act. This is not permission to combine them." },
-  dangerous: { tone: "red", label: "DANGEROUS", gloss: "This pair can injure." },
-  deadly: { tone: "red", label: "DEADLY", gloss: "This pair can kill." },
-  unknown: { tone: "cyan", label: "UNKNOWN", gloss: "The checker has no rank for this pair." },
+  low: { tone: "phosphor", label: "Low", gloss: "Mildest stored rank. This is not a clearance." },
+  moderate: { tone: "amber", label: "Moderate", gloss: "Both substances still act. This is not permission to combine them." },
+  dangerous: { tone: "red", label: "Dangerous", gloss: "This pair can injure." },
+  deadly: { tone: "red", label: "Deadly", gloss: "This pair can kill." },
+  unknown: { tone: "cyan", label: "Unknown", gloss: "The checker has no rank for this pair." },
 };
 
 const RANKS = ["low", "moderate", "dangerous", "deadly"] as const;
@@ -59,13 +59,11 @@ export default function MixScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
     <Screen safeTop>
-      <PageTitle tone="red">MIX CHECK</PageTitle>
+      <PageTitle tone="red">Mix check</PageTitle>
+      <Lead>Pick two substances. The note says what each one does, and what they do together. This is not medical advice and not a dosing tool.</Lead>
       {archiveConfigured ? null : <MissingArchive />}
-      <Banner>
-        Select two substances. The result names what each one does and what they do together. This is not medical advice and not a dosing tool.
-      </Banner>
-      <PickerButton label="SUBSTANCE A" value={a?.name} onPress={() => setWhich("a")} />
-      <PickerButton label="SUBSTANCE B" value={b?.name} onPress={() => setWhich("b")} />
+      <PickerButton label="First substance" value={a?.name} onPress={() => setWhich("a")} />
+      <PickerButton label="Second substance" value={b?.name} onPress={() => setWhich("b")} />
       <View style={{ flexDirection: "row", gap: 18, minHeight: 44, alignItems: "center" }}>
         <Pressable
           accessibilityRole="button"
@@ -76,10 +74,10 @@ export default function MixScreen() {
           }}
           style={{ minHeight: 44, justifyContent: "center" }}
         >
-          <Text style={{ fontFamily: fonts.body, color: colors.purple, letterSpacing: 1 }}>SWAP</Text>
+          <Text style={{ fontFamily: fonts.body, color: colors.purple, fontSize: 16 }}>Swap</Text>
         </Pressable>
         <Pressable accessibilityRole="button" onPress={() => { setA(null); setB(null); }} style={{ minHeight: 44, justifyContent: "center" }}>
-          <Text style={{ fontFamily: fonts.body, color: colors.cyan, letterSpacing: 1 }}>CLEAR</Text>
+          <Text style={{ fontFamily: fonts.body, color: colors.cyan, fontSize: 16 }}>Clear</Text>
         </Pressable>
       </View>
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
@@ -90,40 +88,42 @@ export default function MixScreen() {
         ))}
       </View>
 
-      <Frame title="RESULT" code="OUT" tone={sev?.tone ?? "phosphor"}>
-        {!a || !b ? <Status>Awaiting two substances.</Status> : null}
-        {a && b && a.id === b.id ? <Status>Same substance selected.</Status> : null}
-        {interaction.isLoading ? <Status>Querying the matrix…</Status> : null}
+      <Frame title="Result" tone={sev?.tone ?? "phosphor"}>
+        {!a || !b ? <Status>Choose two substances to see the pair.</Status> : null}
+        {a && b && a.id === b.id ? <Status>Those are the same substance. Choose a second one.</Status> : null}
+        {interaction.isLoading ? <Status>Checking the pair…</Status> : null}
         {interaction.error ? <QueryError error={interaction.error} /> : null}
         {a && b && a.id !== b.id && !interaction.isLoading && interaction.data ? (
-          <View style={{ gap: 8 }}>
-            <View style={{ flexDirection: "row", gap: 4 }}>
+          <View style={{ gap: 16 }}>
+            <View style={{ flexDirection: "row", gap: 8 }}>
               {RANKS.map((rank) => {
                 const active = interaction.data?.severity === rank;
                 const meta = SEV[rank];
                 return (
-                  <View key={rank} style={{ flex: 1, minWidth: 0, gap: 4 }}>
-                    <View style={{ height: 8, backgroundColor: active ? toneColor[meta.tone] : colors.line }} />
-                    <Text numberOfLines={1} style={{ fontFamily: fonts.body, color: active ? toneColor[meta.tone] : colors.muted, fontSize: 9, letterSpacing: 0.2 }}>
+                  <View key={rank} style={{ flex: 1, minWidth: 0, gap: 8 }}>
+                    <View style={{ height: 8, borderRadius: 4, backgroundColor: active ? toneColor[meta.tone] : colors.line }} />
+                    <Text style={{ fontFamily: fonts.body, fontWeight: active ? "600" : "400", color: active ? toneColor[meta.tone] : colors.muted, fontSize: 13, lineHeight: 18 }}>
                       {meta.label}
                     </Text>
                   </View>
                 );
               })}
             </View>
-            <Text style={{ fontFamily: fonts.display, color: toneColor[sev?.tone ?? "phosphor"], fontSize: 56, lineHeight: 58 }}>{sev?.label}</Text>
-            <Text style={[breakWord, { fontFamily: fonts.bodyMedium, color: toneColor[sev?.tone ?? "phosphor"], fontSize: 16, lineHeight: 22 }]}>
+            <Text style={{ fontFamily: fonts.display, fontWeight: "700", color: toneColor[sev?.tone ?? "phosphor"], fontSize: 40, lineHeight: 48 }}>
+              {sev?.label}
+            </Text>
+            <Text style={[breakWord, { fontFamily: fonts.body, fontWeight: "600", color: toneColor[sev?.tone ?? "phosphor"], fontSize: 18, lineHeight: 28 }]}>
               {sev?.gloss}
             </Text>
-            <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 20 }]}>
-              {interaction.data.note || "Catalogued. No further note is stored."}
+            <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 16, lineHeight: 26 }]}>
+              {interaction.data.note || "This pair is catalogued. No further note is stored."}
             </Text>
           </View>
         ) : null}
         {a && b && a.id !== b.id && !interaction.isLoading && !interaction.data && !interaction.error ? (
           <View style={{ gap: 8 }}>
-            <Tag tone="amber">PAIR</Tag>
-            <Text style={[breakWord, { fontFamily: fonts.body, color: colors.muted, fontSize: 13, lineHeight: 18 }]}>
+            <Tag tone="amber">No stored pair</Tag>
+            <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 16, lineHeight: 26 }]}>
               The checker could not build a pair note for these two names. Treat both substances as acting in the same hour. This file has no dose.
             </Text>
           </View>
@@ -135,8 +135,8 @@ export default function MixScreen() {
           <SubstanceFacts drug={(drugs.data ?? []).find((drug) => drug.id === b.id)} />
         </View>
       ) : null}
-      <Text style={[breakWord, { fontFamily: fonts.body, color: colors.muted, fontSize: 12, lineHeight: 18 }]}>
-        Low, moderate, dangerous, and deadly describe the pair. The note says what each substance does. None of those words means the mix is safe.
+      <Text style={[breakWord, { fontFamily: fonts.body, color: colors.muted, fontSize: 15, lineHeight: 24 }]}>
+        Low, moderate, dangerous, and deadly describe the pair. None of those words means the mix is safe.
       </Text>
       <FinePrint />
 
@@ -164,7 +164,7 @@ function SubstanceFacts({
 }) {
   if (!drug?.name) return null;
   return (
-    <Frame title={drug.name} code="FILE" tone="amber">
+    <Frame title={drug.name} tone="amber">
       <Fact label="Acute" value={drug.acute_risks} />
       <Fact label="Overdose signs" value={drug.overdose_signs} />
       <Fact label="Harm reduction" value={drug.harm_reduction} />
@@ -178,9 +178,9 @@ function Fact({ label, value }: { label: string; value?: string | null }) {
   const text = cleanProse(value);
   if (!text) return null;
   return (
-    <View style={{ gap: 2 }}>
-      <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 10, letterSpacing: 1 }}>{label.toUpperCase()}</Text>
-      <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 21 }]}>{text}</Text>
+    <View style={{ gap: 6 }}>
+      <Text style={{ fontFamily: fonts.body, fontWeight: "600", color: colors.muted, fontSize: 13, lineHeight: 18 }}>{label}</Text>
+      <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 17, lineHeight: 28 }]}>{text}</Text>
     </View>
   );
 }
@@ -189,12 +189,14 @@ function PickerButton({ label, value, onPress }: { label: string; value?: string
   const size = value && value.length > 22 ? 20 : 26;
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={value ? `${label}, ${value}` : `${label}, choose a substance`}
       onPress={onPress}
-      style={{ borderWidth: 1, borderColor: colors.line, padding: 12, borderRadius: 4, backgroundColor: colors.panel, minHeight: 72 }}
+      style={{ borderWidth: 1, borderColor: colors.line, padding: 18, borderRadius: 14, backgroundColor: colors.panel, minHeight: 88, gap: 6 }}
     >
-      <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 10, letterSpacing: 1 }}>{label}</Text>
-      <Text numberOfLines={3} style={[breakWord, { fontFamily: fonts.display, color: colors.phosphor, fontSize: size, lineHeight: size + 4 }]}>
-        {value ?? "Select"}
+      <Text style={{ fontFamily: fonts.body, fontWeight: "600", color: colors.muted, fontSize: 13, lineHeight: 18 }}>{label}</Text>
+      <Text numberOfLines={3} style={[breakWord, { fontFamily: fonts.display, fontWeight: "700", color: colors.phosphor, fontSize: size, lineHeight: size + 6 }]}>
+        {value ?? "Choose a substance"}
       </Text>
     </Pressable>
   );
@@ -209,7 +211,7 @@ function SubstanceModal({
   onPick,
 }: {
   open: boolean;
-  drugs: { id?: string; name?: string | null; aliases?: string[] | null; street_names?: string[] | null }[];
+  drugs: { id?: string; name?: string | null; aliases?: string[] | null; brand_names?: string[] | null; street_names?: string[] | null }[];
   loading: boolean;
   error: unknown;
   onClose: () => void;
@@ -222,15 +224,15 @@ function SubstanceModal({
     const rows = drugs.filter((drug) => {
       if (!drug.id || !drug.name) return false;
       if (!q) return true;
-      const names = [drug.name, ...(drug.aliases ?? []), ...(drug.street_names ?? [])].map((item) => item.toLowerCase());
+      const names = [drug.name, ...cleanNames(drug.aliases), ...cleanNames(drug.brand_names), ...cleanNames(drug.street_names)].map((item) => item.toLowerCase());
       return names.some((item) => item.includes(q));
     });
     if (!q) return rows.slice(0, 80);
     const rank = (drug: (typeof rows)[number]) => {
       const name = drug.name!.toLowerCase();
       if (name === q) return 0;
-      if ((drug.aliases ?? []).some((item) => item.toLowerCase() === q)) return 1;
-      if ((drug.street_names ?? []).some((item) => item.toLowerCase() === q)) return 2;
+      if (cleanNames(drug.aliases).some((item) => item.toLowerCase() === q)) return 1;
+      if (cleanNames(drug.brand_names).concat(cleanNames(drug.street_names)).some((item) => item.toLowerCase() === q)) return 2;
       if (name.startsWith(q)) return 3;
       return 4;
     };
@@ -239,7 +241,7 @@ function SubstanceModal({
   const matchCount = useMemo(() => {
     const q = term.trim().toLowerCase();
     if (!q) return drugs.length;
-    return drugs.filter((drug) => [drug.name, ...(drug.aliases ?? []), ...(drug.street_names ?? [])].some((item) => item?.toLowerCase().includes(q))).length;
+    return drugs.filter((drug) => [drug.name, ...cleanNames(drug.aliases), ...cleanNames(drug.brand_names), ...cleanNames(drug.street_names)].some((item) => item?.toLowerCase().includes(q))).length;
   }, [drugs, term]);
 
   if (!open) return null;
@@ -261,13 +263,19 @@ function SubstanceModal({
       }}
     >
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", minHeight: 44 }}>
-        <Text style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: 28 }}>SELECT</Text>
-        <Pressable onPress={onClose} style={{ minHeight: 44, justifyContent: "center", paddingHorizontal: 8 }}>
-          <Text style={{ fontFamily: fonts.body, color: colors.red, letterSpacing: 1 }}>CLOSE</Text>
+        <Text style={{ fontFamily: fonts.display, fontWeight: "700", color: colors.phosphor, fontSize: 28, lineHeight: 34 }}>Choose a substance</Text>
+        <Pressable accessibilityRole="button" onPress={onClose} style={{ minHeight: 44, justifyContent: "center", paddingHorizontal: 8 }}>
+          <Text style={{ fontFamily: fonts.body, fontWeight: "600", color: colors.red, fontSize: 16 }}>Close</Text>
         </Pressable>
       </View>
       <SearchField value={term} onChangeText={setTerm} placeholder="Name, alias, or street name" />
-      {loading ? <Status>Loading the index…</Status> : <Status>{filtered.length} shown · {matchCount} match</Status>}
+      {loading ? <Status>Loading the index…</Status> : (
+        <Status>
+          {term.trim()
+            ? `Showing ${filtered.length} of ${matchCount}.`
+            : `Showing ${filtered.length} of ${drugs.length}. Type to search the rest.`}
+        </Status>
+      )}
       {error ? <QueryError error={error} /> : null}
       <FlatList
         style={{ flex: 1 }}
@@ -278,13 +286,14 @@ function SubstanceModal({
         keyExtractor={(item) => item.id!}
         renderItem={({ item }) => (
           <Pressable
+            accessibilityRole="button"
             onPress={() => onPick({ id: item.id!, name: item.name! })}
             style={{ paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.line, minHeight: 44 }}
           >
-            <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 20 }]}>{item.name}</Text>
+            <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 17, lineHeight: 26 }]}>{item.name}</Text>
             {term.trim() && item.name && !item.name.toLowerCase().includes(term.trim().toLowerCase()) ? (
-              <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 11 }}>
-                {(item.aliases ?? []).concat(item.street_names ?? []).find((alias) => alias.toLowerCase().includes(term.trim().toLowerCase()))}
+              <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 15, lineHeight: 22 }}>
+                {cleanNames(item.aliases).concat(cleanNames(item.brand_names), cleanNames(item.street_names)).find((alias) => alias.toLowerCase().includes(term.trim().toLowerCase()))}
               </Text>
             ) : null}
           </Pressable>

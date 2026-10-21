@@ -39,12 +39,12 @@ export default function TimelineScreen() {
       {query.isLoading ? <Status>Loading timeline…</Status> : <Status>{rows.length} events</Status>}
       {query.error ? <QueryError error={query.error} /> : null}
       {rows.map((event) => (
-        <View key={event.id} style={{ borderLeftWidth: 2, borderLeftColor: colors.phosphor, paddingLeft: 12, gap: 4 }}>
-          <Text style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: 28 }}>{event.year}</Text>
-          <Text style={[breakWord, { fontFamily: fonts.bodyMedium, color: colors.text, fontSize: 14, lineHeight: 20 }]}>{event.title}</Text>
+        <View key={event.id} style={{ borderLeftWidth: 3, borderLeftColor: colors.phosphor, paddingLeft: 16, gap: 8 }}>
+          <Text style={{ fontFamily: fonts.display, fontWeight: "700", color: colors.phosphor, fontSize: 28, lineHeight: 34 }}>{event.year}</Text>
+          <Text style={[breakWord, { fontFamily: fonts.body, fontWeight: "600", color: colors.text, fontSize: 17, lineHeight: 26 }]}>{event.title}</Text>
           {event.category ? <Tag tone="cyan">{event.category}</Tag> : null}
           {event.description ? (
-            <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 13, lineHeight: 20 }}>{event.description}</Text>
+            <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 16, lineHeight: 26 }}>{event.description}</Text>
           ) : null}
         </View>
       ))}

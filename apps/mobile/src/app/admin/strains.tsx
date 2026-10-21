@@ -21,8 +21,8 @@ type Queues = {
   jobs: { stage: string; ran_at: string; [k: string]: unknown }[];
 };
 
-const muted = { fontFamily: fonts.body, color: colors.muted, fontSize: 12, lineHeight: 18 } as const;
-const body = { fontFamily: fonts.body, color: colors.text, fontSize: 13, lineHeight: 19 } as const;
+const muted = { fontFamily: fonts.body, color: colors.muted, fontSize: 15, lineHeight: 24 } as const;
+const body = { fontFamily: fonts.body, color: colors.text, fontSize: 16, lineHeight: 26 } as const;
 
 function SlugLink({ slug, label }: { slug: string; label?: string }) {
   return (
@@ -34,14 +34,14 @@ function SlugLink({ slug, label }: { slug: string; label?: string }) {
   );
 }
 
-function QueueFrame<T>({ title, code, tone, queue, render, limit = 8 }: { title: string; code: string; tone: "red" | "amber" | "cyan" | "purple" | "phosphor"; queue: Queue<T>; render: (item: T) => React.ReactNode; limit?: number }) {
+function QueueFrame<T>({ title, tone, queue, render, limit = 8 }: { title: string; tone: "red" | "amber" | "cyan" | "purple" | "phosphor"; queue: Queue<T>; render: (item: T) => React.ReactNode; limit?: number }) {
   const [more, setMore] = useState(false);
   const items = queue.items.slice(0, more ? queue.items.length : limit);
   return (
-    <Frame title={`${title} · ${queue.total.toLocaleString()}`} code={code} tone={tone}>
+    <Frame title={`${title} · ${queue.total.toLocaleString()}`} tone={tone}>
       {queue.total === 0 ? <Status>Queue empty.</Status> : null}
       {items.map((item, i) => (
-        <View key={i} style={{ borderTopWidth: 1, borderTopColor: colors.line, paddingVertical: 4 }}>
+        <View key={i} style={{ borderTopWidth: 1, borderTopColor: colors.line, paddingVertical: 12, gap: 8 }}>
           {render(item)}
         </View>
       ))}
@@ -65,7 +65,7 @@ export default function StrainAdmin() {
     return (
       <Screen>
         <Stack.Screen options={{ title: "Strain maintenance" }} />
-        <PageTitle tone="red">ADMIN GATE</PageTitle>
+        <PageTitle tone="red">Admin gate</PageTitle>
         <Banner>Sign-in is not configured on this build, so no one can be verified as an administrator. Maintenance tools stay locked.</Banner>
       </Screen>
     );
@@ -81,7 +81,7 @@ export default function StrainAdmin() {
     return (
       <Screen>
         <Stack.Screen options={{ title: "Strain maintenance" }} />
-        <PageTitle tone="red">ADMIN GATE</PageTitle>
+        <PageTitle tone="red">Admin gate</PageTitle>
         <Banner>Sign in with an administrator account first.</Banner>
         <Action label="Sign in" onPress={() => router.push("/auth")} />
       </Screen>
@@ -91,7 +91,7 @@ export default function StrainAdmin() {
     return (
       <Screen>
         <Stack.Screen options={{ title: "Strain maintenance" }} />
-        <PageTitle tone="red">ADMIN GATE</PageTitle>
+        <PageTitle tone="red">Admin gate</PageTitle>
         <Banner>You are signed in but not an administrator. The admin role is sealed to the founding operator.</Banner>
       </Screen>
     );
@@ -104,14 +104,14 @@ export default function StrainAdmin() {
   return (
     <Screen>
       <Stack.Screen options={{ title: "Strain maintenance" }} />
-      <PageTitle>STRAIN MAINTENANCE</PageTitle>
+      <PageTitle>Strain maintenance</PageTitle>
       <Text style={muted}>
         Requests are written to the strain_jobs table, which only administrators can insert into. The offline pipeline (scripts/strains/sync-jobs.mjs) runs them with a server-side key and republishes the index. Nothing here edits a file directly.
       </Text>
       {request.error ? <Banner>{request.error instanceof Error ? request.error.message : "Request failed."}</Banner> : null}
       {request.isSuccess ? <Banner tone="phosphor">Job queued.</Banner> : null}
       {counts ? (
-        <Frame title={`ARCHIVE · BUILT ${meta.data?.built}`} code="CNT">
+        <Frame title={`Archive, built ${meta.data?.built}`}>
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
             <Tag>{`${counts.records.toLocaleString()} records`}</Tag>
             <Tag tone="phosphor">{`${counts.status.documented.toLocaleString()} documented`}</Tag>
@@ -127,22 +127,22 @@ export default function StrainAdmin() {
       {queues.error ? <Banner>Queues could not be read.</Banner> : null}
       {q ? (
         <>
-          <QueueFrame title="IMAGE FAILURES" code="IMG!" tone="red" queue={q.images_failed} render={(item) => (
+          <QueueFrame title="Image failures" tone="red" queue={q.images_failed} render={(item) => (
             <View style={{ gap: 4 }}>
               <SlugLink slug={item.slug} label={item.name} />
               <Text style={muted}>{item.error ?? "unknown error"}</Text>
               <Action label="Queue regeneration" tone="amber" onPress={() => ask("regen_image", item.slug)} />
             </View>
           )} />
-          <QueueFrame title="AWAITING STORED IMAGE" code="IMG" tone="cyan" queue={q.images_missing} render={(slug) => (
+          <QueueFrame title="Awaiting a stored image" tone="cyan" queue={q.images_missing} render={(slug) => (
             <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", gap: 6 }}>
               <SlugLink slug={slug} />
               <Pressable accessibilityRole="button" onPress={() => ask("regen_image", slug)}>
-                <Text style={{ fontFamily: fonts.body, color: colors.amber, fontSize: 12, paddingVertical: 4 }}>queue render</Text>
+                <Text style={{ fontFamily: fonts.body, fontWeight: "600", color: colors.amber, fontSize: 16, lineHeight: 24, paddingVertical: 8 }}>Queue a new drawing</Text>
               </Pressable>
             </View>
           )} />
-          <QueueFrame title="SUSPECTED DUPLICATES" code="DUP" tone="red" queue={q.duplicates} render={(item) => (
+          <QueueFrame title="Suspected duplicates" tone="red" queue={q.duplicates} render={(item) => (
             <View style={{ gap: 4 }}>
               <SlugLink slug={item.slug} label={item.name} />
               {item.duplicates.map((d) => (
@@ -150,40 +150,40 @@ export default function StrainAdmin() {
                   <Text style={muted}>≈</Text>
                   <SlugLink slug={d} />
                   <Pressable accessibilityRole="button" onPress={() => ask("not_duplicate", item.slug, { other: d })}>
-                    <Text style={{ fontFamily: fonts.body, color: colors.cyan, fontSize: 12, paddingVertical: 4 }}>mark distinct</Text>
+                    <Text style={{ fontFamily: fonts.body, fontWeight: "600", color: colors.cyan, fontSize: 16, lineHeight: 24, paddingVertical: 8 }}>Mark as distinct</Text>
                   </Pressable>
                 </View>
               ))}
             </View>
           )} />
-          <QueueFrame title="CONFLICTING LINEAGE" code="LIN" tone="purple" queue={q.lineage_conflicts} render={(item) => (
+          <QueueFrame title="Conflicting lineage" tone="purple" queue={q.lineage_conflicts} render={(item) => (
             <View style={{ gap: 2 }}>
               <SlugLink slug={item.slug} label={item.name} />
               {item.claims.slice(0, 4).map((c, i) => <Text key={i} style={[muted, breakWord]}>{c.parents.join(" × ")} · {c.count}</Text>)}
             </View>
           )} />
-          <QueueFrame title="NO SUPPORTING SOURCE" code="SRC" tone="amber" queue={q.missing_sources} render={(slug) => <SlugLink slug={slug} />} />
-          <QueueFrame title="NEEDS RESEARCH" code="RES" tone="amber" queue={q.incomplete} render={(slug) => (
+          <QueueFrame title="No supporting source" tone="amber" queue={q.missing_sources} render={(slug) => <SlugLink slug={slug} />} />
+          <QueueFrame title="Needs research" tone="amber" queue={q.incomplete} render={(slug) => (
             <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", gap: 6 }}>
               <SlugLink slug={slug} />
               <Pressable accessibilityRole="button" onPress={() => ask("research", slug)}>
-                <Text style={{ fontFamily: fonts.body, color: colors.amber, fontSize: 12, paddingVertical: 4 }}>re-check sources</Text>
+                <Text style={{ fontFamily: fonts.body, fontWeight: "600", color: colors.amber, fontSize: 16, lineHeight: 24, paddingVertical: 8 }}>Re-check sources</Text>
               </Pressable>
             </View>
           )} />
-          <QueueFrame title="BROKEN LINKS" code="URL" tone="red" queue={q.broken_links} render={(item) => (
+          <QueueFrame title="Broken links" tone="red" queue={q.broken_links} render={(item) => (
             <View style={{ gap: 2 }}>
               <SlugLink slug={item.slug} />
               <Text style={[muted, breakWord]}>{item.url} · {item.link}</Text>
             </View>
           )} />
-          <QueueFrame title="MEDICAL REFERENCES TO REVIEW" code="RX" tone="amber" queue={q.medical_outdated} render={(item) => (
+          <QueueFrame title="Medical references to review" tone="amber" queue={q.medical_outdated} render={(item) => (
             <View style={{ gap: 2 }}>
               <SlugLink slug={item.slug} label={item.name} />
               <Text style={muted}>{item.period} · review after {item.review_after}</Text>
             </View>
           )} />
-          <Frame title="PIPELINE RUNS" code="JOB" tone="cyan">
+          <Frame title="Pipeline runs" tone="cyan">
             {q.jobs.slice().reverse().slice(0, 12).map((run, i) => (
               <Text key={i} style={[muted, breakWord]}>
                 {run.ran_at.slice(0, 16).replace("T", " ")} · {run.stage} · {JSON.stringify(Object.fromEntries(Object.entries(run).filter(([k]) => k !== "stage" && k !== "ran_at"))).slice(0, 220)}
@@ -192,7 +192,7 @@ export default function StrainAdmin() {
           </Frame>
         </>
       ) : null}
-      <Frame title="REQUESTED JOBS" code="REQ" tone="amber">
+      <Frame title="Requested jobs" tone="amber">
         {jobs.isLoading ? <Status>Loading…</Status> : null}
         {jobs.error ? <Banner>{jobs.error instanceof Error ? jobs.error.message : "Jobs could not be read."}</Banner> : null}
         {(jobs.data ?? []).length === 0 && !jobs.isLoading ? <Status>No requests yet.</Status> : null}
