@@ -76,6 +76,7 @@ function RootStack() {
       <Stack.Screen name="about" options={{ title: "ABOUT" }} />
       <Stack.Screen name="privacy" options={{ title: "PRIVACY" }} />
       <Stack.Screen name="support" options={{ title: "SUPPORT" }} />
+      <Stack.Screen name="admin/strains" options={{ title: "MAINTENANCE" }} />
     </Stack>
     </>
   );

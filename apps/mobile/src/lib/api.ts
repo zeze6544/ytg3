@@ -9,13 +9,12 @@ import {
   localPopular,
   localRandom,
   localRefs,
-  localStrainBySlug,
-  localStrains,
   localTimeline,
   whenArchiveReady,
 } from "@/lib/localArchive";
 import { supabase } from "@/lib/supabase";
-import type { Drug, DrugClass, Strain } from "@/lib/types";
+import type { Drug, DrugClass } from "@/lib/types";
+import { loadStrainMeta } from "@/lib/strainIndex";
 
 const POPULAR_SLUGS = [
   "alcohol-ethanol",
@@ -175,28 +174,6 @@ export async function fetchClasses(): Promise<DrugClass[]> {
   }, localClasses(), (rows) => rows.length > 0);
 }
 
-export async function fetchStrainBySlug(slug: string): Promise<Strain | null> {
-  await whenArchiveReady();
-  return localStrainBySlug(slug);
-}
-
-export async function fetchStrains(opts?: { search?: string; type?: string }): Promise<Strain[]> {
-  await whenArchiveReady();
-  const local = localStrains(opts);
-  if (local.length > 0) return local;
-  return remoteFirst(async (sb) => {
-    let q = sb.from("strains").select("*").order("name");
-    if (opts?.type && opts.type !== "all") q = q.eq("type", opts.type);
-    if (opts?.search) {
-      const term = opts.search.trim();
-      if (term) q = q.or(`name.ilike.%${term}%,lineage.ilike.%${term}%`);
-    }
-    const { data, error } = await q;
-    if (error) throw error;
-    return (data ?? []) as Strain[];
-  }, localStrains(opts), (rows) => rows.length > 0);
-}
-
 export async function fetchTimeline() {
   return remoteFirst(async (sb) => {
     const { data, error } = await sb.from("timeline_events").select("*").order("year");
@@ -235,6 +212,12 @@ export async function fetchRandomDrug(): Promise<Drug | null> {
 export async function fetchCounts() {
   await whenArchiveReady();
   const local = localCounts();
+  try {
+    const meta = await loadStrainMeta();
+    local.strains = meta.counts.records;
+  } catch {
+    // Without the strain index the bundled name list still counts.
+  }
   if (local.drugs > 0 || local.strains > 0) return local;
   return remoteFirst(async (sb) => {
     const [drugs, strains, classes] = await Promise.all([
@@ -245,13 +228,4 @@ export async function fetchCounts() {
     if (drugs.error || strains.error || classes.error) throw drugs.error || strains.error || classes.error;
     return { drugs: drugs.count ?? 0, strains: strains.count ?? 0, classes: classes.count ?? 0 };
   }, localCounts(), (counts) => counts.drugs > 0);
-}
-
-export function filterStrains(rows: Strain[], terps: string[], mode: "any" | "all"): Strain[] {
-  if (terps.length === 0) return rows;
-  return rows.filter((strain) => {
-    const have = (strain.terpenes ?? []).filter(Boolean).map((terp) => terp.toLowerCase());
-    if (mode === "all") return terps.every((terp) => have.includes(terp));
-    return terps.some((terp) => have.includes(terp));
-  });
 }

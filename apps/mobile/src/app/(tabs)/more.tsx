@@ -1,5 +1,6 @@
 import { colors, fonts } from "@/constants/theme";
 import { FileCard, Frame, PageTitle, Prose, Screen, breakWord } from "@/components/ui";
+import { useIsAdmin } from "@/lib/admin";
 import { useSession } from "@/lib/session";
 import { router } from "expo-router";
 import { Pressable, Text } from "react-native";
@@ -16,6 +17,7 @@ const LINKS = [
 
 export default function MoreScreen() {
   const { user } = useSession();
+  const { isAdmin } = useIsAdmin();
   return (
     <Screen safeTop>
       <PageTitle>MORE</PageTitle>
@@ -40,6 +42,12 @@ export default function MoreScreen() {
           <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 12 }}>{link.note}</Text>
         </FileCard>
       ))}
+      {isAdmin ? (
+        <FileCard onPress={() => router.push("/admin/strains")}>
+          <Text style={[breakWord, { fontFamily: fonts.display, color: colors.red, fontSize: 26, lineHeight: 28 }]}>Strain maintenance</Text>
+          <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 12 }}>Admin queues: images, duplicates, lineage, sources</Text>
+        </FileCard>
+      ) : null}
     </Screen>
   );
 }

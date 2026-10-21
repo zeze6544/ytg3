@@ -1,0 +1,40 @@
+{
+ "files": {
+  "cannlytics_nv": {
+   "id": "cannlytics_nv",
+   "url": "https://huggingface.co/datasets/cannlytics/cannabis_results/resolve/main/data/nv/nv-results-latest.csv",
+   "file": "lab-nv.csv",
+   "license": "CC BY 4.0",
+   "fetched_at": "2026-10-21T17:06:19.136Z",
+   "bytes": 98519804,
+   "sha256": "cb308443e3066f516dd4b7fac594e7ac84c648bf73fe8ffc73f5f6ea6019a28b"
+  },
+  "cannlytics_md": {
+   "id": "cannlytics_md",
+   "url": "https://huggingface.co/datasets/cannlytics/cannabis_results/resolve/main/data/md/md-results-latest.csv",
+   "file": "lab-md.csv",
+   "license": "CC BY 4.0",
+   "fetched_at": "2026-10-21T17:06:19.321Z",
+   "bytes": 32885944,
+   "sha256": "1f2f556981e7117a20f8c891fcb527bfe4020279d8ee653fed5f34b4329844e2"
+  },
+  "cannlytics_hi": {
+   "id": "cannlytics_hi",
+   "url": "https://huggingface.co/datasets/cannlytics/cannabis_results/resolve/main/data/hi/hi-results-latest.csv",
+   "file": "lab-hi.csv",
+   "license": "CC BY 4.0",
+   "fetched_at": "2026-10-21T17:06:19.392Z",
+   "bytes": 27109389,
+   "sha256": "89ae07fc2d39ed2eb0f2f983c25f4fa178fc30130a35270a7c94758ef92122e4"
+  },
+  "ci_strains": {
+   "id": "ci_strains",
+   "url": "https://raw.githubusercontent.com/Shannon-Goddard/ci-strains-pro/main/raw-data.csv",
+   "file": "ci-raw.csv",
+   "license": "CC BY 4.0",
+   "fetched_at": "2026-10-21T17:06:19.441Z",
+   "bytes": 13799732,
+   "sha256": "469fb653819f0f97c29d17ca6e58451f3e4972da72424ab9ca6d1cd319d9103c"
+  }
+ }
+}

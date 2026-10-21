@@ -24,7 +24,7 @@ const archive = {
 export const ARCHIVE_ORIGIN = "https://narcodex.surge.sh";
 let indexStamp = String((raw as { generated_at?: string }).generated_at ?? "");
 
-function archiveUrl(path: string) {
+export function archiveUrl(path: string) {
   const host = typeof window !== "undefined" ? window.location?.host : "";
   if (host) return path;
   return `${ARCHIVE_ORIGIN}${path}`;
@@ -141,20 +141,6 @@ export function localRefs(drugId: string) {
 
 export function localClasses() {
   return [...archive.classes].sort((a, b) => a.name.localeCompare(b.name));
-}
-
-export function localStrainBySlug(slug: string) {
-  return archive.strains.find((strain) => strain.slug === slug) ?? null;
-}
-
-export function localStrains(opts?: { search?: string; type?: string }) {
-  let rows = archive.strains;
-  if (opts?.type && opts.type !== "all") rows = rows.filter((strain) => strain.type === opts.type);
-  const term = opts?.search?.trim().toLowerCase() ?? "";
-  if (term) {
-    rows = rows.filter((strain) => `${strain.name}\n${strain.lineage ?? ""}`.toLowerCase().includes(term));
-  }
-  return [...rows].sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export function localTimeline() {
@@ -390,7 +376,6 @@ export function localTimelineFor(name: string) {
   return archive.timeline.filter((event) => re.test(`${event.title}\n${event.description ?? ""}`));
 }
 
-const strainSlugs = new Set(archive.strains.map((strain) => strain.slug));
 let loading: Promise<void> | null = null;
 
 function adoptBase(main: Archive & { generated_at?: string }, extraPart: { drugs?: ArchiveDrug[]; refs?: Archive["refs"]; strains?: Strain[] }) {
@@ -407,8 +392,6 @@ function adoptBase(main: Archive & { generated_at?: string }, extraPart: { drugs
     byId.set(drug.id, drug);
     bySlug.set(drug.slug, drug);
   }
-  strainSlugs.clear();
-  for (const strain of archive.strains) strainSlugs.add(strain.slug);
   if (main.generated_at) indexStamp = main.generated_at;
 }
 
@@ -424,7 +407,7 @@ async function loadMax() {
   }
   const response = await fetch(archiveUrl("/catalogue/manifest.json"));
   if (!response.ok) throw new Error("catalogue manifest " + response.status);
-  const manifest = (await response.json()) as { drugs?: string[]; strains?: string[] };
+  const manifest = (await response.json()) as { drugs?: string[] };
   for (const name of manifest.drugs ?? []) {
     const partResponse = await fetch(archiveUrl(`/catalogue/${name}`));
     if (!partResponse.ok) throw new Error("catalogue shard " + name);
@@ -436,16 +419,6 @@ async function loadMax() {
       bySlug.set(drug.slug, drug);
     }
     for (const ref of part.refs ?? []) archive.refs.push(ref);
-  }
-  for (const name of manifest.strains ?? []) {
-    const partResponse = await fetch(archiveUrl(`/catalogue/${name}`));
-    if (!partResponse.ok) throw new Error("catalogue shard " + name);
-    const part = (await partResponse.json()) as { strains?: Strain[] };
-    for (const strain of part.strains ?? []) {
-      if (strainSlugs.has(strain.slug)) continue;
-      strainSlugs.add(strain.slug);
-      archive.strains.push(strain);
-    }
   }
 }
 
