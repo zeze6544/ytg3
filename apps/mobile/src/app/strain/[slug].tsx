@@ -45,7 +45,7 @@ export default function StrainScreen() {
         <Tag tone={STRAIN_TONE[strain.type as StrainType] ?? "phosphor"}>{strain.type}</Tag>
         <Tag tone={EVIDENCE_TONE[strain.confidence] ?? "cyan"}>{strain.confidence}</Tag>
       </View>
-      <Banner>Not medical advice. Not a dose. The mark is generated from the name. It is not a photograph.</Banner>
+      <Banner>Not medical advice. Not a dose. The plate is the terminal reference. It is not a photograph of this batch.</Banner>
       {showSummary ? <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 21 }]}>{summary}</Text> : null}
       <Frame title="CANNABINOIDS" code="CB">
         <Field label="THC" value={rangePercent(strain.thc_low, strain.thc_high)} />

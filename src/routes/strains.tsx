@@ -1,11 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { fetchStrains } from "@/lib/db";
-import { Frame, Tag } from "@/components/narcodex/Frame";
+import { Frame } from "@/components/narcodex/Frame";
 import { NugMark } from "@/components/narcodex/NugMark";
-import { isTemplateStrainSummary, rangePercent } from "@/lib/copy";
+import { rangePercent } from "@/lib/copy";
 import { useEffect, useMemo, useState } from "react";
-import type { Strain, StrainType, Tone } from "@/lib/types";
+import type { Strain, StrainType } from "@/lib/types";
 
 export const Route = createFileRoute("/strains")({
   head: () => ({
@@ -20,8 +20,6 @@ export const Route = createFileRoute("/strains")({
 });
 
 const TYPES: (StrainType | "all")[] = ["all", "indica", "sativa", "hybrid", "ruderalis", "unspecified"];
-const EV_TONE: Record<string, Tone> = { established: "phosphor", limited: "cyan", anecdotal: "amber", disputed: "purple", unknown: "red" };
-const TYPE_TONE: Record<string, Tone> = { indica: "purple", sativa: "amber", hybrid: "cyan", ruderalis: "phosphor", unspecified: "cyan" };
 
 // Widely reported cannabis terpenes with plain language notes.
 const TERPENES: { key: string; aroma: string; note: string }[] = [
@@ -127,30 +125,13 @@ function Strains() {
         </div>
       </Frame>
 
-      <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {page.map((s: Strain) => (
-          <Link key={s.slug} to="/strains/$slug" params={{ slug: s.slug }} className="panel-outline p-3 rounded-sm hover:border-phosphor/70">
-            <div className="mb-2 border border-phosphor/30">
-              <NugMark slug={s.slug} name={s.name} type={s.type} compact />
-            </div>
-            <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 items-start">
-              <div className="min-w-0">
-                <div className="font-display text-lg text-phosphor break-words">{s.name}</div>
-              </div>
-              <Tag tone={TYPE_TONE[s.type]}>{s.type}</Tag>
-            </div>
-            <div className="mt-2 grid grid-cols-2 gap-1 text-[11px]">
-              <div>THC <span className="text-phosphor">{rangePercent(s.thc_low, s.thc_high)}</span></div>
-              <div>CBD <span className="text-cyan">{rangePercent(s.cbd_low, s.cbd_high)}</span></div>
-            </div>
-            {(s.terpene_profile ?? []).slice(0, 3).length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-1">
-                {s.terpene_profile?.slice(0, 3).map((terp) => <Tag key={terp.name} tone="cyan">{terp.name} {terp.percent}%</Tag>)}
-              </div>
-            )}
-            {s.summary && !isTemplateStrainSummary(s.summary) ? <p className="mt-2 text-[11px] text-foreground/90 leading-snug line-clamp-3">{s.summary}</p> : null}
-            <div className="mt-2 text-[9px] uppercase tracking-widest text-muted-foreground">
-              <Tag tone={EV_TONE[s.confidence]}>{s.confidence === "unknown" ? "class record" : s.confidence}</Tag>
+          <Link key={s.slug} to="/strains/$slug" params={{ slug: s.slug }} className="border border-[#39ff14] bg-black p-1 hover:bg-[#39ff14]/5">
+            <NugMark slug={s.slug} name={s.name} type={s.type} compact />
+            <div className="px-1 pt-1 font-display text-sm uppercase leading-tight text-[#39ff14]">{s.name}</div>
+            <div className="px-1 pb-1 text-[10px] uppercase tracking-wide text-[#39ff14]/80">
+              THC {rangePercent(s.thc_low, s.thc_high)} | {s.type}
             </div>
           </Link>
         ))}

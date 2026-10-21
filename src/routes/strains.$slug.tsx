@@ -45,25 +45,21 @@ function StrainFile() {
 
   return (
     <div className="space-y-4">
+      <NugMark slug={strain.slug} name={strain.name} type={strain.type} />
       <Frame title={strain.name} code="STRAIN" accent={TYPE_TONE[strain.type] ?? "phosphor"} status={strain.type}>
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)] items-start">
-          <div className="border border-phosphor/40">
-            <NugMark slug={strain.slug} name={strain.name} type={strain.type} />
-          </div>
-          <div className="min-w-0 space-y-3">
+        <div className="min-w-0 space-y-3">
             <h1 className="font-display text-4xl sm:text-5xl text-phosphor break-words">{strain.name}</h1>
             <div className="flex flex-wrap gap-1">
               <Tag tone={TYPE_TONE[strain.type] ?? "phosphor"}>{strain.type}</Tag>
               <Tag tone={EV_TONE[strain.confidence] ?? "cyan"}>{strain.confidence}</Tag>
             </div>
             <p className="text-sm text-red leading-relaxed">
-              Not medical advice. Not a dose. The mark above is generated from the name. It is not a photograph of this flower.
+              Not medical advice. Not a dose. The plate is the terminal reference. It is not a photograph of this batch.
             </p>
             {showSummary ? <p className="text-sm leading-relaxed text-foreground/90">{summary}</p> : null}
             <Link to="/strains" className="inline-block text-[11px] uppercase tracking-widest text-cyan">
               ← Strain index
             </Link>
-          </div>
         </div>
       </Frame>
 

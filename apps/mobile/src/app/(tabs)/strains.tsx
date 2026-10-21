@@ -1,21 +1,22 @@
 import { colors, fonts } from "@/constants/theme";
-import { ChipWrap, FileCard, FinePrint, LoadMore, MissingArchive, NameRow, PageTitle, QueryError, SearchField, Status, Tag, breakWord, useScreenInsets } from "@/components/ui";
+import { ChipWrap, FinePrint, LoadMore, MissingArchive, PageTitle, QueryError, SearchField, Status, Tag, breakWord, useScreenInsets } from "@/components/ui";
 import { NugMark } from "@/components/NugMark";
 import { fetchStrains, filterStrains } from "@/lib/api";
-import { isTemplateStrainSummary, rangePercent } from "@/lib/reading";
+import { rangePercent } from "@/lib/reading";
 import { TERPENES } from "@/lib/reagents";
 import { archiveConfigured } from "@/lib/supabase";
-import { EVIDENCE_TONE, STRAIN_TONE, type StrainType } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { FlatList, Pressable, Text, View } from "react-native";
+import { FlatList, Pressable, Text, View, useWindowDimensions } from "react-native";
 
 const TYPES = ["all", "indica", "sativa", "hybrid", "ruderalis", "unspecified"] as const;
 const PAGE = 24;
 
 export default function StrainsScreen() {
   const insets = useScreenInsets(true);
+  const { width } = useWindowDimensions();
+  const columns = width >= 980 ? 5 : width >= 720 ? 4 : width >= 480 ? 3 : 2;
   const [search, setSearch] = useState("");
   const [type, setType] = useState<(typeof TYPES)[number]>("all");
   const [terps, setTerps] = useState<string[]>([]);
@@ -43,6 +44,9 @@ export default function StrainsScreen() {
       style={{ flex: 1, backgroundColor: colors.bg }}
       contentContainerStyle={{ ...insets, gap: 10 }}
       data={rows}
+      key={columns}
+      numColumns={columns}
+      columnWrapperStyle={{ gap: 8 }}
       keyExtractor={(item) => item.id}
       keyboardShouldPersistTaps="handled"
       ListHeaderComponent={
@@ -122,26 +126,13 @@ export default function StrainsScreen() {
         <Pressable
           accessibilityRole="button"
           onPress={() => router.push(`/strain/${item.slug}`)}
-          style={{ borderWidth: 1, borderColor: colors.line, backgroundColor: colors.panel, padding: 12, borderRadius: 4, gap: 8 }}
+          style={{ flex: 1, borderWidth: 1, borderColor: "#39ff14", backgroundColor: "#000", padding: 4, gap: 4 }}
         >
-          <View style={{ flexDirection: "row", gap: 10 }}>
-            <NugMark slug={item.slug} name={item.name} type={item.type} compact />
-            <View style={{ flex: 1, gap: 6 }}>
-              <NameRow name={item.name} tag={item.type} tone={STRAIN_TONE[item.type as StrainType] ?? "phosphor"} />
-              <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 12, lineHeight: 18 }]}>
-                THC {rangePercent(item.thc_low, item.thc_high)} · CBD {rangePercent(item.cbd_low, item.cbd_high)}
-              </Text>
-              {(item.terpene_profile ?? []).slice(0, 3).map((terp) => (
-                <Text key={terp.name} style={{ fontFamily: fonts.body, color: colors.cyan, fontSize: 11 }}>
-                  {terp.name} {terp.percent}%
-                </Text>
-              ))}
-            </View>
-          </View>
-          {item.summary && !isTemplateStrainSummary(item.summary) ? (
-            <Text numberOfLines={3} style={[breakWord, { fontFamily: fonts.body, color: colors.muted, fontSize: 12, lineHeight: 18 }]}>{item.summary}</Text>
-          ) : null}
-          <Tag tone={EVIDENCE_TONE[item.confidence] ?? "cyan"}>{item.confidence === "unknown" ? "class record" : item.confidence}</Tag>
+          <NugMark slug={item.slug} name={item.name} type={item.type} compact />
+          <Text numberOfLines={2} style={[breakWord, { fontFamily: fonts.display, color: "#39ff14", fontSize: 16, lineHeight: 18 }]}>{item.name}</Text>
+          <Text style={{ fontFamily: fonts.body, color: "#39ff14", fontSize: 10 }}>
+            THC {rangePercent(item.thc_low, item.thc_high)} | {item.type}
+          </Text>
         </Pressable>
       )}
     />
