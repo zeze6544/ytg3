@@ -23,15 +23,38 @@ const SEV: Record<string, { tone: Tone; label: string }> = {
   unknown: { tone: "cyan", label: "UNKNOWN" },
 };
 
-function Picker({ label, value, onChange, drugs }: { label: string; value: string; onChange: (v: string) => void; drugs: any[] }) {
+function Picker({ label, value, onChange, drugs }: { label: string; value: string; onChange: (v: string) => void; drugs: { id?: string; name?: string | null; slug?: string | null }[] }) {
+  const [query, setQuery] = useState("");
+  const selected = drugs.find((drug) => drug.id === value);
+  const term = query.trim().toLowerCase();
+  const hits = term
+    ? drugs.filter((drug) => `${drug.name ?? ""}\n${drug.slug ?? ""}`.toLowerCase().includes(term)).slice(0, 8)
+    : [];
   return (
     <div className="border border-phosphor/40 p-3 rounded-sm bg-panel-2/40">
       <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">{label}</div>
-      <select value={value} onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-panel border border-border/60 px-2 py-2 rounded-sm text-sm text-phosphor outline-none">
-        <option value="">· select substance ·</option>
-        {drugs.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
-      </select>
+      <div className="mb-2 font-display text-xl text-phosphor break-words">{selected?.name ?? "None selected"}</div>
+      <input
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+        placeholder="Type a name"
+        spellCheck={false}
+        className="w-full bg-panel border border-border/60 px-2 py-2 rounded-sm text-sm text-phosphor outline-none"
+      />
+      {hits.length > 0 ? (
+        <div className="mt-2 flex flex-col">
+          {hits.map((drug) => (
+            <button
+              key={drug.id}
+              type="button"
+              onClick={() => { if (drug.id) { onChange(drug.id); setQuery(""); } }}
+              className="text-left text-sm text-foreground/90 py-1 hover:text-phosphor"
+            >
+              {drug.name}
+            </button>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -9,8 +9,10 @@ import {
   localPopular,
   localRandom,
   localRefs,
+  localStrainBySlug,
   localStrains,
   localTimeline,
+  whenArchiveReady,
 } from "./localArchive";
 
 const sb: any = supabase;
@@ -44,7 +46,9 @@ async function remoteFirst<T>(load: () => Promise<T | null | undefined>, fallbac
 }
 
 export async function fetchDrugs(opts?: { search?: string; category?: string; limit?: number }) {
+  await whenArchiveReady();
   const fallback = localDrugs(opts);
+  if (fallback.length > 0) return fallback;
   return remoteFirst(async () => {
     const term = opts?.search?.trim() ?? "";
     const cat = opts?.category && opts.category !== "all" ? opts.category : null;
@@ -64,7 +68,9 @@ export async function fetchDrugs(opts?: { search?: string; category?: string; li
 }
 
 export async function fetchPopularDrugs(): Promise<Partial<Drug>[]> {
+  await whenArchiveReady();
   const fallback = localPopular(POPULAR_SLUGS);
+  if (fallback.length > 0) return fallback;
   return remoteFirst(async () => {
     const { data, error } = await sb
       .from("drugs")
@@ -78,7 +84,9 @@ export async function fetchPopularDrugs(): Promise<Partial<Drug>[]> {
 }
 
 export async function fetchDrugBySlug(slug: string): Promise<Drug | null> {
+  await whenArchiveReady();
   const fallback = localDrugBySlug(slug);
+  if (fallback) return fallback;
   return remoteFirst(async () => {
     const { data, error } = await sb.from("drugs").select("*").eq("slug", slug).maybeSingle();
     if (error) throw error;
@@ -103,7 +111,15 @@ export async function fetchClasses(): Promise<DrugClass[]> {
   }, localClasses(), (rows) => rows.length > 0);
 }
 
+export async function fetchStrainBySlug(slug: string): Promise<Strain | null> {
+  await whenArchiveReady();
+  return localStrainBySlug(slug);
+}
+
 export async function fetchStrains(opts?: { search?: string; type?: string }): Promise<Strain[]> {
+  await whenArchiveReady();
+  const local = localStrains(opts);
+  if (local.length > 0) return local;
   return remoteFirst(async () => {
     let q = sb.from("strains").select("*").order("name");
     if (opts?.type && opts.type !== "all") q = q.eq("type", opts.type);
@@ -139,6 +155,9 @@ export async function fetchInteraction(aId: string, bId: string) {
 }
 
 export async function fetchRandomDrug(): Promise<Drug | null> {
+  await whenArchiveReady();
+  const local = localRandom();
+  if (local) return local;
   return remoteFirst(async () => {
     const { count, error } = await sb.from("drugs").select("*", { count: "exact", head: true });
     if (error) throw error;
@@ -151,6 +170,9 @@ export async function fetchRandomDrug(): Promise<Drug | null> {
 }
 
 export async function fetchCounts() {
+  await whenArchiveReady();
+  const local = localCounts();
+  if (local.drugs > 0 || local.strains > 0) return local;
   return remoteFirst(async () => {
     const [drugs, strains, classes] = await Promise.all([
       sb.from("drugs").select("*", { count: "exact", head: true }),

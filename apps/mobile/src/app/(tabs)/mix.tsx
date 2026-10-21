@@ -1,6 +1,7 @@
 import { colors, fonts, toneColor, type Tone } from "@/constants/theme";
 import { Banner, FinePrint, Frame, MissingArchive, PageTitle, QueryError, Screen, SearchField, Status, Tag, breakWord } from "@/components/ui";
 import { fetchDrugs, fetchInteraction } from "@/lib/api";
+import { cleanProse } from "@/lib/reading";
 import { archiveConfigured } from "@/lib/supabase";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
@@ -174,11 +175,12 @@ function SubstanceFacts({
 }
 
 function Fact({ label, value }: { label: string; value?: string | null }) {
-  if (!value) return null;
+  const text = cleanProse(value);
+  if (!text) return null;
   return (
     <View style={{ gap: 2 }}>
       <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 10, letterSpacing: 1 }}>{label.toUpperCase()}</Text>
-      <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 21 }]}>{value}</Text>
+      <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 21 }]}>{text}</Text>
     </View>
   );
 }

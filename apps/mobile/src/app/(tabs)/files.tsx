@@ -130,12 +130,12 @@ export default function FilesScreen() {
             tag={CATEGORY_LABELS[item.category ?? "other"]}
             tone={CATEGORY_TONE[item.category as DrugCategory] ?? "phosphor"}
           />
-          {item.summary ? (
+          {blurb(item.summary) ? (
             <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 12, lineHeight: 18 }} numberOfLines={3}>
               {blurb(item.summary)}
             </Text>
           ) : null}
-          {item.acute_risks ? (
+          {blurb(item.acute_risks, 220) ? (
             <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 12, lineHeight: 18 }} numberOfLines={3}>
               {blurb(item.acute_risks, 220)}
             </Text>

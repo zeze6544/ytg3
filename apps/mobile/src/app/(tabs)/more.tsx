@@ -2,7 +2,7 @@ import { colors, fonts } from "@/constants/theme";
 import { FileCard, Frame, PageTitle, Prose, Screen, breakWord } from "@/components/ui";
 import { useSession } from "@/lib/session";
 import { router } from "expo-router";
-import { Linking, Pressable, Text } from "react-native";
+import { Pressable, Text } from "react-native";
 
 const LINKS = [
   { href: "/classes", label: "Classes", note: "Pharmacological groups" },
@@ -19,16 +19,10 @@ export default function MoreScreen() {
   return (
     <Screen safeTop>
       <PageTitle>MORE</PageTitle>
-      <Frame title="IPHONE APP" code="IPA" tone="amber">
+      <Frame title="IPHONE" code="IOS" tone="amber">
         <Prose>
-          Download NARCØDEX.ipa. A free personal Apple ID runs it for 7 days after AltStore or SideStore signs it. Safari can save the file. Apple does not let Safari install it on a free Apple ID. Turn on Developer Mode, then trust your Apple ID certificate.
+          There is no signed iPhone app on this site. Safari can download a file. It cannot install an unsigned app, and a free Apple ID cannot install an IPA from the browser. Use this archive in the browser.
         </Prose>
-        <Pressable accessibilityRole="link" onPress={() => Linking.openURL("https://narcodex.surge.sh/narcodex.ipa")} style={{ minHeight: 44, justifyContent: "center" }}>
-          <Text style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: 28, lineHeight: 30 }}>DOWNLOAD IPA</Text>
-        </Pressable>
-        <Pressable accessibilityRole="link" onPress={() => Linking.openURL("https://narcodex.surge.sh/install.html")} style={{ minHeight: 36, justifyContent: "center" }}>
-          <Text style={{ fontFamily: fonts.body, color: colors.cyan, fontSize: 13 }}>Install steps</Text>
-        </Pressable>
       </Frame>
       <Frame title="ACCOUNT" code="AUTH" tone="cyan">
         <Prose>

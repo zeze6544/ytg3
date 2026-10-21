@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Frame, Tag } from "@/components/narcodex/Frame";
 import { fetchCounts, fetchPopularDrugs, fetchRandomDrug } from "@/lib/db";
+import { fileText } from "@/lib/copy";
 import { CATEGORY_COLOR, CATEGORY_LABELS } from "@/lib/types";
 import { useEffect, useState } from "react";
 
@@ -31,11 +32,8 @@ function Home() {
           &gt; a public library for substances · <Link to="/read-only" className="text-amber amber-glow hover:underline">read only</Link>
         </div>
         <p className="mt-4 max-w-2xl text-sm leading-relaxed text-foreground/90">
-          NARCØDEX is a plain spoken encyclopaedia of drugs, cannabis strains, interactions and
-          history. It is built for people who want honest information without the moralising, and
-          for people who take care of the ones who use. Every entry tells you what we know, how
-          well we know it, and what to do to stay safer. Nothing here is dosing advice, sales, or
-          a green light. It is just what the evidence says today.
+          A public file of drugs, cannabis strains, and interactions. A number is shown only when
+          a source published it. Nothing here is a dose, a sale, or a reason to use a substance.
         </p>
         <div className="mt-6 flex flex-wrap gap-2">
           <Link to="/database" className="px-3 py-2 border border-phosphor/60 text-phosphor phosphor-glow rounded-sm text-xs uppercase tracking-widest hover:bg-phosphor/10">Browse the database</Link>
@@ -73,7 +71,7 @@ function Home() {
                 <span className="font-display text-lg text-phosphor group-hover:phosphor-glow truncate">{d.name}</span>
                 <Tag tone={CATEGORY_COLOR[d.category!] ?? "phosphor"}>{CATEGORY_LABELS[d.category!]}</Tag>
               </div>
-              <div className="mt-2 text-[11px] text-muted-foreground line-clamp-2">{d.summary}</div>
+              {fileText(d.summary) ? <div className="mt-2 text-[11px] text-muted-foreground line-clamp-2">{fileText(d.summary)}</div> : null}
             </Link>
           ))}
         </div>
@@ -84,7 +82,7 @@ function Home() {
           <div className="marquee-track text-red red-glow text-xs uppercase tracking-widest">
             {Array.from({ length: 2 }).map((_, i) => (
               <span key={i} className="pr-12">
-                ⚠ never mix opioids with benzodiazepines or alcohol&nbsp;&nbsp;·&nbsp;&nbsp; ⚠ test your batch with a reagent kit&nbsp;&nbsp;·&nbsp;&nbsp; ⚠ fentanyl contamination is still everywhere&nbsp;&nbsp;·&nbsp;&nbsp; ⚠ start low, go slow&nbsp;&nbsp;·&nbsp;&nbsp; ⚠ if you are not sure, do not&nbsp;&nbsp;·&nbsp;&nbsp; ⚠ NARCØDEX does not tell anyone to use drugs&nbsp;&nbsp;·&nbsp;&nbsp;
+                ⚠ never mix opioids with benzodiazepines or alcohol&nbsp;&nbsp;·&nbsp;&nbsp; ⚠ a reagent colour is not a clearance&nbsp;&nbsp;·&nbsp;&nbsp; ⚠ fentanyl and nitazenes still show up in other supplies&nbsp;&nbsp;·&nbsp;&nbsp; ⚠ this archive has no dose&nbsp;&nbsp;·&nbsp;&nbsp; ⚠ if you are not sure, do not take it&nbsp;&nbsp;·&nbsp;&nbsp; ⚠ NARCØDEX does not tell anyone to use drugs&nbsp;&nbsp;·&nbsp;&nbsp;
               </span>
             ))}
           </div>

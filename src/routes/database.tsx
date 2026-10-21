@@ -4,6 +4,7 @@ import { fetchDrugs } from "@/lib/db";
 import { LOCAL_DRUG_COUNT } from "@/lib/localArchive";
 import { CATEGORY_COLOR, CATEGORY_LABELS, type DrugCategory } from "@/lib/types";
 import { Frame, Tag } from "@/components/narcodex/Frame";
+import { fileText, nameList } from "@/lib/copy";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 
@@ -32,10 +33,12 @@ function Database() {
   const { q: qParam, cat: catParam } = Route.useSearch();
   const [search, setSearch] = useState(qParam ?? "");
   const [cat, setCat] = useState<string>(catParam ?? "all");
+  const [shown, setShown] = useState(48);
 
   // Sync url -> state (back/forward, external links)
   useEffect(() => { setCat(catParam ?? "all"); }, [catParam]);
   useEffect(() => { setSearch(qParam ?? ""); }, [qParam]);
+  useEffect(() => { setShown(48); }, [search, cat]);
 
   const q = useQuery({ queryKey: ["drugs", search, cat], queryFn: () => fetchDrugs({ search, category: cat }) });
 
@@ -79,22 +82,32 @@ function Database() {
         {!q.isLoading && (q.data?.length ?? 0) === 0 && (
           <div className="text-xs text-muted-foreground uppercase tracking-widest sm:col-span-2 lg:col-span-3">No records match. Try clearing filters.</div>
         )}
-        {(q.data ?? []).map((d) => (
+        {(q.data ?? []).slice(0, shown).map((d) => {
+          const aka = nameList(d.aliases);
+          const summary = fileText(d.summary);
+          return (
           <Link key={d.slug} to="/drugs/$slug" params={{ slug: d.slug! }}
             className="panel-outline p-3 rounded-sm hover:border-phosphor/60 transition group">
             <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 items-start">
               <div className="min-w-0">
                 <div className="font-display text-lg text-phosphor group-hover:phosphor-glow truncate">{d.name}</div>
-                {(d.aliases && d.aliases.filter(Boolean).length > 0) && (
-                  <div className="text-[10px] text-muted-foreground truncate uppercase tracking-widest">a.k.a. {d.aliases.filter(Boolean).join(", ")}</div>
-                )}
+                {aka ? (
+                  <div className="text-[10px] text-muted-foreground truncate uppercase tracking-widest">a.k.a. {aka}</div>
+                ) : null}
               </div>
               <Tag tone={CATEGORY_COLOR[d.category!] ?? "phosphor"}>{CATEGORY_LABELS[d.category!]}</Tag>
             </div>
-            <p className="mt-2 text-[11px] text-foreground/85 line-clamp-2">{d.summary}</p>
+            {summary ? <p className="mt-2 text-[11px] text-foreground/85 line-clamp-2">{summary}</p> : null}
             <div className="mt-2 text-[9px] uppercase tracking-widest text-muted-foreground">EVIDENCE: <span className="text-phosphor">{d.evidence_quality === "unknown" ? "class record" : d.evidence_quality}</span></div>
           </Link>
-        ))}
+          );
+        })}
+        {shown < (q.data?.length ?? 0) ? (
+          <button type="button" onClick={() => setShown((count) => count + 48)}
+            className="sm:col-span-2 lg:col-span-3 px-3 py-3 border border-phosphor/50 text-phosphor uppercase text-[11px] tracking-widest rounded-sm hover:bg-phosphor/10">
+            Show {Math.min(48, (q.data?.length ?? 0) - shown)} more
+          </button>
+        ) : null}
       </div>
     </div>
   );
