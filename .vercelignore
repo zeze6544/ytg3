@@ -1,0 +1,9 @@
+.git
+.agents
+.cursor
+.workspace
+supabase
+**/*.md
+apps
+data
+scripts/substances*.mjs
