@@ -143,6 +143,10 @@ export function localClasses() {
   return [...archive.classes].sort((a, b) => a.name.localeCompare(b.name));
 }
 
+export function localStrainBySlug(slug: string) {
+  return archive.strains.find((strain) => strain.slug === slug) ?? null;
+}
+
 export function localStrains(opts?: { search?: string; type?: string }) {
   let rows = archive.strains;
   if (opts?.type && opts.type !== "all") rows = rows.filter((strain) => strain.type === opts.type);

@@ -1,0 +1,364 @@
+{
+ "runs": [
+  {
+   "stage": "listings",
+   "ran_at": "2026-10-21T17:07:53.316Z",
+   "rows": 21210,
+   "matched_rows": 20662,
+   "records": 19168,
+   "unmatched_rows": 548,
+   "rejected_values": {
+    "flowering_days": 225,
+    "yield_indoor_g_m2": 3014,
+    "yield_outdoor_g_plant": 901,
+    "thc_pct_inverted": 71,
+    "height_indoor_cm": 392,
+    "thc_pct": 204,
+    "cbd_pct_inverted": 92,
+    "height_outdoor_cm": 348,
+    "yield_indoor_g_m2_inverted": 15,
+    "cbd_pct": 5,
+    "yield_outdoor_g_plant_inverted": 2
+   }
+  },
+  {
+   "stage": "labs",
+   "ran_at": "2026-10-21T17:07:58.161Z",
+   "NV": {
+    "used_rows": 74935,
+    "name_groups": 8098,
+    "excluded": {
+     "not_flower": 70677,
+     "no_name": 3060,
+     "all_zero": 4202,
+     "implausible": 190
+    }
+   },
+   "MD": {
+    "used_rows": 88817,
+    "name_groups": 2300,
+    "excluded": {
+     "not_flower": 11014,
+     "no_name": 1364,
+     "all_zero": 3768,
+     "implausible": 50
+    }
+   },
+   "HI": {
+    "used_rows": 5607,
+    "name_groups": 725,
+    "excluded": {
+     "not_flower": 7722,
+     "no_name": 82,
+     "all_zero": 5,
+     "implausible": 69
+    }
+   }
+  },
+  {
+   "stage": "listings",
+   "ran_at": "2026-10-21T17:08:53.824Z",
+   "rows": 21210,
+   "matched_rows": 20662,
+   "records": 19168,
+   "unmatched_rows": 548,
+   "rejected_values": {
+    "flowering_days": 225,
+    "yield_indoor_g_m2": 3014,
+    "yield_outdoor_g_plant": 901,
+    "thc_pct_inverted": 71,
+    "height_indoor_cm": 392,
+    "thc_pct": 204,
+    "cbd_pct_inverted": 92,
+    "height_outdoor_cm": 348,
+    "yield_indoor_g_m2_inverted": 15,
+    "cbd_pct": 5,
+    "yield_outdoor_g_plant_inverted": 2
+   }
+  },
+  {
+   "stage": "labs",
+   "ran_at": "2026-10-21T17:09:16.249Z",
+   "NV": {
+    "used_rows": 74935,
+    "name_groups_matched": 995,
+    "name_groups_unmatched": 7103,
+    "excluded": {
+     "not_flower": 70677,
+     "no_name": 3060,
+     "all_zero": 4202,
+     "implausible": 190
+    }
+   },
+   "MD": {
+    "used_rows": 88817,
+    "name_groups_matched": 811,
+    "name_groups_unmatched": 1489,
+    "excluded": {
+     "not_flower": 11014,
+     "no_name": 1364,
+     "all_zero": 3768,
+     "implausible": 50
+    }
+   },
+   "HI": {
+    "used_rows": 5607,
+    "name_groups_matched": 284,
+    "name_groups_unmatched": 441,
+    "excluded": {
+     "not_flower": 7722,
+     "no_name": 82,
+     "all_zero": 5,
+     "implausible": 69
+    }
+   }
+  },
+  {
+   "stage": "listings",
+   "ran_at": "2026-10-21T17:14:17.479Z",
+   "rows": 21210,
+   "matched_rows": 20662,
+   "records": 19168,
+   "unmatched_rows": 548,
+   "rejected_values": {
+    "flowering_days": 225,
+    "yield_indoor_g_m2": 3014,
+    "yield_outdoor_g_plant": 901,
+    "thc_pct_inverted": 71,
+    "height_indoor_cm": 392,
+    "thc_pct": 204,
+    "cbd_pct_inverted": 92,
+    "height_outdoor_cm": 348,
+    "yield_indoor_g_m2_inverted": 15,
+    "cbd_pct": 5,
+    "yield_outdoor_g_plant_inverted": 2
+   }
+  },
+  {
+   "stage": "labs",
+   "ran_at": "2026-10-21T17:14:25.403Z",
+   "NV": {
+    "used_rows": 74935,
+    "name_groups_matched": 995,
+    "name_groups_unmatched": 7103,
+    "excluded": {
+     "not_flower": 70677,
+     "no_name": 3060,
+     "all_zero": 4202,
+     "implausible": 190
+    }
+   },
+   "MD": {
+    "used_rows": 88817,
+    "name_groups_matched": 811,
+    "name_groups_unmatched": 1489,
+    "excluded": {
+     "not_flower": 11014,
+     "no_name": 1364,
+     "all_zero": 3768,
+     "implausible": 50
+    }
+   },
+   "HI": {
+    "used_rows": 5607,
+    "name_groups_matched": 284,
+    "name_groups_unmatched": 441,
+    "excluded": {
+     "not_flower": 7722,
+     "no_name": 82,
+     "all_zero": 5,
+     "implausible": 69
+    }
+   }
+  },
+  {
+   "stage": "listings",
+   "ran_at": "2026-10-21T17:15:14.981Z",
+   "rows": 21210,
+   "matched_rows": 20662,
+   "records": 19168,
+   "unmatched_rows": 548,
+   "rejected_values": {
+    "flowering_days": 225,
+    "yield_indoor_g_m2": 3014,
+    "yield_outdoor_g_plant": 901,
+    "thc_pct_inverted": 71,
+    "height_indoor_cm": 392,
+    "thc_pct": 204,
+    "cbd_pct_inverted": 92,
+    "thc_pct_zero": 2482,
+    "cbd_pct_zero": 122,
+    "height_outdoor_cm": 348,
+    "yield_indoor_g_m2_inverted": 15,
+    "cbd_pct": 5,
+    "yield_outdoor_g_plant_inverted": 2
+   }
+  },
+  {
+   "stage": "labs",
+   "ran_at": "2026-10-21T17:15:52.620Z",
+   "NV": {
+    "used_rows": 74935,
+    "name_groups_matched": 995,
+    "name_groups_unmatched": 7103,
+    "excluded": {
+     "not_flower": 70677,
+     "no_name": 3060,
+     "all_zero": 4202,
+     "implausible": 190
+    }
+   },
+   "MD": {
+    "used_rows": 88817,
+    "name_groups_matched": 808,
+    "name_groups_unmatched": 1492,
+    "excluded": {
+     "not_flower": 11014,
+     "no_name": 1364,
+     "all_zero": 3768,
+     "implausible": 50
+    }
+   },
+   "HI": {
+    "used_rows": 5607,
+    "name_groups_matched": 282,
+    "name_groups_unmatched": 443,
+    "excluded": {
+     "not_flower": 7722,
+     "no_name": 82,
+     "all_zero": 5,
+     "implausible": 69
+    }
+   }
+  },
+  {
+   "stage": "labs",
+   "ran_at": "2026-10-21T17:16:42.951Z",
+   "NV": {
+    "used_rows": 74935,
+    "name_groups_matched": 995,
+    "name_groups_unmatched": 7103,
+    "excluded": {
+     "not_flower": 70677,
+     "no_name": 3060,
+     "all_zero": 4202,
+     "implausible": 190
+    }
+   },
+   "MD": {
+    "used_rows": 88817,
+    "name_groups_matched": 808,
+    "name_groups_unmatched": 1492,
+    "excluded": {
+     "not_flower": 11014,
+     "no_name": 1364,
+     "all_zero": 3768,
+     "implausible": 50
+    }
+   },
+   "HI": {
+    "used_rows": 5607,
+    "name_groups_matched": 282,
+    "name_groups_unmatched": 443,
+    "excluded": {
+     "not_flower": 7722,
+     "no_name": 82,
+     "all_zero": 5,
+     "implausible": 69
+    }
+   }
+  },
+  {
+   "stage": "research",
+   "ran_at": "2026-10-21T17:16:43.119Z",
+   "queued": 11461,
+   "processed": 3000,
+   "with_proposals": 67,
+   "remaining": 8461
+  },
+  {
+   "stage": "labs",
+   "ran_at": "2026-10-21T17:32:18.425Z",
+   "NV": {
+    "used_rows": 74935,
+    "name_groups_matched": 1013,
+    "name_groups_unmatched": 7085,
+    "excluded": {
+     "not_flower": 70677,
+     "no_name": 3060,
+     "all_zero": 4202,
+     "implausible": 190
+    }
+   },
+   "MD": {
+    "used_rows": 88817,
+    "name_groups_matched": 823,
+    "name_groups_unmatched": 1477,
+    "excluded": {
+     "not_flower": 11014,
+     "no_name": 1364,
+     "all_zero": 3768,
+     "implausible": 50
+    }
+   },
+   "HI": {
+    "used_rows": 5607,
+    "name_groups_matched": 284,
+    "name_groups_unmatched": 441,
+    "excluded": {
+     "not_flower": 7722,
+     "no_name": 82,
+     "all_zero": 5,
+     "implausible": 69
+    }
+   }
+  },
+  {
+   "stage": "labs",
+   "ran_at": "2026-10-21T17:32:52.414Z",
+   "NV": {
+    "used_rows": 74935,
+    "name_groups_matched": 1012,
+    "name_groups_unmatched": 7086,
+    "excluded": {
+     "not_flower": 70677,
+     "no_name": 3060,
+     "all_zero": 4202,
+     "implausible": 190
+    }
+   },
+   "MD": {
+    "used_rows": 88817,
+    "name_groups_matched": 823,
+    "name_groups_unmatched": 1477,
+    "excluded": {
+     "not_flower": 11014,
+     "no_name": 1364,
+     "all_zero": 3768,
+     "implausible": 50
+    }
+   },
+   "HI": {
+    "used_rows": 5607,
+    "name_groups_matched": 284,
+    "name_groups_unmatched": 441,
+    "excluded": {
+     "not_flower": 7722,
+     "no_name": 82,
+     "all_zero": 5,
+     "implausible": 69
+    }
+   }
+  },
+  {
+   "stage": "links",
+   "ran_at": "2026-10-21T17:35:24.884Z",
+   "checked_now": 400,
+   "ok": 381,
+   "broken": 19,
+   "failed": 0,
+   "total_known": 20668,
+   "total_checked": 400
+  }
+ ]
+}

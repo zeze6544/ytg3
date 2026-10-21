@@ -4,7 +4,7 @@ export type DrugCategory =
   | "dissociative" | "cannabinoid" | "antidepressant" | "antipsychotic"
   | "anaesthetic" | "inhalant" | "plant_fungi" | "research_chemical"
   | "prescription" | "otc" | "withdrawn" | "historical" | "other";
-export type StrainType = "indica" | "sativa" | "hybrid" | "ruderalis";
+export type StrainType = "indica" | "sativa" | "hybrid" | "ruderalis" | "unspecified";
 
 export interface Drug {
   id: string; slug: string; name: string; category: DrugCategory;
@@ -22,11 +22,20 @@ export interface Drug {
 }
 
 export interface DrugClass { id: string; slug: string; name: string; description: string | null; color: string | null; }
+export interface AssayPoint { name: string; percent: number }
+export interface StrainProduct {
+  region: string; brand: string; product: string; form?: string | null;
+  thc_label?: string | null; cbd_label?: string | null; source?: string | null; source_url?: string | null;
+}
 export interface Strain {
   id: string; slug: string; name: string; type: StrainType; lineage: string | null;
   thc_low: number | null; thc_high: number | null; cbd_low: number | null; cbd_high: number | null;
   terpenes: string[] | null; effects: string[] | null; adverse: string[] | null;
   confidence: EvidenceQuality; summary: string | null;
+  terpene_profile?: AssayPoint[] | null;
+  cannabinoids?: AssayPoint[] | null;
+  products?: StrainProduct[] | null;
+  assay_note?: string | null;
 }
 
 export const CATEGORY_LABELS: Record<string, string> = {

@@ -3,7 +3,7 @@ import { Action, Banner, ChipScroller, Field, FileCard, FinePrint, Frame, QueryE
 import { fetchDrugBySlug, fetchDrugRefs, fetchNeighbors } from "@/lib/api";
 import { readingFor } from "@/lib/briefing";
 import { localGroupsOf, localRuleHits, localTimelineFor, localUnnamedFloor } from "@/lib/localArchive";
-import { blurb } from "@/lib/reading";
+import { blurb, fileText, nameList } from "@/lib/reading";
 import { rememberFile } from "@/lib/recent";
 import { useSession } from "@/lib/session";
 import { requireClient } from "@/lib/supabase";
@@ -134,11 +134,11 @@ export default function DrugScreen() {
       </ChipScroller>
 
       <View nativeID="spot-overview" style={spotStyle} onLayout={(event) => { spots.current.overview = event.nativeEvent.layout.y; }}>
-        {drug.acute_risks ? (
+        {fileText(drug.acute_risks) ? (
           <Text style={[breakWord, { fontFamily: fonts.bodyMedium, color: colors.red, fontSize: 14, lineHeight: 21 }]}>{blurb(drug.acute_risks, 180)}</Text>
         ) : null}
-        {drug.summary ? (
-          <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 21 }]}>{drug.summary}</Text>
+        {fileText(drug.summary) ? (
+          <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 14, lineHeight: 21 }]}>{fileText(drug.summary)}</Text>
         ) : null}
         <Frame title="EFFECTS" code="EFF">
           <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 10 }}>REPORTED</Text>
@@ -155,35 +155,35 @@ export default function DrugScreen() {
           </View>
         </Frame>
         <Frame title="NAMES" code="NAM" tone="cyan">
-          <Field label="Aliases" value={drug.aliases?.filter(Boolean).join(", ")} />
-          <Field label="Brand names" value={drug.brand_names?.filter(Boolean).join(", ")} />
-          <Field label="Street names" value={drug.street_names?.filter(Boolean).join(", ")} />
-          <Field label="Chemistry" value={drug.chemistry} />
+          <Field label="Aliases" value={nameList(drug.aliases)} />
+          <Field label="Brand names" value={nameList(drug.brand_names)} />
+          <Field label="Street names" value={nameList(drug.street_names)} />
+          <Field label="Chemistry" value={fileText(drug.chemistry)} />
         </Frame>
       </View>
       <View nativeID="spot-pharm" style={spotStyle} onLayout={(event) => { spots.current.pharm = event.nativeEvent.layout.y; }}>
         <Frame title="PHARMACOLOGY" code="MEC" tone="purple">
-          <Field label="Mechanism" value={drug.mechanism} />
-          <Field label="Onset" value={drug.onset} />
-          <Field label="Duration" value={drug.duration} />
-          <Field label="Half-life" value={drug.half_life} />
+          <Field label="Mechanism" value={fileText(drug.mechanism)} />
+          <Field label="Onset" value={fileText(drug.onset)} />
+          <Field label="Duration" value={fileText(drug.duration)} />
+          <Field label="Half-life" value={fileText(drug.half_life)} />
         </Frame>
       </View>
       <View nativeID="spot-risk" style={spotStyle} onLayout={(event) => { spots.current.risk = event.nativeEvent.layout.y; }}>
         <Frame title="RISKS" code="RSK" tone="red">
-          <Field label="Acute" value={drug.acute_risks} />
-          <Field label="Chronic" value={drug.chronic_risks} />
-          <Field label="Overdose signs" value={drug.overdose_signs} />
-          <Field label="Contraindications" value={drug.contraindications} />
+          <Field label="Acute" value={fileText(drug.acute_risks)} />
+          <Field label="Chronic" value={fileText(drug.chronic_risks)} />
+          <Field label="Overdose signs" value={fileText(drug.overdose_signs)} />
+          <Field label="Contraindications" value={fileText(drug.contraindications)} />
         </Frame>
         <Frame title="DEPENDENCE" code="DEP" tone="amber">
-          <Field label="Dependence" value={drug.dependence} />
-          <Field label="Tolerance" value={drug.tolerance} />
-          <Field label="Withdrawal" value={drug.withdrawal} />
+          <Field label="Dependence" value={fileText(drug.dependence)} />
+          <Field label="Tolerance" value={fileText(drug.tolerance)} />
+          <Field label="Withdrawal" value={fileText(drug.withdrawal)} />
         </Frame>
         <Frame title="HARM REDUCTION" code="HR" tone="cyan">
-          <Field label="Testing" value={drug.testing} />
-          <Field label="Safer context" value={drug.harm_reduction} />
+          <Field label="Testing" value={fileText(drug.testing)} />
+          <Field label="Safer context" value={fileText(drug.harm_reduction)} />
           <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 11, lineHeight: 16 }}>
             NARCØDEX does not provide dosing, sourcing, synthesis, or test-evasion instructions.
           </Text>
@@ -196,7 +196,7 @@ export default function DrugScreen() {
       <View nativeID="spot-history" style={spotStyle} onLayout={(event) => { spots.current.history = event.nativeEvent.layout.y; }}>
         <Frame title="HISTORY" code="HIS" tone="purple">
           <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 13, lineHeight: 20 }]}>
-            {drug.history ?? "· see the class record ·"}
+            {fileText(drug.history) ?? "· see the class record ·"}
           </Text>
         </Frame>
         <TimelineRecord name={drug.name} />

@@ -21,6 +21,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DrugsSlugRouteImport } from './routes/drugs.$slug'
+import { Route as StrainsSlugRouteImport } from './routes/strains.$slug'
 
 const TimelineRoute = TimelineRouteImport.update({
   id: '/timeline',
@@ -82,6 +83,11 @@ const DrugsSlugRoute = DrugsSlugRouteImport.update({
   path: '/drugs/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StrainsSlugRoute = StrainsSlugRouteImport.update({
+  id: '/strains/$slug',
+  path: '/strains/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/strains': typeof StrainsRoute
   '/timeline': typeof TimelineRoute
   '/drugs/$slug': typeof DrugsSlugRoute
+  '/strains/$slug': typeof StrainsSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/strains': typeof StrainsRoute
   '/timeline': typeof TimelineRoute
   '/drugs/$slug': typeof DrugsSlugRoute
+  '/strains/$slug': typeof StrainsSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   '/strains': typeof StrainsRoute
   '/timeline': typeof TimelineRoute
   '/drugs/$slug': typeof DrugsSlugRoute
+  '/strains/$slug': typeof StrainsSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/strains'
     | '/timeline'
     | '/drugs/$slug'
+    | '/strains/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
     | '/strains'
     | '/timeline'
     | '/drugs/$slug'
+    | '/strains/$slug'
   id:
     | '__root__'
     | '/'
@@ -169,6 +180,7 @@ export interface FileRouteTypes {
     | '/strains'
     | '/timeline'
     | '/drugs/$slug'
+    | '/strains/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -184,6 +196,7 @@ export interface RootRouteChildren {
   StrainsRoute: typeof StrainsRoute
   TimelineRoute: typeof TimelineRoute
   DrugsSlugRoute: typeof DrugsSlugRoute
+  StrainsSlugRoute: typeof StrainsSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -272,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DrugsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/strains/$slug': {
+      id: '/strains/$slug'
+      path: '/strains/$slug'
+      fullPath: '/strains/$slug'
+      preLoaderRoute: typeof StrainsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -288,6 +308,7 @@ const rootRouteChildren: RootRouteChildren = {
   StrainsRoute: StrainsRoute,
   TimelineRoute: TimelineRoute,
   DrugsSlugRoute: DrugsSlugRoute,
+  StrainsSlugRoute: StrainsSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

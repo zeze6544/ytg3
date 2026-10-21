@@ -1,0 +1,51 @@
+{
+ "built": "2026-10-21",
+ "counts": {
+  "records": 47929,
+  "cultivars": 30394,
+  "products": 17535,
+  "status": {
+   "documented": 10978,
+   "partial": 25496,
+   "needs_research": 11455
+  },
+  "with_sources": 38747,
+  "with_cannabinoids": 28973,
+  "with_sourced_cannabinoids": 28921,
+  "with_lab": 3695,
+  "with_terpenes_measured": 8319,
+  "with_terpenes_any": 9109,
+  "with_lineage": 17652,
+  "with_lineage_conflict": 2787,
+  "with_breeder": 18939,
+  "suspected_duplicates": 3810,
+  "image_stored": 1000,
+  "image_failed": 0,
+  "image_on_device": 46929,
+  "families_multi": 4468
+ },
+ "excluded": [
+  {
+   "slug": "seeds",
+   "name": "Seeds",
+   "origin": "listing",
+   "reason": "scraped page text, not a cultivar name"
+  },
+  {
+   "slug": "age-verification",
+   "name": "AGE VERIFICATION",
+   "origin": "listing",
+   "reason": "scraped page text, not a cultivar name"
+  }
+ ],
+ "queues": {
+  "images_missing": 46929,
+  "images_failed": 0,
+  "missing_sources": 9182,
+  "incomplete": 11455,
+  "duplicates": 1126,
+  "lineage_conflicts": 2787,
+  "broken_links": 19,
+  "medical_outdated": 497
+ }
+}

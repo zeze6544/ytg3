@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/lib/session";
 import { toast } from "sonner";
+import { fileText, nameList } from "@/lib/copy";
 
 export const Route = createFileRoute("/drugs/$slug")({ component: Detail });
 
@@ -49,7 +50,7 @@ function Detail() {
               <Tag tone={EV_TONE[drug.evidence_quality]}>EVIDENCE: {drug.evidence_quality === "unknown" ? "class record" : drug.evidence_quality}</Tag>
               {drug.discovered_year && <Tag tone="amber">EST. {drug.discovered_year}</Tag>}
             </div>
-            {drug.summary && <p className="mt-4 text-sm text-foreground/85 leading-relaxed">{drug.summary}</p>}
+            {fileText(drug.summary) ? <p className="mt-4 text-sm text-foreground/85 leading-relaxed">{fileText(drug.summary)}</p> : null}
           </div>
           <div className="flex flex-row lg:flex-col gap-2">
             <button onClick={save} className="px-3 py-2 border border-phosphor/60 text-phosphor uppercase text-[11px] tracking-widest rounded-sm hover:bg-phosphor/10">◇ Save</button>
@@ -60,25 +61,25 @@ function Detail() {
 
       <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
         <Frame title="NAMES & CLASSIFICATION" code="NAM" accent="cyan">
-          <Field label="Aliases" value={drug.aliases?.filter(Boolean).join(", ") || undefined} />
-          <Field label="Brand names" value={drug.brand_names?.filter(Boolean).join(", ") || undefined} />
-          <Field label="Street names" value={drug.street_names?.filter(Boolean).join(", ") || undefined} />
+          <Field label="Aliases" value={nameList(drug.aliases)} />
+          <Field label="Brand names" value={nameList(drug.brand_names)} />
+          <Field label="Street names" value={nameList(drug.street_names)} />
           <Field label="Category" value={CATEGORY_LABELS[drug.category]} />
-          <Field label="Chemistry" value={drug.chemistry} />
+          <Field label="Chemistry" value={fileText(drug.chemistry)} />
         </Frame>
 
         <Frame title="STATUS" code="LEG" accent="amber">
-          <Field label="Legal" value={drug.legal_status} />
-          <Field label="Medical" value={drug.medical_status} />
-          <Field label="Medical uses" value={drug.medical_uses} />
-          <Field label="Contraindications" value={drug.contraindications} />
+          <Field label="Legal" value={fileText(drug.legal_status)} />
+          <Field label="Medical" value={fileText(drug.medical_status)} />
+          <Field label="Medical uses" value={fileText(drug.medical_uses)} />
+          <Field label="Contraindications" value={fileText(drug.contraindications)} />
         </Frame>
 
         <Frame title="PHARMACOLOGY" code="MEC" accent="purple">
-          <Field label="Mechanism" value={drug.mechanism} />
-          <Field label="Onset" value={drug.onset} />
-          <Field label="Duration" value={drug.duration} />
-          <Field label="Half-life" value={drug.half_life} />
+          <Field label="Mechanism" value={fileText(drug.mechanism)} />
+          <Field label="Onset" value={fileText(drug.onset)} />
+          <Field label="Duration" value={fileText(drug.duration)} />
+          <Field label="Half-life" value={fileText(drug.half_life)} />
         </Frame>
 
         <Frame title="EFFECTS" code="EFF" accent="phosphor">
@@ -95,20 +96,20 @@ function Detail() {
         </Frame>
 
         <Frame title="RISK PROFILE" code="RSK" accent="red">
-          <Field label="Acute risks" value={drug.acute_risks} />
-          <Field label="Chronic risks" value={drug.chronic_risks} />
-          <Field label="Overdose signs" value={drug.overdose_signs} />
+          <Field label="Acute risks" value={fileText(drug.acute_risks)} />
+          <Field label="Chronic risks" value={fileText(drug.chronic_risks)} />
+          <Field label="Overdose signs" value={fileText(drug.overdose_signs)} />
         </Frame>
 
         <Frame title="DEPENDENCE" code="DEP" accent="amber">
-          <Field label="Dependence" value={drug.dependence} />
-          <Field label="Tolerance" value={drug.tolerance} />
-          <Field label="Withdrawal" value={drug.withdrawal} />
+          <Field label="Dependence" value={fileText(drug.dependence)} />
+          <Field label="Tolerance" value={fileText(drug.tolerance)} />
+          <Field label="Withdrawal" value={fileText(drug.withdrawal)} />
         </Frame>
 
         <Frame title="HARM REDUCTION" code="HR" accent="cyan">
-          <Field label="Testing" value={drug.testing} />
-          <Field label="Safer use" value={drug.harm_reduction} />
+          <Field label="Testing" value={fileText(drug.testing)} />
+          <Field label="Safer use" value={fileText(drug.harm_reduction)} />
           <div className="mt-3 text-[10px] uppercase tracking-widest text-muted-foreground">
             &gt; NARCØDEX does not provide dosing, sourcing, synthesis, or test-evasion instructions.
           </div>
@@ -116,7 +117,7 @@ function Detail() {
 
         <Frame title="HISTORY" code="HIS" accent="purple">
           <Field label="Year" value={drug.discovered_year ?? undefined} />
-          <div className="mt-2 text-sm text-foreground/85 leading-relaxed">{drug.history ?? <span className="text-muted-foreground">· see the class record ·</span>}</div>
+          <div className="mt-2 text-sm text-foreground/85 leading-relaxed">{fileText(drug.history) ?? <span className="text-muted-foreground">· see the class record ·</span>}</div>
         </Frame>
       </div>
 

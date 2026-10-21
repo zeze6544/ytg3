@@ -66,6 +66,7 @@ function RootStack() {
       <Stack.Screen name="gate" options={{ headerShown: false, gestureEnabled: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="drug/[slug]" options={{ title: "FILE" }} />
+      <Stack.Screen name="strain/[slug]" options={{ title: "STRAIN" }} />
       <Stack.Screen name="classes" options={{ title: "CLASSES" }} />
       <Stack.Screen name="timeline" options={{ title: "TIMELINE" }} />
       <Stack.Screen name="reagents/index" options={{ title: "REAGENTS" }} />
@@ -75,6 +76,7 @@ function RootStack() {
       <Stack.Screen name="about" options={{ title: "ABOUT" }} />
       <Stack.Screen name="privacy" options={{ title: "PRIVACY" }} />
       <Stack.Screen name="support" options={{ title: "SUPPORT" }} />
+      <Stack.Screen name="admin/strains" options={{ title: "MAINTENANCE" }} />
     </Stack>
     </>
   );

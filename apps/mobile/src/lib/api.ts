@@ -9,11 +9,12 @@ import {
   localPopular,
   localRandom,
   localRefs,
-  localStrains,
   localTimeline,
+  whenArchiveReady,
 } from "@/lib/localArchive";
 import { supabase } from "@/lib/supabase";
-import type { Drug, DrugClass, Strain } from "@/lib/types";
+import type { Drug, DrugClass } from "@/lib/types";
+import { loadStrainMeta } from "@/lib/strainIndex";
 
 const POPULAR_SLUGS = [
   "alcohol-ethanol",
@@ -92,6 +93,9 @@ async function remoteFirst<T>(load: (sb: NonNullable<typeof supabase>) => Promis
 }
 
 export async function fetchDrugs(opts?: { search?: string; category?: string; limit?: number }) {
+  await whenArchiveReady();
+  const local = localDrugs(opts);
+  if (local.length > 0) return local;
   return remoteFirst(async (sb) => {
     const term = opts?.search?.trim() ?? "";
     const cat = opts?.category && opts.category !== "all" ? opts.category : null;
@@ -111,6 +115,9 @@ export async function fetchDrugs(opts?: { search?: string; category?: string; li
 }
 
 export async function fetchPopularDrugs(): Promise<Partial<Drug>[]> {
+  await whenArchiveReady();
+  const local = localPopular(POPULAR_SLUGS);
+  if (local.length > 0) return local;
   return remoteFirst(async (sb) => {
     const { data, error } = await sb.from("drugs").select(LIST_COLUMNS).in("slug", POPULAR_SLUGS);
     if (error) throw error;
@@ -121,6 +128,9 @@ export async function fetchPopularDrugs(): Promise<Partial<Drug>[]> {
 }
 
 export async function fetchCommonDrugs(): Promise<Partial<Drug>[]> {
+  await whenArchiveReady();
+  const local = localPopular(COMMON_SLUGS);
+  if (local.length > 0) return local;
   return remoteFirst(async (sb) => {
     const { data, error } = await sb.from("drugs").select(LIST_COLUMNS).in("slug", COMMON_SLUGS);
     if (error) throw error;
@@ -134,6 +144,9 @@ export function fetchNeighbors(slug: string) {
 }
 
 export async function fetchDrugBySlug(slug: string): Promise<Drug | null> {
+  await whenArchiveReady();
+  const local = localDrugBySlug(slug);
+  if (local) return local;
   return remoteFirst(async (sb) => {
     const { data, error } = await sb.from("drugs").select("*").eq("slug", slug).maybeSingle();
     if (error) throw error;
@@ -161,20 +174,6 @@ export async function fetchClasses(): Promise<DrugClass[]> {
   }, localClasses(), (rows) => rows.length > 0);
 }
 
-export async function fetchStrains(opts?: { search?: string; type?: string }): Promise<Strain[]> {
-  return remoteFirst(async (sb) => {
-    let q = sb.from("strains").select("*").order("name");
-    if (opts?.type && opts.type !== "all") q = q.eq("type", opts.type);
-    if (opts?.search) {
-      const term = opts.search.trim();
-      if (term) q = q.or(`name.ilike.%${term}%,lineage.ilike.%${term}%`);
-    }
-    const { data, error } = await q;
-    if (error) throw error;
-    return (data ?? []) as Strain[];
-  }, localStrains(opts), (rows) => rows.length > 0);
-}
-
 export async function fetchTimeline() {
   return remoteFirst(async (sb) => {
     const { data, error } = await sb.from("timeline_events").select("*").order("year");
@@ -196,6 +195,9 @@ export async function fetchInteraction(aId: string, bId: string) {
 }
 
 export async function fetchRandomDrug(): Promise<Drug | null> {
+  await whenArchiveReady();
+  const local = localRandom();
+  if (local) return local;
   return remoteFirst(async (sb) => {
     const { count, error } = await sb.from("drugs").select("*", { count: "exact", head: true });
     if (error) throw error;
@@ -208,6 +210,15 @@ export async function fetchRandomDrug(): Promise<Drug | null> {
 }
 
 export async function fetchCounts() {
+  await whenArchiveReady();
+  const local = localCounts();
+  try {
+    const meta = await loadStrainMeta();
+    local.strains = meta.counts.records;
+  } catch {
+    // Without the strain index the bundled name list still counts.
+  }
+  if (local.drugs > 0 || local.strains > 0) return local;
   return remoteFirst(async (sb) => {
     const [drugs, strains, classes] = await Promise.all([
       sb.from("drugs").select("*", { count: "exact", head: true }),
@@ -217,13 +228,4 @@ export async function fetchCounts() {
     if (drugs.error || strains.error || classes.error) throw drugs.error || strains.error || classes.error;
     return { drugs: drugs.count ?? 0, strains: strains.count ?? 0, classes: classes.count ?? 0 };
   }, localCounts(), (counts) => counts.drugs > 0);
-}
-
-export function filterStrains(rows: Strain[], terps: string[], mode: "any" | "all"): Strain[] {
-  if (terps.length === 0) return rows;
-  return rows.filter((strain) => {
-    const have = (strain.terpenes ?? []).filter(Boolean).map((terp) => terp.toLowerCase());
-    if (mode === "all") return terps.every((terp) => have.includes(terp));
-    return terps.some((terp) => have.includes(terp));
-  });
 }

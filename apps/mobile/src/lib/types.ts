@@ -22,7 +22,7 @@ export type DrugCategory =
   | "historical"
   | "other";
 
-export type StrainType = "indica" | "sativa" | "hybrid" | "ruderalis";
+export type StrainType = "indica" | "sativa" | "hybrid" | "ruderalis" | "unspecified";
 
 export interface Drug {
   id: string;
@@ -67,6 +67,20 @@ export interface DrugClass {
   color: string | null;
 }
 
+export interface AssayPoint {
+  name: string;
+  percent: number;
+}
+export interface StrainProduct {
+  region: string;
+  brand: string;
+  product: string;
+  form?: string | null;
+  thc_label?: string | null;
+  cbd_label?: string | null;
+  source?: string | null;
+  source_url?: string | null;
+}
 export interface Strain {
   id: string;
   slug: string;
@@ -82,6 +96,10 @@ export interface Strain {
   adverse: string[] | null;
   confidence: EvidenceQuality;
   summary: string | null;
+  terpene_profile?: AssayPoint[] | null;
+  cannabinoids?: AssayPoint[] | null;
+  products?: StrainProduct[] | null;
+  assay_note?: string | null;
 }
 
 export const CATEGORY_LABELS: Record<string, string> = {
@@ -139,6 +157,7 @@ export const STRAIN_TONE: Record<string, Tone> = {
   sativa: "amber",
   hybrid: "cyan",
   ruderalis: "phosphor",
+  unspecified: "cyan",
 };
 
 export const CATEGORIES: (DrugCategory | "all")[] = [

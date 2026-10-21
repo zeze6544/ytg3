@@ -1,9 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { fetchStrains } from "@/lib/db";
-import { Frame, Tag } from "@/components/narcodex/Frame";
-import { useMemo, useState } from "react";
-import type { Strain, StrainType, Tone } from "@/lib/types";
+import { Frame } from "@/components/narcodex/Frame";
+import { NugMark } from "@/components/narcodex/NugMark";
+import { rangePercent } from "@/lib/copy";
+import { useEffect, useMemo, useState } from "react";
+import type { Strain, StrainType } from "@/lib/types";
 
 export const Route = createFileRoute("/strains")({
   head: () => ({
@@ -17,9 +19,7 @@ export const Route = createFileRoute("/strains")({
   component: Strains,
 });
 
-const TYPES: (StrainType | "all")[] = ["all", "indica", "sativa", "hybrid", "ruderalis"];
-const EV_TONE: Record<string, Tone> = { established: "phosphor", limited: "cyan", anecdotal: "amber", disputed: "purple", unknown: "red" };
-const TYPE_TONE: Record<string, Tone> = { indica: "purple", sativa: "amber", hybrid: "cyan", ruderalis: "phosphor" };
+const TYPES: (StrainType | "all")[] = ["all", "indica", "sativa", "hybrid", "ruderalis", "unspecified"];
 
 // Widely reported cannabis terpenes with plain language notes.
 const TERPENES: { key: string; aroma: string; note: string }[] = [
@@ -45,33 +45,41 @@ function Strains() {
   const [type, setType] = useState("all");
   const [terps, setTerps] = useState<string[]>([]);
   const [mode, setMode] = useState<"any" | "all">("any");
+  const [medical, setMedical] = useState(false);
+  const [shown, setShown] = useState(48);
 
   const q = useQuery({ queryKey: ["strains", search, type], queryFn: () => fetchStrains({ search, type }) });
 
   const data = q.data ?? [];
 
   const filtered = useMemo(() => {
-    if (terps.length === 0) return data;
-    return data.filter((s) => {
+    let rows = data;
+    if (medical) rows = rows.filter((strain) => (strain.products ?? []).length > 0);
+    if (terps.length === 0) return rows;
+    return rows.filter((s) => {
       const have = (s.terpenes ?? []).filter(Boolean).map((t) => t.toLowerCase());
       if (mode === "all") return terps.every((t) => have.includes(t));
       return terps.some((t) => have.includes(t));
     });
-  }, [data, terps, mode]);
+  }, [data, terps, mode, medical]);
+  const page = filtered.slice(0, shown);
 
   function toggle(t: string) {
     setTerps((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
   }
 
+  useEffect(() => {
+    setShown(48);
+  }, [search, type, terps, mode, medical]);
+
   return (
     <div className="space-y-4">
       <Frame title="CANNABIS STRAIN LIBRARY" code="DEX-03" status={`${filtered.length} of ${data.length}`} accent="phosphor">
         <p className="text-sm leading-relaxed text-foreground/90">
-          A working library of cannabis cultivars. Search by name or lineage, narrow by type,
-          then pick terpenes to find the aroma and effect profile you want. THC and CBD ranges
-          reflect commonly reported chemotypes, not any single grower or batch. Cannabis
-          breeding is largely unregulated, so most confidence tags are marked anecdotal on
-          purpose. If a number here matters to you, verify with a lab test.
+          Search by name. A percent is shown only when a source published one. Medical files are
+          dried flower from the Australian TGA list for 1 January–30 June 2026, or a Connecticut
+          flower registration. That is not a national United States formulary, and a product name
+          is not a pedigree. The picture on each file is a generated mark, not a photograph.
         </p>
         <div className="mt-3 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
           <div className="flex items-center gap-2 border border-phosphor/40 bg-panel-2/40 px-3 py-2 rounded-sm min-w-0">
@@ -93,6 +101,8 @@ function Strains() {
             className={`px-2 py-1 rounded-sm border ${mode === "any" ? "border-cyan/70 bg-cyan/10 text-cyan cyan-glow" : "border-border/60 text-muted-foreground hover:border-cyan/40"}`}>any of</button>
           <button onClick={() => setMode("all")}
             className={`px-2 py-1 rounded-sm border ${mode === "all" ? "border-cyan/70 bg-cyan/10 text-cyan cyan-glow" : "border-border/60 text-muted-foreground hover:border-cyan/40"}`}>all of</button>
+          <button onClick={() => { setMedical((value) => !value); setShown(48); }}
+            className={`px-2 py-1 rounded-sm border ${medical ? "border-amber/70 bg-amber/10 text-amber" : "border-border/60 text-muted-foreground"}`}>medical files</button>
           {terps.length > 0 && (
             <button onClick={() => setTerps([])}
               className="ml-auto px-2 py-1 rounded-sm border border-red/50 text-red hover:bg-red/10">clear</button>
@@ -115,50 +125,30 @@ function Strains() {
         </div>
       </Frame>
 
-      <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        {filtered.map((s: Strain) => (
-          <article key={s.slug} className="panel-outline p-3 rounded-sm">
-            <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 items-start">
-              <div className="min-w-0">
-                <div className="font-display text-lg text-phosphor truncate">{s.name}</div>
-                {s.lineage && <div className="text-[10px] text-muted-foreground truncate uppercase tracking-widest">↳ {s.lineage}</div>}
-              </div>
-              <Tag tone={TYPE_TONE[s.type]}>{s.type}</Tag>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        {page.map((s: Strain) => (
+          <Link key={s.slug} to="/strains/$slug" params={{ slug: s.slug }} className="border border-[#39ff14] bg-black p-1 hover:bg-[#39ff14]/5">
+            <NugMark slug={s.slug} name={s.name} type={s.type} compact />
+            <div className="px-1 pt-1 font-display text-sm uppercase leading-tight text-[#39ff14]">{s.name}</div>
+            <div className="px-1 pb-1 text-[10px] uppercase tracking-wide text-[#39ff14]/80">
+              THC {rangePercent(s.thc_low, s.thc_high)} | {s.type}
             </div>
-            <div className="mt-2 grid grid-cols-2 gap-1 text-[11px]">
-              <div>THC <span className="text-phosphor">{s.thc_low ?? "?"} to {s.thc_high ?? "?"}%</span></div>
-              <div>CBD <span className="text-cyan">{s.cbd_low ?? "?"} to {s.cbd_high ?? "?"}%</span></div>
-            </div>
-            {s.terpenes && s.terpenes.filter(Boolean).length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-1">
-                {s.terpenes.filter(Boolean).map((t) => (
-                  <button key={t} onClick={() => toggle(t.toLowerCase())} title={`Filter by ${t}`}>
-                    <Tag tone={terps.includes(t.toLowerCase()) ? "amber" : "cyan"}>{t}</Tag>
-                  </button>
-                ))}
-              </div>
-            )}
-            {s.effects && s.effects.filter(Boolean).length > 0 && (
-              <div className="mt-1 flex flex-wrap gap-1">
-                {s.effects.filter(Boolean).map((t) => <Tag key={t} tone="phosphor">{t}</Tag>)}
-              </div>
-            )}
-            {s.adverse && s.adverse.filter(Boolean).length > 0 && (
-              <div className="mt-1 flex flex-wrap gap-1">
-                {s.adverse.filter(Boolean).map((t) => <Tag key={t} tone="red">{t}</Tag>)}
-              </div>
-            )}
-            {s.summary && <p className="mt-2 text-[11px] text-foreground/90 leading-snug">{s.summary}</p>}
-            <div className="mt-2 text-[9px] uppercase tracking-widest text-muted-foreground">
-              confidence: <Tag tone={EV_TONE[s.confidence]}>{s.confidence === "unknown" ? "class record" : s.confidence}</Tag>
-            </div>
-          </article>
+          </Link>
         ))}
         {filtered.length === 0 && (
           <div className="col-span-full text-xs uppercase tracking-widest text-muted-foreground text-center py-8">
             no strains match those filters. try fewer terpenes or a different search.
           </div>
         )}
+        {shown < filtered.length ? (
+          <button
+            type="button"
+            onClick={() => setShown((count) => count + 48)}
+            className="col-span-full px-3 py-3 border border-phosphor/50 text-phosphor uppercase text-[11px] tracking-widest rounded-sm hover:bg-phosphor/10"
+          >
+            Show {Math.min(48, filtered.length - shown)} more · {filtered.length - shown} remaining
+          </button>
+        ) : null}
       </div>
     </div>
   );
