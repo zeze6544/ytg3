@@ -18,6 +18,7 @@ export interface Drug {
   medical_uses: string | null; contraindications: string | null;
   testing: string | null; harm_reduction: string | null;
   evidence_quality: EvidenceQuality; discovered_year: number | null; featured: boolean;
+  risk_classes?: string[];
 }
 
 export interface DrugClass { id: string; slug: string; name: string; description: string | null; color: string | null; }

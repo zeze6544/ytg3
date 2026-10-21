@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { fetchDrugs } from "@/lib/db";
+import { LOCAL_DRUG_COUNT } from "@/lib/localArchive";
 import { CATEGORY_COLOR, CATEGORY_LABELS, type DrugCategory } from "@/lib/types";
 import { Frame, Tag } from "@/components/narcodex/Frame";
 import { useEffect, useState } from "react";
@@ -15,16 +16,16 @@ export const Route = createFileRoute("/database")({
   head: () => ({
     meta: [
       { title: "Database · NARCØDEX" },
-      { name: "description", content: "Searchable database of 360+ drugs across every major pharmacological category. Filter by opioid, stimulant, psychedelic, benzodiazepine and more." },
+      { name: "description", content: `Searchable harm-reduction index of ${LOCAL_DRUG_COUNT} substances across every class in the archive, with risks and interactions filled in.` },
       { property: "og:title", content: "NARCØDEX Database" },
-      { property: "og:description", content: "360+ drug files. Search, filter by class, evidence-graded." },
+      { property: "og:description", content: `${LOCAL_DRUG_COUNT} substance files. Search, filter by class, evidence-graded. Not a dose or a source.` },
     ],
   }),
   validateSearch: (s) => searchSchema.parse(s),
   component: Database,
 });
 
-const CATS: (DrugCategory | "all")[] = ["all","opioid","stimulant","depressant","benzodiazepine","psychedelic","dissociative","cannabinoid","antidepressant","antipsychotic","anaesthetic","inhalant","plant_fungi","research_chemical","prescription","otc","withdrawn","historical"];
+const CATS: (DrugCategory | "all")[] = ["all","opioid","stimulant","depressant","benzodiazepine","psychedelic","dissociative","cannabinoid","antidepressant","antipsychotic","anaesthetic","inhalant","plant_fungi","research_chemical","prescription","otc","withdrawn","historical","other"];
 
 function Database() {
   const nav = useNavigate({ from: "/database" });
@@ -91,7 +92,7 @@ function Database() {
               <Tag tone={CATEGORY_COLOR[d.category!] ?? "phosphor"}>{CATEGORY_LABELS[d.category!]}</Tag>
             </div>
             <p className="mt-2 text-[11px] text-foreground/85 line-clamp-2">{d.summary}</p>
-            <div className="mt-2 text-[9px] uppercase tracking-widest text-muted-foreground">EVIDENCE: <span className="text-phosphor">{d.evidence_quality}</span></div>
+            <div className="mt-2 text-[9px] uppercase tracking-widest text-muted-foreground">EVIDENCE: <span className="text-phosphor">{d.evidence_quality === "unknown" ? "class record" : d.evidence_quality}</span></div>
           </Link>
         ))}
       </div>

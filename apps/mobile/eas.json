@@ -1,0 +1,26 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "production": {
+      "distribution": "store",
+      "autoIncrement": true,
+      "ios": {
+        "resourceClass": "m-medium"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleTeamId": "APPLE_TEAM_ID_FROM_ENV",
+        "ascAppId": "ASC_APP_ID_FROM_ENV",
+        "ascApiKeyPath": "ASC_KEY_PATH_FROM_ENV",
+        "ascApiKeyId": "ASC_KEY_ID_FROM_ENV",
+        "ascApiKeyIssuerId": "ASC_ISSUER_ID_FROM_ENV"
+      }
+    }
+  }
+}

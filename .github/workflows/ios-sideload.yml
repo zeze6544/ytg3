@@ -1,0 +1,70 @@
+name: iOS sideload IPA
+
+# Unsigned device build. A free personal Apple ID signs it afterwards in
+# AltStore or SideStore. This file is not an App Store signature.
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - cursor/ios-app-store-a3e1
+    paths:
+      - ".github/workflows/ios-sideload.yml"
+
+jobs:
+  ipa:
+    runs-on: macos-15
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/mobile/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Use the thin catalogue shell
+        run: touch .thin-bundle
+      - name: Generate the Xcode project
+        run: npx expo prebuild -p ios --no-install
+      - name: Install CocoaPods
+        run: pod install --project-directory=ios
+      - name: Archive without a signature
+        run: |
+          set -euo pipefail
+          WORKSPACE=$(find ios -maxdepth 2 -name "*.xcworkspace" | head -1)
+          SCHEME=$(find ios -name "*.xcscheme" | head -1)
+          SCHEME_NAME=$(basename "$SCHEME" .xcscheme)
+          echo "workspace=$WORKSPACE scheme=$SCHEME_NAME"
+          xcodebuild \
+            -workspace "$WORKSPACE" \
+            -scheme "$SCHEME_NAME" \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath "$RUNNER_TEMP/NARCODEX.xcarchive" \
+            archive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            EXPANDED_CODE_SIGN_IDENTITY="" \
+            COMPILER_INDEX_STORE_ENABLE=NO
+      - name: Package the IPA
+        run: |
+          set -euo pipefail
+          APP=$(find "$RUNNER_TEMP/NARCODEX.xcarchive/Products/Applications" -maxdepth 1 -name "*.app" | head -1)
+          test -n "$APP"
+          mkdir -p "$RUNNER_TEMP/Payload"
+          cp -R "$APP" "$RUNNER_TEMP/Payload/"
+          (cd "$RUNNER_TEMP" && zip -qry "$GITHUB_WORKSPACE/narcodex.ipa" Payload)
+          ls -lh "$GITHUB_WORKSPACE/narcodex.ipa"
+          BIN=$(find "$RUNNER_TEMP/Payload" -type f -perm +111 -print | head -5)
+          echo "$BIN"
+          file "$APP"/* | head -20
+      - uses: actions/upload-artifact@v4
+        with:
+          name: narcodex-ipa
+          path: narcodex.ipa
+          if-no-files-found: error

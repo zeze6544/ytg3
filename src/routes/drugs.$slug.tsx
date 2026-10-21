@@ -40,13 +40,13 @@ function Detail() {
     <div className="space-y-4">
       <Frame accent={catTone}
         title={drug.name} code={`FILE-${drug.slug.toUpperCase().slice(0, 10)}`}
-        status={drug.evidence_quality.toUpperCase()}>
+        status={drug.evidence_quality === "unknown" ? "CLASS RECORD" : drug.evidence_quality.toUpperCase()}>
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] items-start">
           <div className="min-w-0">
             <div className="font-display text-4xl sm:text-5xl text-phosphor phosphor-glow break-words">{drug.name}</div>
             <div className="mt-2 flex flex-wrap gap-1">
               <Tag tone={catTone}>{CATEGORY_LABELS[drug.category]}</Tag>
-              <Tag tone={EV_TONE[drug.evidence_quality]}>EVIDENCE: {drug.evidence_quality}</Tag>
+              <Tag tone={EV_TONE[drug.evidence_quality]}>EVIDENCE: {drug.evidence_quality === "unknown" ? "class record" : drug.evidence_quality}</Tag>
               {drug.discovered_year && <Tag tone="amber">EST. {drug.discovered_year}</Tag>}
             </div>
             {drug.summary && <p className="mt-4 text-sm text-foreground/85 leading-relaxed">{drug.summary}</p>}
@@ -85,12 +85,12 @@ function Detail() {
           <div className="mb-2 text-[10px] uppercase tracking-widest text-muted-foreground">Reported</div>
           <div className="flex flex-wrap gap-1 mb-4">
             {(drug.effects ?? []).filter(Boolean).map((e) => <Tag key={e} tone="phosphor">{e}</Tag>)}
-            {(!drug.effects || drug.effects.filter(Boolean).length === 0) && <span className="text-xs text-muted-foreground">· unknown ·</span>}
+            {(!drug.effects || drug.effects.filter(Boolean).length === 0) && <span className="text-xs text-muted-foreground">· see the class record ·</span>}
           </div>
           <div className="mb-2 text-[10px] uppercase tracking-widest text-muted-foreground">Adverse</div>
           <div className="flex flex-wrap gap-1">
             {(drug.adverse_effects ?? []).filter(Boolean).map((e) => <Tag key={e} tone="red">{e}</Tag>)}
-            {(!drug.adverse_effects || drug.adverse_effects.filter(Boolean).length === 0) && <span className="text-xs text-muted-foreground">· unknown ·</span>}
+            {(!drug.adverse_effects || drug.adverse_effects.filter(Boolean).length === 0) && <span className="text-xs text-muted-foreground">· see the class record ·</span>}
           </div>
         </Frame>
 
@@ -116,7 +116,7 @@ function Detail() {
 
         <Frame title="HISTORY" code="HIS" accent="purple">
           <Field label="Year" value={drug.discovered_year ?? undefined} />
-          <div className="mt-2 text-sm text-foreground/85 leading-relaxed">{drug.history ?? <span className="text-muted-foreground">· unknown ·</span>}</div>
+          <div className="mt-2 text-sm text-foreground/85 leading-relaxed">{drug.history ?? <span className="text-muted-foreground">· see the class record ·</span>}</div>
         </Frame>
       </div>
 

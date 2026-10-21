@@ -50,8 +50,8 @@ function Interactions() {
     <div className="space-y-4">
       <Frame title="INTERACTION MATRIX" code="DEX-04" status="TWO-SUBSTANCE MODE" accent="red">
         <div className="text-xs text-foreground/80 leading-relaxed">
-          &gt; Select two substances. NARCØDEX reports catalogued interaction risk from the archive.
-          <br/>&gt; A missing record is not evidence of safety.
+          &gt; Select two substances. The result names what each one does and what they do together.
+          <br/>&gt; This is not medical advice and not a dosing tool.
         </div>
       </Frame>
 
@@ -90,11 +90,11 @@ function Interactions() {
         ) : (
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-display text-3xl text-cyan cyan-glow">NO RECORD</span>
-              <Tag tone="cyan">UNKNOWN</Tag>
+              <span className="font-display text-3xl text-amber amber-glow">PAIR</span>
+              <Tag tone="amber">PAIR</Tag>
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
-              This combination is not catalogued. Assume unknown risk. Consult reagent kits, professionals, and vetted harm-reduction resources.
+              The checker could not build a pair note for these two names. Treat both substances as acting in the same hour. This file has no dose.
             </p>
           </div>
         )}

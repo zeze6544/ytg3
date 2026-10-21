@@ -1,0 +1,43 @@
+{
+  "configVersion": 0,
+  "apple": {
+    "version": "1.0",
+    "copyright": "2026 NARCODEX",
+    "categories": ["REFERENCE", "EDUCATION"],
+    "release": {
+      "automaticRelease": true,
+      "phasedRelease": false
+    },
+    "advisory": {
+      "alcoholTobaccoOrDrugUseOrReferences": "FREQUENT_OR_INTENSE",
+      "medicalOrTreatmentInformation": "FREQUENT_OR_INTENSE",
+      "contests": "NONE",
+      "gamblingSimulated": "NONE",
+      "horrorOrFearThemes": "NONE",
+      "matureOrSuggestiveThemes": "NONE",
+      "profanityOrCrudeHumor": "NONE",
+      "sexualContentGraphicAndNudity": "NONE",
+      "sexualContentOrNudity": "NONE",
+      "violenceCartoonOrFantasy": "NONE",
+      "violenceRealistic": "NONE",
+      "violenceRealisticProlongedGraphicOrSadistic": "NONE",
+      "gambling": false,
+      "unrestrictedWebAccess": false,
+      "kidsAgeBand": null,
+      "ageRatingOverride": "SEVENTEEN_PLUS",
+      "koreaAgeRatingOverride": "NINETEEN_PLUS"
+    },
+    "info": {
+      "en-US": {
+        "title": "NARCØDEX",
+        "subtitle": "Harm reduction reference",
+        "promoText": "Adult reference for substances, risks, and interactions. Not medical advice and not a dosing tool.",
+        "keywords": ["harm reduction", "interactions", "substance", "reference", "overdose", "cannabis"],
+        "releaseNotes": "First release of the NARCØDEX archive for iPhone.",
+        "supportUrl": "https://github.com/zeze6544/ytg3/issues",
+        "privacyPolicyUrl": "https://raw.githubusercontent.com/zeze6544/ytg3/cursor/ios-app-store-a3e1/apps/mobile/legal/privacy.html",
+        "description": "NARCØDEX is a plain-spoken reference library of substances, cannabis cultivars, interactions, and history. It is written for adults who want the evidence, the risks, and the harm-reduction context in one place.\n\nThis is not a pharmacy, a marketplace, or a dosing tool. The archive does not sell anything, does not tell you where to obtain a substance, and does not give you a dose to take. It tells you what is known, how solid that knowledge is, and what can go wrong.\n\nWhat you can do\n• Search a public archive of substance files, each tagged with an evidence tier\n• Read legal status, medical context, risks, dependence, withdrawal, and harm-reduction notes\n• Check a two-substance interaction and see when a combination is catalogued as dangerous\n• Browse pharmacological classes and a historical timeline\n• Look up cannabis cultivars with reported THC and CBD ranges and terpene notes\n• Read a field guide to reagent colour tests, including the limits of those tests\n• Optionally sign in to save files and keep a private reading history\n\nWhat this app will not do\n• It will not recommend that you use a drug\n• It will not calculate a dose\n• It will not help you buy, make, or conceal a substance\n• A missing interaction is not a sign that a combination is safe\n\nEvery screen carries the same rule the archive was built on: this is not medical advice. If someone is in trouble, contact local emergency services.\n\nNARCØDEX is for adults. The first launch asks you to confirm you are 18 or older."
+      }
+    }
+  }
+}

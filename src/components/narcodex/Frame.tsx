@@ -34,7 +34,7 @@ export function Field({ label, value }: { label: string; value?: ReactNode }) {
     <div className="grid grid-cols-[minmax(0,120px)_minmax(0,1fr)] gap-2 py-1.5 border-b border-border/40 last:border-b-0 items-start">
       <div className="text-[10px] uppercase tracking-widest text-muted-foreground pt-0.5">{label}</div>
       <div className="text-sm text-foreground/90 font-mono break-words">
-        {value ?? <span className="text-muted-foreground">· unknown ·</span>}
+        {value ?? <span className="text-muted-foreground">· see the class record ·</span>}
       </div>
     </div>
   );

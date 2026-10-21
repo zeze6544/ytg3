@@ -1,0 +1,51 @@
+import { colors, fonts } from "@/constants/theme";
+import { FileCard, Frame, PageTitle, Prose, Screen, breakWord } from "@/components/ui";
+import { useSession } from "@/lib/session";
+import { router } from "expo-router";
+import { Linking, Pressable, Text } from "react-native";
+
+const LINKS = [
+  { href: "/classes", label: "Classes", note: "Pharmacological groups" },
+  { href: "/timeline", label: "Timeline", note: "History of the archive" },
+  { href: "/reagents", label: "Reagents", note: "Colour checks and their limits" },
+  { href: "/saved", label: "Saved", note: "Account bookmarks and files opened on this device" },
+  { href: "/about", label: "About", note: "What this app is, and is not" },
+  { href: "/privacy", label: "Privacy", note: "What an account stores" },
+  { href: "/support", label: "Support", note: "How to reach the archive" },
+] as const;
+
+export default function MoreScreen() {
+  const { user } = useSession();
+  return (
+    <Screen safeTop>
+      <PageTitle>MORE</PageTitle>
+      <Frame title="IPHONE APP" code="IPA" tone="amber">
+        <Prose>
+          Download NARCØDEX.ipa. A free personal Apple ID runs it for 7 days after AltStore or SideStore signs it. Safari can save the file. Apple does not let Safari install it on a free Apple ID. Turn on Developer Mode, then trust your Apple ID certificate.
+        </Prose>
+        <Pressable accessibilityRole="link" onPress={() => Linking.openURL("https://narcodex.surge.sh/narcodex.ipa")} style={{ minHeight: 44, justifyContent: "center" }}>
+          <Text style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: 28, lineHeight: 30 }}>DOWNLOAD IPA</Text>
+        </Pressable>
+        <Pressable accessibilityRole="link" onPress={() => Linking.openURL("https://narcodex.surge.sh/install.html")} style={{ minHeight: 36, justifyContent: "center" }}>
+          <Text style={{ fontFamily: fonts.body, color: colors.cyan, fontSize: 13 }}>Install steps</Text>
+        </Pressable>
+      </Frame>
+      <Frame title="ACCOUNT" code="AUTH" tone="cyan">
+        <Prose>
+          {user?.email ?? "Browsing without an account. The public archive does not require one. Files you open are remembered on this device until you clear the browser."}
+        </Prose>
+        <Pressable onPress={() => router.push("/auth")} style={{ minHeight: 44, justifyContent: "center" }}>
+          <Text style={{ fontFamily: fonts.body, color: colors.cyan, letterSpacing: 1 }}>
+            {user ? "ACCOUNT" : "SIGN IN"}
+          </Text>
+        </Pressable>
+      </Frame>
+      {LINKS.map((link) => (
+        <FileCard key={link.href} onPress={() => router.push(link.href)}>
+          <Text style={[breakWord, { fontFamily: fonts.display, color: colors.phosphor, fontSize: 26, lineHeight: 28 }]}>{link.label}</Text>
+          <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 12 }}>{link.note}</Text>
+        </FileCard>
+      ))}
+    </Screen>
+  );
+}
