@@ -14,6 +14,8 @@ Saved files and the 18+ gate stay on the phone. The website account is separate.
 
 This project was prepared on Linux. Xcode is not installed here. No Apple Account was added. No provisioning profile was created. No IPA was signed, exported, or installed, and nothing was verified on an iPhone.
 
+Do not send an Apple ID password to this environment. There is no Mac connected to the iPhone, so a login cannot create the Personal Team profile, register the phone, or install the app. The free-account install still has to be Xcode’s Run button with the iPhone plugged into that Mac.
+
 A simulator compile is set up in `.github/workflows/ios-native.yml`. That job turns signing off so it can check that the project builds. An unsigned build is not an installable app.
 
 ## What you need

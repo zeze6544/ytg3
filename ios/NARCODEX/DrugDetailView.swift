@@ -274,8 +274,8 @@ struct DrugDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    private func section<Content: View>(_ id: String, _ title: String, _ code: String, @ViewBuilder content: () -> Content) -> some View {
-        Panel(title: title, code: code) { content() }
+    private func section<Content: View>(_ id: String, _ title: String, _ code: String, @ViewBuilder content: @escaping () -> Content) -> some View {
+        Panel(title: title, code: code, content: content)
             .id(id)
     }
 
