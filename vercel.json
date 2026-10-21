@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "tanstack-start",
-  "buildCommand": "bun run build",
-  "installCommand": "bun install",
-  "regions": ["iad1"]
+  "rewrites": [
+    { "source": "/", "destination": "https://narcodex-archive.web.app/" },
+    { "source": "/(.*)", "destination": "https://narcodex-archive.web.app/$1" }
+  ]
 }
