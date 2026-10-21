@@ -1,14 +1,18 @@
-import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import tailwindcss from "@tailwindcss/vite";
+import { tanstackStart } from "@tanstack/react-start/plugin/vite";
+import viteReact from "@vitejs/plugin-react";
+import { nitro } from "nitro/vite";
+import { defineConfig } from "vite";
+import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
-  // Pin Nitro to Vercel so local + CLI builds match production.
-  // Cloudflare Workers (wrangler) is no longer the deploy target.
-  nitro: {
-    preset: "vercel",
-  },
-  tanstackStart: {
-    server: {
-      entry: "server",
-    },
-  },
+  plugins: [
+    tailwindcss(),
+    tsconfigPaths(),
+    tanstackStart({
+      server: { entry: "server" },
+    }),
+    nitro({ preset: "vercel" }),
+    viteReact(),
+  ],
 });
