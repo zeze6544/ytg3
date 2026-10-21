@@ -1,9 +1,10 @@
 {
-  "$comment": "Fill these in, then: VERCEL_ALIASES=$(node -e \"console.log(require('./domains.json').aliases.join(','))\") bun run deploy",
   "project": "narcodex",
   "aliases": [
-    "www.example.com",
-    "app.example.com",
-    "api.example.com"
+    "i1l.live",
+    "www.i1l.live",
+    "app.i1l.live",
+    "api.i1l.live",
+    "admin.i1l.live"
   ]
 }
