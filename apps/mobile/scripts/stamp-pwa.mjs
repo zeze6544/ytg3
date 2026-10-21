@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -50,4 +50,9 @@ if (!html.includes("apple-mobile-web-app-capable")) {
 }
 writeFileSync(indexPath, html);
 copyFileSync(indexPath, join(dist, "200.html"));
+const dataDir = join(dist, "data");
+mkdirSync(dataDir, { recursive: true });
+const mobileRoot = join(dist, "..");
+copyFileSync(join(mobileRoot, "src/data/archive.json"), join(dataDir, "archive.json"));
+copyFileSync(join(mobileRoot, "src/data/drugs-extra.json"), join(dataDir, "drugs-extra.json"));
 console.log("stamped", indexPath);

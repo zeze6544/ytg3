@@ -5,7 +5,7 @@ const supabaseUrl =
 const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_KEY ?? "";
 
 const config: ExpoConfig = {
-  name: "NARCØDEX",
+  name: "NARCODEX",
   slug: "narcodex",
   version: "1.0.0",
   orientation: "portrait",

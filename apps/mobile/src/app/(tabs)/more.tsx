@@ -2,7 +2,7 @@ import { colors, fonts } from "@/constants/theme";
 import { FileCard, Frame, PageTitle, Prose, Screen, breakWord } from "@/components/ui";
 import { useSession } from "@/lib/session";
 import { router } from "expo-router";
-import { Pressable, Text } from "react-native";
+import { Linking, Pressable, Text } from "react-native";
 
 const LINKS = [
   { href: "/classes", label: "Classes", note: "Pharmacological groups" },
@@ -19,6 +19,17 @@ export default function MoreScreen() {
   return (
     <Screen safeTop>
       <PageTitle>MORE</PageTitle>
+      <Frame title="IPHONE APP" code="IPA" tone="amber">
+        <Prose>
+          Download NARCØDEX.ipa. A free personal Apple ID runs it for 7 days after AltStore or SideStore signs it. Safari can save the file. Apple does not let Safari install it on a free Apple ID. Turn on Developer Mode, then trust your Apple ID certificate.
+        </Prose>
+        <Pressable accessibilityRole="link" onPress={() => Linking.openURL("https://narcodex.surge.sh/narcodex.ipa")} style={{ minHeight: 44, justifyContent: "center" }}>
+          <Text style={{ fontFamily: fonts.display, color: colors.phosphor, fontSize: 28, lineHeight: 30 }}>DOWNLOAD IPA</Text>
+        </Pressable>
+        <Pressable accessibilityRole="link" onPress={() => Linking.openURL("https://narcodex.surge.sh/install.html")} style={{ minHeight: 36, justifyContent: "center" }}>
+          <Text style={{ fontFamily: fonts.body, color: colors.cyan, fontSize: 13 }}>Install steps</Text>
+        </Pressable>
+      </Frame>
       <Frame title="ACCOUNT" code="AUTH" tone="cyan">
         <Prose>
           {user?.email ?? "Browsing without an account. The public archive does not require one. Files you open are remembered on this device until you clear the browser."}

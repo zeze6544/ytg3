@@ -98,7 +98,7 @@ export function ChipScroller({ children, sticky = false }: { children: ReactNode
       style={[
         styles.scroller,
         sticky && Platform.OS === "web"
-          ? ({ position: "sticky", top: 0, zIndex: 4, backgroundColor: colors.bg, paddingVertical: 6 } as const)
+          ? ({ position: "sticky", top: 0, zIndex: 4, backgroundColor: colors.bg, paddingVertical: 6 } as object)
           : null,
       ]}
       contentContainerStyle={styles.scrollerContent}

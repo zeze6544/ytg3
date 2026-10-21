@@ -9,7 +9,7 @@ import { CATEGORY_LABELS, CATEGORY_TONE } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
-import { Pressable, Text, View, useWindowDimensions } from "react-native";
+import { Linking, Pressable, Text, View, useWindowDimensions } from "react-native";
 
 function formatCount(value?: number) {
   if (value === undefined) return "·";
@@ -77,6 +77,9 @@ export default function HomeScreen() {
           <Action label="Surprise file" tone="purple" disabled={!archiveConfigured} onPress={() => void surprise()} />
         </View>
         <Prose>Nothing here is dosing advice, a sale, or a green light.</Prose>
+        <Pressable accessibilityRole="link" onPress={() => Linking.openURL("https://narcodex.surge.sh/install.html")} style={{ minHeight: 36, justifyContent: "center" }}>
+          <Text style={{ fontFamily: fonts.body, color: colors.cyan, fontSize: 12 }}>iPhone app file, free Apple ID</Text>
+        </Pressable>
       </Frame>
 
       {recent.length ? (

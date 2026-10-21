@@ -21,6 +21,14 @@ const archive = {
   refs: [...(raw as Archive).refs, ...(extra.refs ?? [])],
   strains: [...(raw as Archive).strains, ...(extra.strains ?? [])],
 };
+export const ARCHIVE_ORIGIN = "https://narcodex.surge.sh";
+let indexStamp = String((raw as { generated_at?: string }).generated_at ?? "");
+
+function archiveUrl(path: string) {
+  const host = typeof window !== "undefined" ? window.location?.host : "";
+  if (host) return path;
+  return `${ARCHIVE_ORIGIN}${path}`;
+}
 const byId = new Map(archive.drugs.map((drug) => [drug.id, drug]));
 const bySlug = new Map(archive.drugs.map((drug) => [drug.slug, drug]));
 const RANK: Record<string, number> = { unknown: 0, low: 1, moderate: 2, dangerous: 3, deadly: 4 };
@@ -257,7 +265,7 @@ export function localCounts() {
 }
 
 export function localIndexStamp() {
-  return String((raw as { generated_at?: string }).generated_at ?? "");
+  return indexStamp;
 }
 
 export function localCategoryCounts() {
@@ -381,13 +389,40 @@ export function localTimelineFor(name: string) {
 const strainSlugs = new Set(archive.strains.map((strain) => strain.slug));
 let loading: Promise<void> | null = null;
 
+function adoptBase(main: Archive & { generated_at?: string }, extraPart: { drugs?: ArchiveDrug[]; refs?: Archive["refs"]; strains?: Strain[] }) {
+  archive.drugs = [...(main.drugs ?? []), ...(extraPart.drugs ?? [])];
+  archive.classes = main.classes ?? [];
+  archive.strains = [...(main.strains ?? []), ...(extraPart.strains ?? [])];
+  archive.timeline = main.timeline ?? [];
+  archive.refs = [...(main.refs ?? []), ...(extraPart.refs ?? [])];
+  archive.groups = main.groups ?? {};
+  archive.rules = main.rules ?? [];
+  byId.clear();
+  bySlug.clear();
+  for (const drug of archive.drugs) {
+    byId.set(drug.id, drug);
+    bySlug.set(drug.slug, drug);
+  }
+  strainSlugs.clear();
+  for (const strain of archive.strains) strainSlugs.add(strain.slug);
+  if (main.generated_at) indexStamp = main.generated_at;
+}
+
 async function loadMax() {
   if (typeof fetch !== "function") return;
-  const response = await fetch("/catalogue/manifest.json");
+  if (archive.drugs.length < 1000) {
+    const [mainResponse, extraResponse] = await Promise.all([
+      fetch(archiveUrl("/data/archive.json")),
+      fetch(archiveUrl("/data/drugs-extra.json")),
+    ]);
+    if (!mainResponse.ok || !extraResponse.ok) throw new Error("archive files missing");
+    adoptBase(await mainResponse.json(), await extraResponse.json());
+  }
+  const response = await fetch(archiveUrl("/catalogue/manifest.json"));
   if (!response.ok) throw new Error("catalogue manifest " + response.status);
   const manifest = (await response.json()) as { drugs?: string[]; strains?: string[] };
   for (const name of manifest.drugs ?? []) {
-    const partResponse = await fetch(`/catalogue/${name}`);
+    const partResponse = await fetch(archiveUrl(`/catalogue/${name}`));
     if (!partResponse.ok) throw new Error("catalogue shard " + name);
     const part = (await partResponse.json()) as { drugs?: ArchiveDrug[]; refs?: Archive["refs"] };
     for (const drug of part.drugs ?? []) {
@@ -399,7 +434,7 @@ async function loadMax() {
     for (const ref of part.refs ?? []) archive.refs.push(ref);
   }
   for (const name of manifest.strains ?? []) {
-    const partResponse = await fetch(`/catalogue/${name}`);
+    const partResponse = await fetch(archiveUrl(`/catalogue/${name}`));
     if (!partResponse.ok) throw new Error("catalogue shard " + name);
     const part = (await partResponse.json()) as { strains?: Strain[] };
     for (const strain of part.strains ?? []) {
