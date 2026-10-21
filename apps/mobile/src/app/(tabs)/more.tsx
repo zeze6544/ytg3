@@ -3,9 +3,7 @@ import { Action, FileCard, Frame, Lead, PageTitle, Prose, Screen, breakWord } fr
 import { useIsAdmin } from "@/lib/admin";
 import { useSession } from "@/lib/session";
 import { router } from "expo-router";
-import { Linking, Text } from "react-native";
-
-const APK_URL = "https://narcodex-archive.web.app/narcodex.apk";
+import { Text } from "react-native";
 
 const LINKS = [
   { href: "/classes", label: "Classes", note: "Pharmacological groups, and what each one does in the body." },
@@ -23,12 +21,11 @@ export default function MoreScreen() {
   return (
     <Screen safeTop>
       <PageTitle>More</PageTitle>
-      <Lead>Classes, history, reagents, and the ways to keep this archive on a phone.</Lead>
+      <Lead>Classes, history, reagents, and how this archive works on a phone.</Lead>
       <Frame title="Android app" tone="cyan">
         <Prose>
-          The Android app is this archive. It is not on the Play Store. The phone asks before it installs a file from this site. This file does not install on an iPhone.
+          The Android app is this same archive. It is not on the Play Store, and this site cannot host the install file. The file does not install on an iPhone.
         </Prose>
-        <Action label="Download the Android app" tone="cyan" onPress={() => void Linking.openURL(APK_URL)} />
       </Frame>
       <Frame title="iPhone" tone="amber">
         <Prose>
