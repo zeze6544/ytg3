@@ -1,0 +1,43 @@
+name: Native iOS compile
+
+# Compiles the SwiftUI app for the iOS Simulator without a signature.
+# It does not produce an installable IPA and does not claim a device install.
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - cursor/native-ios-swift-a3e1
+    paths:
+      - "ios/**"
+      - "src/data/archive.json"
+      - "src/data/drugs-extra.json"
+      - "public/catalogue/**"
+      - ".github/workflows/ios-native.yml"
+
+jobs:
+  compile:
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile for the iOS Simulator without signing
+        run: |
+          set -euo pipefail
+          # Signing is disabled only for this check. A Personal Team install still
+          # uses Automatic signing in the Xcode project. This job does not export an IPA.
+          xcodebuild \
+            -project ios/NARCODEX.xcodeproj \
+            -scheme NARCODEX \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath /tmp/narcodex-derived \
+            build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_STYLE=Automatic \
+            DEVELOPMENT_TEAM=""
