@@ -126,12 +126,10 @@ export function NameRow({ name, tag, tone = "phosphor" }: { name: string; tag: s
 
 export function Frame({
   title,
-  code,
   children,
   tone = "phosphor",
 }: {
   title: string;
-  code?: string;
   children: ReactNode;
   tone?: Tone;
 }) {
@@ -139,7 +137,6 @@ export function Frame({
     <View style={styles.frame}>
       <View style={styles.frameHead}>
         <Text style={[styles.frameTitle, breakWord, { color: toneColor[tone] }]}>{title}</Text>
-        {code ? <Text style={styles.frameCode}>{code}</Text> : null}
       </View>
       <View style={styles.frameBody}>{children}</View>
     </View>
@@ -312,13 +309,6 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   frameTitle: { fontFamily: fonts.display, fontWeight: "700", fontSize: 24, lineHeight: 30, flex: 1, minWidth: 0 },
-  frameCode: {
-    fontFamily: fonts.body,
-    color: colors.muted,
-    fontSize: 12,
-    lineHeight: 18,
-    marginTop: 6,
-  },
   frameBody: { padding: space.card, gap: 16 },
   tag: {
     borderWidth: 1,

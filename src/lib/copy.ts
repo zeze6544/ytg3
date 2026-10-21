@@ -17,6 +17,7 @@ const BOILERPLATE = [
   /This file is not a regimen and has no dose\.\s*/gi,
   /This is not a dose, a source, or a reason to use it\.\s*/gi,
   /Listed under this catalogued name(?: when no (?:separate brand|slang name) is on the file)?\.?\s*/gi,
+  /The file uses the class record rather than one invention date\.\s*/gi,
 ];
 
 export function cleanProse(value?: string | null) {

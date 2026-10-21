@@ -503,7 +503,9 @@ function drugRecord(row) {
 
 function split(value) {
   if (!value) return [];
-  return value.split(",").map((part) => part.trim()).filter(Boolean);
+  // Locants such as 3,4- and N,N- are part of one chemical name, not a list.
+  const protectedValue = value.replace(/(\d),(?=\d)/g, "$1\u0001").replace(/N,(?=N-)/g, "N\u0001");
+  return protectedValue.split(",").map((part) => part.trim().replaceAll("\u0001", ",")).filter(Boolean);
 }
 
 const drugs = [...ROWS, ...MORE_ROWS, ...NEXT_ROWS, ...DOUBLE_ROWS, ...FOLD_ROWS, ...TRIPLE_ROWS, ...QUAD_ROWS, ...MAX_ROWS].map(drugRecord);

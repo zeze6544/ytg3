@@ -1,5 +1,6 @@
 import raw from "@/data/archive.json";
 import extraRaw from "@/data/drugs-extra.json";
+import { cleanNames, cleanProse } from "@/lib/copy";
 import { CATEGORY_LABELS, type Drug, type DrugClass, type Strain } from "@/lib/types";
 
 export type ArchiveDrug = Drug & { risk_classes?: string[] };
@@ -76,12 +77,7 @@ export function localDrugs(opts?: { search?: string; category?: string; limit?: 
   if (cat) rows = rows.filter((drug) => tagsOf(drug).includes(cat));
   const term = opts?.search?.trim().toLowerCase() ?? "";
   if (term) {
-    rows = rows.filter((drug) =>
-      [drug.name, drug.slug, drug.summary, drug.chemistry, ...(drug.aliases ?? []), ...(drug.brand_names ?? []), ...(drug.street_names ?? [])]
-        .join("\n")
-        .toLowerCase()
-        .includes(term),
-    );
+    rows = rows.filter((drug) => searchBlob(drug).includes(term));
   }
   const sorted = [...rows].sort((a, b) => {
     if (term) {
@@ -102,16 +98,23 @@ function browseRank(name: string) {
   return /[a-z]/.test(trimmed) ? 0 : 1;
 }
 
+function searchBlob(drug: ArchiveDrug) {
+  return [drug.name, drug.slug, cleanProse(drug.summary), cleanProse(drug.chemistry), ...cleanNames(drug.aliases), ...cleanNames(drug.brand_names), ...cleanNames(drug.street_names)]
+    .join("\n")
+    .toLowerCase();
+}
+
 function searchRank(drug: ArchiveDrug, term: string) {
   const name = drug.name.toLowerCase();
   if (name === term) return 0;
   if (name.startsWith(term)) return 1;
-  const aliases = (drug.aliases ?? []).map((alias) => alias.toLowerCase());
+  const aliases = cleanNames(drug.aliases).map((alias) => alias.toLowerCase());
   if (aliases.some((alias) => alias === term)) return 2;
   if (name.includes(term)) return 3;
   if (aliases.some((alias) => alias.includes(term))) return 4;
-  const streets = (drug.street_names ?? []).map((street) => street.toLowerCase());
-  if (streets.some((street) => street === term || street.includes(term))) return 5;
+  const streets = cleanNames(drug.street_names).map((street) => street.toLowerCase());
+  const brands = cleanNames(drug.brand_names).map((brand) => brand.toLowerCase());
+  if (streets.some((street) => street === term || street.includes(term)) || brands.some((brand) => brand === term || brand.includes(term))) return 5;
   if (drug.slug.includes(term)) return 6;
   return 7;
 }

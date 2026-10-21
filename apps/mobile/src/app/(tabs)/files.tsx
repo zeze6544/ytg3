@@ -96,10 +96,10 @@ export default function FilesScreen() {
             <Status>Loading records…</Status>
           ) : (
             <Status>
-              {commonShelf ? "Common shelf. " : shelf !== "all" && shelf !== "common" ? `${shelf}. ` : ""}
+              {term ? `Search. ` : commonShelf ? "Common shelf. " : shelf !== "all" && shelf !== "common" ? `Names starting with ${shelf}. ` : ""}
               {cat !== "all" ? `${CATEGORY_LABELS[cat] ?? cat}. ` : ""}
               {matches.length > rows.length ? `Showing ${rows.length} of ${matches.length}.` : `${rows.length} files.`}
-              {commonShelf ? " All and the letters open the rest of the index." : ""}
+              {commonShelf && !term ? " All and the letters open the rest of the index." : ""}
             </Status>
           )}
           {query.error ? <QueryError error={query.error} /> : null}
@@ -131,14 +131,9 @@ export default function FilesScreen() {
             tag={CATEGORY_LABELS[item.category ?? "other"]}
             tone={CATEGORY_TONE[item.category as DrugCategory] ?? "phosphor"}
           />
-          {blurb(item.summary) ? (
-            <Text style={{ fontFamily: fonts.body, color: colors.muted, fontSize: 15, lineHeight: 24 }} numberOfLines={3}>
-              {blurb(item.summary)}
-            </Text>
-          ) : null}
-          {blurb(item.acute_risks, 220) ? (
+          {blurb(item.acute_risks, 220) || blurb(item.summary) ? (
             <Text style={{ fontFamily: fonts.body, color: colors.text, fontSize: 15, lineHeight: 24 }} numberOfLines={3}>
-              {blurb(item.acute_risks, 220)}
+              {blurb(item.acute_risks, 220) || blurb(item.summary)}
             </Text>
           ) : null}
         </FileCard>

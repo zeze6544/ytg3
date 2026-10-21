@@ -35,7 +35,6 @@ export const toneColor: Record<Tone, string> = {
 export const sans = Platform.OS === "web" ? "System" : Platform.OS === "android" ? "sans-serif" : undefined;
 
 export const fonts = {
-  mark: "VT323_400Regular",
   display: sans,
   body: sans,
   bodyMedium: sans,

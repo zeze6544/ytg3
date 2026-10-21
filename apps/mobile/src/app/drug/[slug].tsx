@@ -3,7 +3,7 @@ import { Action, Banner, ChipScroller, Field, FileCard, FinePrint, Frame, QueryE
 import { fetchDrugBySlug, fetchDrugRefs, fetchNeighbors } from "@/lib/api";
 import { readingFor } from "@/lib/briefing";
 import { localGroupsOf, localRuleHits, localTimelineFor, localUnnamedFloor } from "@/lib/localArchive";
-import { blurb, fileText, nameList } from "@/lib/reading";
+import { fileText, nameList } from "@/lib/reading";
 import { rememberFile } from "@/lib/recent";
 import { useSession } from "@/lib/session";
 import { requireClient } from "@/lib/supabase";
@@ -92,6 +92,14 @@ export default function DrugScreen() {
 
   const long = drug.name.length > 24;
   const titleSize = long ? (width < 360 ? 26 : 30) : width < 360 ? 34 : 40;
+  const acute = fileText(drug.acute_risks);
+  const summary = fileText(drug.summary);
+  const history = fileText(drug.history);
+  const shown = [acute, summary].filter(Boolean) as string[];
+  const historyLeft = history
+    ?.split(/(?<=\.)\s+/)
+    .filter((sentence) => sentence && !shown.some((item) => item.includes(sentence)))
+    .join(" ");
 
   return (
     <Screen ref={scroller}>
@@ -134,11 +142,11 @@ export default function DrugScreen() {
       </ChipScroller>
 
       <View nativeID="spot-overview" style={spotStyle} onLayout={(event) => { spots.current.overview = event.nativeEvent.layout.y; }}>
-        {fileText(drug.acute_risks) ? (
-          <Text style={[breakWord, { fontFamily: fonts.body, fontWeight: "600", color: colors.red, fontSize: 17, lineHeight: 28 }]}>{blurb(drug.acute_risks, 180)}</Text>
+        {acute ? (
+          <Text style={[breakWord, { fontFamily: fonts.body, fontWeight: "600", color: colors.red, fontSize: 17, lineHeight: 28 }]}>{acute}</Text>
         ) : null}
-        {fileText(drug.summary) ? (
-          <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 17, lineHeight: 28 }]}>{fileText(drug.summary)}</Text>
+        {summary && !(acute ?? "").includes(summary) ? (
+          <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 17, lineHeight: 28 }]}>{summary}</Text>
         ) : null}
         <Frame title="Effects">
           <Text style={{ fontFamily: fonts.body, fontWeight: "600", color: colors.muted, fontSize: 13, lineHeight: 18 }}>Reported</Text>
@@ -171,7 +179,6 @@ export default function DrugScreen() {
       </View>
       <View nativeID="spot-risk" style={spotStyle} onLayout={(event) => { spots.current.risk = event.nativeEvent.layout.y; }}>
         <Frame title="Risks" tone="red">
-          <Field label="Acute" value={fileText(drug.acute_risks)} />
           <Field label="Chronic" value={fileText(drug.chronic_risks)} />
           <Field label="Overdose signs" value={fileText(drug.overdose_signs)} />
           <Field label="Contraindications" value={fileText(drug.contraindications)} />
@@ -196,7 +203,7 @@ export default function DrugScreen() {
       <View nativeID="spot-history" style={spotStyle} onLayout={(event) => { spots.current.history = event.nativeEvent.layout.y; }}>
         <Frame title="History" tone="purple">
           <Text style={[breakWord, { fontFamily: fonts.body, color: colors.text, fontSize: 17, lineHeight: 28 }]}>
-            {fileText(drug.history) ?? "See the class record."}
+            {historyLeft || "See the class record."}
           </Text>
         </Frame>
         <TimelineRecord name={drug.name} />
