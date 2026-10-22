@@ -49,8 +49,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "NARCØDEX" },
       { name: "twitter:description", content: "A plain spoken library of drugs, cannabis strains, interactions and history." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/c531afeb-6b03-462e-aa01-dda17f3daddc" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/c531afeb-6b03-462e-aa01-dda17f3daddc" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
