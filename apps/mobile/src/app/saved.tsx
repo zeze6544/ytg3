@@ -1,9 +1,9 @@
 import { colors, fonts } from "@/constants/theme";
-import { Frame, Screen, Status, Tag, breakWord } from "@/components/ui";
+import { Action, Frame, PageTitle, Screen, Status, Tag, breakWord } from "@/components/ui";
 import { useSession } from "@/lib/session";
-import { requireClient } from "@/lib/supabase";
+import { accountsEnabled, requireClient } from "@/lib/supabase";
 import { useQuery } from "@tanstack/react-query";
-import { router } from "expo-router";
+import { Redirect, router } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
 type SavedRow = {
@@ -40,7 +40,9 @@ async function loadSaved() {
 
 export default function SavedScreen() {
   const { user, loading } = useSession();
-  const query = useQuery({ queryKey: ["saved", user?.id], queryFn: loadSaved, enabled: Boolean(user) });
+  const query = useQuery({ queryKey: ["saved", user?.id], queryFn: loadSaved, enabled: accountsEnabled && Boolean(user) });
+
+  if (!accountsEnabled) return <Redirect href="/" />;
 
   if (loading) {
     return (
@@ -50,7 +52,12 @@ export default function SavedScreen() {
     );
   }
   if (!user) {
-    return <Screen />;
+    return (
+      <Screen>
+        <PageTitle>Saved</PageTitle>
+        <Action label="Sign in" onPress={() => router.push("/auth")} />
+      </Screen>
+    );
   }
 
   const savedCount = query.data?.saved.length ?? 0;
